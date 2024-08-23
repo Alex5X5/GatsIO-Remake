@@ -21,6 +21,7 @@ namespace sh_game.game {
 			Logging.DisableColors();
 			Logging.SetStartTime();
 			new Logger(new LoggingLevel("programm")).Log("Main");
+			new Logger(new LoggingLevel("test")).Log("bla");
 			new GameServer(100);
 			Thread.Sleep(1000);
 			//Control.CheckForIllegalCrossThreadCalls=false;
