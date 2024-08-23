@@ -65,7 +65,6 @@ namespace sh_game.game.client{
 
 		private void SetVisible() {
 			logger.Log("setting vivible");
-			logger.Log("test");
 			//logger.Log("")
 			panel=new Panel();
 			//panel.BackColor = System.Drawing.Color.FromArgb(100,100,100);
