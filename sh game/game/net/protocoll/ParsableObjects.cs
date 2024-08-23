@@ -25,9 +25,9 @@ namespace sh_game.game.net.protocoll {
 		public readonly double HEALTH;
 
 		public ParsablePlayer(Player p) {
-			HEALTH = p.health;
-			POS = p.pos;
-			DIR = p.dir;
+			HEALTH = p.Health;
+			POS = p.Pos;
+			DIR = p.Dir;
 		}
 	}
 }
