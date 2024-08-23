@@ -33,8 +33,8 @@ namespace sh_game.game.client{
 		private readonly LoggingLevel mlvl = new LoggingLevel("Client");
 		private readonly NetHandler handler;
 
-		private readonly Player player;
-		private readonly SemaphoreSlim playersLock;
+		internal readonly Player player;
+        internal readonly SemaphoreSlim playersLock;
 		internal Player[] players;
 
 		internal Obstacle[] obstacles;
