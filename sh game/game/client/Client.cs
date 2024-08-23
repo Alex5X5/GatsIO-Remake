@@ -14,6 +14,15 @@ using System.Windows.Forms;
 namespace sh_game.game.client{
 	public class Client:Form {
 
+		[NonSerialized]
+		internal bool keyUp;
+		[NonSerialized]
+		internal bool keyDown;
+		[NonSerialized]
+		internal bool keyLeft;
+		[NonSerialized]
+		internal bool keyRight;
+
 		internal static readonly int WIDTH = 1000, HEIGHT = 1000;
 		private bool stop = false;
 
@@ -56,6 +65,7 @@ namespace sh_game.game.client{
 
 		private void SetVisible() {
 			logger.Log("setting vivible");
+			logger.Log("test");
 			//logger.Log("")
 			panel=new Panel();
 			//panel.BackColor = System.Drawing.Color.FromArgb(100,100,100);
