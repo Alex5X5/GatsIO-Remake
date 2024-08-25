@@ -15,13 +15,13 @@ namespace sh_game.game.client{
 	public class Client:Form {
 
 		[NonSerialized]
-		internal bool keyUp;
+		internal bool keyUp = false;
 		[NonSerialized]
-		internal bool keyDown;
+		internal bool keyDown = false;
 		[NonSerialized]
-		internal bool keyLeft;
+		internal bool keyLeft = false;
 		[NonSerialized]
-		internal bool keyRight;
+		internal bool keyRight = false;
 
 		internal static readonly int WIDTH = 1000, HEIGHT = 1000;
 		private bool stop = false;
@@ -34,7 +34,7 @@ namespace sh_game.game.client{
 		private readonly NetHandler handler;
 
 		internal readonly Player player;
-        internal readonly SemaphoreSlim playersLock;
+		internal readonly SemaphoreSlim playersLock;
 		internal Player[] players;
 
 		internal Obstacle[] obstacles;
@@ -48,8 +48,8 @@ namespace sh_game.game.client{
 
 			SetVisible();
 			//Thread.Sleep(500);
-			handler=new NetHandler();
-			player=new Player(new Logic.Vector3d(100,100,0));
+			handler = new NetHandler();
+			player = new Player(new Logic.Vector3d(100,100,0));
 			//if(handler != null ) {
 			//	ParsableObstacle[] obstacles_ = handler.GetMap().obstacles;
 			//	List<Obstacle> list = new List<Obstacle>();
