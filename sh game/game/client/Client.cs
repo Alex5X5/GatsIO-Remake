@@ -34,7 +34,7 @@ namespace sh_game.game.client{
 		private readonly NetHandler handler;
 
 		internal readonly Player player;
-		internal readonly SemaphoreSlim playersLock;
+		//internal readonly SemaphoreSlim playersLock;
 		internal Player[] players;
 
 		internal Obstacle[] obstacles;
@@ -108,23 +108,41 @@ namespace sh_game.game.client{
 			logger.Log("start threads!");
 			renderThread = new Thread(
 					() => {
-						while(!this.CanRaiseEvents) {}
-						for(int i = 0; i<100; i++) {
-							if(stop)
-								break;
-							//logger.Log("draw!");'
-							renderer.Render(this);
+						while(!this.CanRaiseEvents&&!stop) {
+							Thread.Sleep(100);
 						}
+						while(!stop)
+							renderer.Render(this);
 					}
 			);
 			renderThread.Start();
 			//renderThread.Start();
 		}
 
+		public void KeyUp(Object sender, KeyEventArgs e) {
+			if(e.KeyCode == Keys.W) {
+				keyUp=false;
+				player.OnKeyEvent(this);
+			};
+			if(e.KeyCode==Keys.S) {
+				keyDown=false;
+				player.OnKeyEvent(this);
+			};
+			if(e.KeyCode==Keys.A) {
+				keyLeft=false;
+				player.OnKeyEvent(this);
+			};
+			if(e.KeyCode==Keys.D) {
+				keyRight=false;
+				player.OnKeyEvent(this);
+			};
+			//						logger.log("key released", new MessageParameter("player",player.toString()));
+		}
+
 		private delegate void RenderDelegate(Image im);
 
 		private void DoRender(Image im) {
-			//logger.Log("doRender");
+			logger.Log("doRender");
 			using(Graphics g = panel.CreateGraphics()) {
 				g.DrawImage(im, new Point(0, 0));
 			}
@@ -137,8 +155,8 @@ namespace sh_game.game.client{
 
 		private void Paint_(Object sender, PaintEventArgs a) {
 			logger.Log("repainting");
-			if(sender==panel)
-				renderer.Render(this);
+			//if(sender==panel)
+				//renderer.Render(this);
 		}
 
 		private void Stop(object sender, FormClosingEventArgs e) {

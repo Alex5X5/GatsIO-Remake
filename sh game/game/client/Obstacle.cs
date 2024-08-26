@@ -1,13 +1,6 @@
 ﻿using sh_game.game.Logic;
 using sh_game.game.net.protocoll;
-
-using SimpleLogging.logging;
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace sh_game.game.client {
 	[Serializable]
@@ -15,7 +8,7 @@ namespace sh_game.game.client {
 
 		//public readonly long UUID = new Random().NextInt64();
 
-		public readonly Vector3d pos;
+		public readonly Vector3d Pos;
 
 		//private readonly LoggingLevel mLvl = new LoggingLevel("Obstacle"+UUID);
 		//private readonly Logger logger = new Logger(mLvl);
@@ -24,13 +17,13 @@ namespace sh_game.game.client {
 		private readonly LineSection3d boundL, boundT, boundR, boundB;
 		public readonly int type;
 
-		//	public Obsticle(int x, int y) {
-		//		this.pos = new Vector3d((double)x,(double)x,0);
-		//	}
+		//public Obsticle(int x, int y) {
+		//	this.pos=new Vector3d((double)x, (double)x, 0);
+		//}
 
 		public Obstacle(Vector3d position, int type) {
 			//new Random().;
-			this.pos=position;
+			this.Pos=position;
 			this.type=type;
 			switch(type) {
 				case 1:
@@ -54,15 +47,15 @@ namespace sh_game.game.client {
 					HEIGHT=0;
 					break;
 			}
-			boundL=new LineSection3d(pos, pos.cpy().Add(0, HEIGHT, 0));
-			boundT=new LineSection3d(pos, pos.cpy().Add(WIDTH, 0, 0));
+			boundL=new LineSection3d(Pos, Pos.cpy().Add(0, HEIGHT, 0));
+			boundT=new LineSection3d(Pos, Pos.cpy().Add(WIDTH, 0, 0));
 			boundB=new LineSection3d(boundL.point2, boundL.point2.cpy().Add(WIDTH, 0, 0));
 			boundR=new LineSection3d(boundT.point2, boundB.point2);
 			//logger.log("set bounds");
 		}
 
 		public Obstacle(ParsableObstacle obstacle) {
-			pos = obstacle.POS;
+			Pos = obstacle.POS;
 			type = obstacle.TYPE;
 
 			switch(type) {
@@ -87,8 +80,8 @@ namespace sh_game.game.client {
 					HEIGHT=0;
 					break;
 			}
-			boundL=new LineSection3d(pos, pos.cpy().Add(0, HEIGHT, 0));
-			boundT=new LineSection3d(pos, pos.cpy().Add(WIDTH, 0, 0));
+			boundL=new LineSection3d(Pos, Pos.cpy().Add(0, HEIGHT, 0));
+			boundT=new LineSection3d(Pos, Pos.cpy().Add(WIDTH, 0, 0));
 			boundB=new LineSection3d(boundL.point2, boundL.point2.cpy().Add(WIDTH, 0, 0));
 			boundR=new LineSection3d(boundT.point2, boundB.point2);
 		}
@@ -136,25 +129,25 @@ namespace sh_game.game.client {
 		}
 
 		private int RelativeX(Vector3d v) {
-			if(v.x<=pos.x)
+			if(v.x<=Pos.x)
 				return 1;
-			else if(v.x>pos.x&&v.x<pos.x+WIDTH)
+			else if(v.x>Pos.x&&v.x<Pos.x+WIDTH)
 				return 2;
 			else
 				return 3;
 		}
 
 		private int RelativeY(Vector3d v) {
-			if(v.y<=pos.y)
+			if(v.y<=Pos.y)
 				return 1;
-			else if(v.y>pos.y&&v.y<pos.y+HEIGHT)
+			else if(v.y>Pos.y&&v.y<Pos.y+HEIGHT)
 				return 2;
 			else
 				return 3;
 		}
 
 		public override String ToString() {
-			return "game.client.graphics.Obstacle[type:"+Convert.ToString(type)+" posX:"+pos.x+" posY"+pos.y+"]";
+			return "game.client.graphics.Obstacle[type:"+Convert.ToString(type)+" posX:"+Pos.x+" posY"+Pos.y+"]";
 		}
 	}
 }

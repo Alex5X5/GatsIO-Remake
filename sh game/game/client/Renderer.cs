@@ -55,26 +55,27 @@ namespace sh_game.game.client {
 			//		Vector3d pp = c.player.pos.cpy();
 			//graphics2D.SetColor(new Color(90, 90, 110));
 			//graphics2D.fillRect(-1, -1, (int)SCALED_WIDTH + 2, (int)SCALED_HEIGHT + 2
+			graphics.FillRectangle(SHADOW_COLOR, new RectangleF(0,0,UNSCALED_WIDTH,UNSCALED_HEIGHT));
 			if(c.players!=null)
 				foreach(Player p in c.players) {
 					if(p!=null) {
-						drawPlayer(p);
+						DrawPlayer(p);
 					}
 				}
 			if(c.player!=null)
-				drawPlayer(c.player);
+				DrawPlayer(c.player);
 			if(c.player!=null && c.obstacles!=null)
 				if(RESTRICTED_VIEW) {
 					RenderObstacleShadows(c.player.Pos, c.obstacles);
-					getVievRestrictions();
+					GetVievRestrictions();
 				}
 			if(c.obstacles!=null)
-				renderObstacles(c.obstacles);
+				RenderObstacles(c.obstacles);
 				//g.Dispose();
 			return (Image)image;
 		}
 
-		private Vector3d[] getVievRestrictions() {
+		private Vector3d[] GetVievRestrictions() {
 			Vector3d r = logicalMouseVector.cpy();
 			//		logger.log("",new MessageParameter("r",r.toString()));
 			double angle = Math.Tan(r.y / r.x);
@@ -102,7 +103,7 @@ namespace sh_game.game.client {
 			}
 		}
 
-		private Dir relativeDir(Vector3d pos, Vector3d relativeTo)
+		private Dir RelativeDir(Vector3d pos, Vector3d relativeTo)
 		{
 			Vector3d dir = relativeTo.cpy().Sub(pos).Nor();
 			if (dir.y > 1.0 / Math.Sqrt(2))
@@ -126,19 +127,19 @@ namespace sh_game.game.client {
 		//	private Dir relativeDir(Vector3d pos, Obstacle relativeTo) {
 		//		return (Dir)null;
 		//	}
-		private void renderBackHalf(Vector3d pos, Brush b) {
+		private void RenderBackHalf(Vector3d pos, Brush b) {
 			switch (GetRoundedVievDirection()) {
 				case Dir.T:
-					graphics.FillRectangle(SHADOW_COLOR, new Rectangle(-1, -1, (int)SCALED_WIDTH + 2, (int)(pos.y / gScl + 1)));
+					graphics.FillRectangle(SHADOW_COLOR, new Rectangle(-1, -1, (int)SCALED_WIDTH + 2, (int)(pos.y + 1)));
 					break;
 				case Dir.B:
-					graphics.FillRectangle(SHADOW_COLOR, new Rectangle(-1, (int)pos.y / gScl, (int)SCALED_WIDTH + 2, (int)(SCALED_HEIGHT - pos.y / gScl) + 1));
+					graphics.FillRectangle(SHADOW_COLOR, new Rectangle(-1, (int)pos.y , (int)SCALED_WIDTH + 2, (int)(SCALED_HEIGHT - pos.y) + 1));
 					break;
 				case Dir.R:
-					graphics.FillRectangle(SHADOW_COLOR, new Rectangle(-1, -1, (int)pos.x / gScl + 1, (int)SCALED_HEIGHT + 2));
+					graphics.FillRectangle(SHADOW_COLOR, new Rectangle(-1, -1, (int)pos.x + 1, (int)SCALED_HEIGHT + 2));
 					break;
 				case Dir.L:
-					graphics.FillRectangle(SHADOW_COLOR, new Rectangle((int)pos.x / gScl, -1, (int)(SCALED_WIDTH - pos.x / gScl) + 1, (int)(SCALED_HEIGHT) + 2));
+					graphics.FillRectangle(SHADOW_COLOR, new Rectangle((int)pos.x, -1, (int)(SCALED_WIDTH - pos.x) + 1, (int)(SCALED_HEIGHT) + 2));
 					break;
 				//default:
 				//	logger.warn("unexpected direction", new MessageParameter("direction", getRoundedVievDirection().toString()));
@@ -151,23 +152,23 @@ namespace sh_game.game.client {
 				Vector3d[] sp = o.GetShadowPoints(v);
 				Vector3d p1 = new Vector3d(0, 0, 0);
 				Vector3d p2 = new Vector3d(0, 0, 0);
-				if (!(v.x >= o.pos.x && v.x <= o.pos.x + o.WIDTH && v.y >= o.pos.y && v.y <= o.pos.y + o.HEIGHT)) {
-					switch (relativeDir(v, o.pos.cpy().Add(new Vector3d(o.WIDTH / 2.0, o.HEIGHT / 2.0, 0).Nor()))) {
+				if (!(v.x >= o.Pos.x && v.x <= o.Pos.x + o.WIDTH && v.y >= o.Pos.y && v.y <= o.Pos.y + o.HEIGHT)) {
+					switch (RelativeDir(v, o.Pos.cpy().Add(new Vector3d(o.WIDTH / 2.0, o.HEIGHT / 2.0, 0).Nor()))) {
 						case Dir.T:
-							p1 = shadowHit(v, sp[0], BORDER_TOP);
-							p2 = shadowHit(v, sp[1], BORDER_TOP);
+							p1 = ShadowHit(v, sp[0], BORDER_TOP);
+							p2 = ShadowHit(v, sp[1], BORDER_TOP);
 							break;
 						case Dir.B:
-							p1 = shadowHit(v, sp[0], BORDER_BOTTOM);
-							p2 = shadowHit(v, sp[1], BORDER_BOTTOM);
+							p1 = ShadowHit(v, sp[0], BORDER_BOTTOM);
+							p2 = ShadowHit(v, sp[1], BORDER_BOTTOM);
 							break;
 						case Dir.R:
-							p1 = shadowHit(v, sp[0], BORDER_RIGHT);
-							p2 = shadowHit(v, sp[1], BORDER_RIGHT);
+							p1 = ShadowHit(v, sp[0], BORDER_RIGHT);
+							p2 = ShadowHit(v, sp[1], BORDER_RIGHT);
 							break;
 						case Dir.L:
-							p1 = shadowHit(v, sp[0], BORDER_LEFT);
-							p2 = shadowHit(v, sp[1], BORDER_LEFT);
+							p1 = ShadowHit(v, sp[0], BORDER_LEFT);
+							p2 = ShadowHit(v, sp[1], BORDER_LEFT);
 							break;
 						//default:
 						//	logger.warn("unexpected direction", new MessageParameter("direction", getRoundedVievDirection().toString()));
@@ -206,7 +207,7 @@ namespace sh_game.game.client {
 		//		return v.x>=0&&v.x<=UNSCALED_WIDTH&&v.y>=0&&v.y<=UNSCALED_HEIGHT;
 		//	}
 
-		private Vector3d shadowHit(Vector3d pp, Vector3d sp, Line3d l) {
+		private Vector3d ShadowHit(Vector3d pp, Vector3d sp, Line3d l) {
 			double oth1X = l.origin.x;
 			double oth1Y = l.origin.y;
 			double oth1Z = l.origin.z;
@@ -220,47 +221,48 @@ namespace sh_game.game.client {
 			return new Vector3d(oth1X + u * (oth2X - oth1X), oth1Y + u * (oth2Y - oth1Y), oth1Z + u * (oth2Z - oth1Z));
 		}
 
-		private void renderObstacles(Obstacle[] l) {
+		private void RenderObstacles(Obstacle[] l) {
 			foreach(Obstacle o in l) {
 				switch(o.type) {
 					case 1:
-						drawObstacle1(o.pos);
+						DrawObstacle1(o.Pos);
 						break;
 					case 2:
-						drawObstacle2(o.pos);
+						DrawObstacle2(o.Pos);
 						break;
 					case 3:
-						drawObstacle3(o.pos);
+						DrawObstacle3(o.Pos);
 						break;
 				}
 			}
 		}
 
-		private void drawPlayer(Player p) {
+		private void DrawPlayer(Player p) {
 			//graphics2D.SetStroke(new BasicStroke(1 / gScl));
 			//graphics2D.drawLine(0, 0, (int)p.pos.x / gScl, (int)p.pos.y / gScl);
 			graphics.FillEllipse(PLAYER_RED_COLOR, new Rectangle((int)p.Pos.x, (int)p.Pos.y, Player.radius*2, Player.radius*2));
 			//		logger.log(String.valueOf(p.pos.x/gScl)+" "+String.valueOf(p.pos.y/gScl));
 		}
 
-		private void drawObstacle1(Vector3d pos) {
+		private void DrawObstacle1(Vector3d pos) {
 			graphics.FillRectangle(OBSTACLE_COLOR, new RectangleF((int)pos.x / gScl, (int)pos.y / gScl, 35 / gScl, 70 / gScl));
 		}
 
-		private void drawObstacle2(Vector3d pos) {
+		private void DrawObstacle2(Vector3d pos) {
 			graphics.FillRectangle(OBSTACLE_COLOR, new RectangleF((int)pos.x / gScl, (int)pos.y / gScl, 70 / gScl, 35 / gScl));
 		}
 
-		private void drawObstacle3(Vector3d pos) {
+		private void DrawObstacle3(Vector3d pos) {
 			graphics.FillRectangle(OBSTACLE_COLOR, new RectangleF((int)pos.x/gScl, (int)pos.y/gScl, 70/gScl, 70/gScl));
 		}
 
-		public void updateMouse(Vector3d mouse, Vector3d pos) {
+		public void UpdateMouse(Vector3d mouse, Vector3d pos) {
 			mouseVector.Set(mouse);
 			logicalMouseVector = mouseVector.cpy().Sub(pos).Nor();
 		}
 
 		public void Stop() {
+			logger.Log("stoppping");
 			image.Dispose();
 			graphics.Dispose();
 			PLAYER_RED_COLOR.Dispose();

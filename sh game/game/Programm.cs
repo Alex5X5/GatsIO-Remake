@@ -18,6 +18,12 @@ namespace sh_game.game {
 
 		//[STAThread]
 		public static void Main() {
+
+
+			byte[] data = new byte[6];
+			Array.Copy(BitConverter.GetBytes((int)-1), 0, data, 0, 4);
+			
+			Console.WriteLine(Convert.ToString(BitConverter.ToInt32(data,0)));
 			Logging.DisableColors();
 			Logging.SetStartTime();
 			new Logger(new LoggingLevel("programm")).Log("Main");

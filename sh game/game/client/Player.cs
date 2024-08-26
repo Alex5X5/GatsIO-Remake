@@ -7,10 +7,13 @@ using System;
 namespace sh_game.game.client {
 
 	public class Player {
-		
+
+
+		public static readonly int PLAYER_BYTE_LENGTH = 44;
+
 		public Vector3d Pos {set; get;} = new Vector3d(0,0,0);
 		public Vector3d Dir {set; get;} = new Vector3d(0,0,0);
-		public double Speed { set; get;} = 10E-2;
+		public double Speed {set; get;} = 1;
 		public double Health {set; get;} = 100;
 
 		public Player(Vector3d p) {
@@ -69,7 +72,7 @@ namespace sh_game.game.client {
 							Dir.x=0; //wasd
 							Dir.y=0;
 						} else {
-							//						logger.log("was");
+							//logger.log("was");
 							Dir.x=-1; //was
 							Dir.y=0;
 						}
@@ -88,7 +91,7 @@ namespace sh_game.game.client {
 							Dir.x=1; //wsd
 							Dir.y=0;
 						} else {
-							//						logger.log("ws");
+							//logger.log("ws");
 							Dir.x=0; //ws
 							Dir.y=0;
 						}
@@ -141,7 +144,32 @@ namespace sh_game.game.client {
 					}
 				}
 			}
-			//		logger.log(dir.ToString());
+			//logger.log(dir.ToString());
+		}
+
+		public static void SerializePlayer(ref byte[] input, ref Player p, ref int offset) {
+			BitConverter.GetBytes(p.Pos.x).CopyTo(input, offset);
+			offset+=8;
+			BitConverter.GetBytes(p.Pos.y).CopyTo(input, offset);
+			offset+=8;
+			BitConverter.GetBytes(p.Dir.x).CopyTo(input, offset);
+			offset+=8;
+			BitConverter.GetBytes(p.Dir.y).CopyTo(input, offset);
+			offset+=8;
+			BitConverter.GetBytes(p.Speed).CopyTo(input, offset);
+			offset+=8;
+			BitConverter.GetBytes(p.Health).CopyTo(input, offset);
+			offset+=4;
+		}
+
+		public static void DeserializePlayer(ref byte[] input, ref Player player, ref int offset) {
+			player.Health=BitConverter.ToInt32(input, offset);
+			offset+=PLAYER_BYTE_LENGTH;
+			if(player.Health!=-1) {
+				player = null;
+			} else {
+				
+			}
 		}
 	}
 }
