@@ -17,8 +17,8 @@ namespace sh_game.game.server {
 	
 	internal class ServerConnection:Socket {
 
-		private readonly NetworkStream input;
-		private readonly NetworkStream output;
+		//private readonly NetworkStream input;
+		//private readonly NetworkStream output;
 		private readonly BinaryFormatter formatter;
 		private bool stop = false;
 		private readonly Logger logger;
@@ -27,9 +27,9 @@ namespace sh_game.game.server {
 			logger = new Logger(new LoggingLevel("ServerConnection"));
 			logger.Log("Constructor");
 			formatter = new BinaryFormatter();
-			output = new NetworkStream(this, FileAccess.Write);
-			output.Flush();
-			input = new NetworkStream(this, FileAccess.Read);
+			//output = new NetworkStream(this, FileAccess.Write);
+			//output.Flush();
+			//input = new NetworkStream(this, FileAccess.Read);
 			new Thread(
 					() => Run(gs)
 			).Start();
@@ -74,7 +74,7 @@ namespace sh_game.game.server {
 						SendPacket(gs.OnPlayerRequest(protocoll));
 						break;
 					case ProtocollType.Map:
-						SendPacket(gs.OnMapRequest(protocoll));
+						SendPacket(gs.OnMapRequest());
 						break;
 					default:
 						Console.WriteLine("[ServerConnection]:type of recieved Protocoll is unknown (protocoll.type="+protocoll.type+")");

@@ -54,7 +54,7 @@ namespace sh_game.game.Logic {
 			double th1X = this.origin.x;
 			double th1Y = this.origin.y;
 
-			Vector3d th2 = this.origin.cpy().Add(this.direction);
+			Vector3d th2 = this.origin.Cpy().Add(this.direction);
 			double th2X = th2.x;
 			double th2Y = th2.y;
 
@@ -62,7 +62,7 @@ namespace sh_game.game.Logic {
 			double oth1Y = other.origin.y;
 			double oth1Z = other.origin.z;
 
-			Vector3d oth2 = other.origin.cpy().Add(other.direction);
+			Vector3d oth2 = other.origin.Cpy().Add(other.direction);
 			double oth2X = oth2.x;
 			double oth2Y = oth2.y;
 			double oth2Z = oth2.z;
@@ -85,8 +85,8 @@ namespace sh_game.game.Logic {
 
 		public static Line3d FromPoints(Vector3d point1, Vector3d point2) {
 			Line3d l = new Line3d {
-				origin=point1.cpy(),
-				direction=point2.cpy().Sub(point1).Nor()
+				origin=point1.Cpy(),
+				direction=point2.Cpy().Sub(point1).Nor()
 			};
 			return l;
 		}

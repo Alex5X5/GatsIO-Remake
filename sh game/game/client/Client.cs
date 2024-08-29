@@ -4,7 +4,6 @@ using sh_game.game.server;
 using SimpleLogging.logging;
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
@@ -14,33 +13,28 @@ using System.Windows.Forms;
 namespace sh_game.game.client{
 	public class Client:Form {
 
-		[NonSerialized]
 		internal bool keyUp = false;
-		[NonSerialized]
 		internal bool keyDown = false;
-		[NonSerialized]
 		internal bool keyLeft = false;
-		[NonSerialized]
 		internal bool keyRight = false;
 
-		internal static readonly int WIDTH = 1000, HEIGHT = 1000;
 		private bool stop = false;
 
 		private readonly Logger logger;
 
-		private Panel panel;
 		private readonly Renderer renderer;
 		private readonly LoggingLevel mlvl = new LoggingLevel("Client");
-		private readonly NetHandler handler;
+		private NetHandler handler;
 
-		internal readonly Player player;
+		internal Player player;
 		//internal readonly SemaphoreSlim playersLock;
-		internal Player[] players;
+		private Player[] players;
 
 		internal Obstacle[] obstacles;
 
 		private Thread renderThread;
 		private Thread connectionThread;
+		private Thread playerMoveThread;
 
 		public Client() : base() {
 			logger=new Logger(mlvl);
@@ -48,8 +42,15 @@ namespace sh_game.game.client{
 
 			SetVisible();
 			//Thread.Sleep(500);
-			handler = new NetHandler();
-			player = new Player(new Logic.Vector3d(100,100,0));
+			//handler=new NetHandler();
+			byte[] temp = new byte[8];
+			new Random().NextBytes(temp);
+			player=new Player(new Logic.Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
+			players=new Player[30];
+
+			//for(int i = 1; i<players.Length; i++) {
+			//	players[i]=new Player(new Logic.Vector3d(0, 0, 0), -1);
+			//}
 			//if(handler != null ) {
 			//	ParsableObstacle[] obstacles_ = handler.GetMap().obstacles;
 			//	List<Obstacle> list = new List<Obstacle>();
@@ -58,112 +59,135 @@ namespace sh_game.game.client{
 			//	obstacles=list.ToArray();
 			//}
 
-			//Console.WriteLine("[Client]:handler="+handler.ToString());
 			renderer=new Renderer();
 			StartThreads();
 		}
 
 		private void SetVisible() {
 			logger.Log("setting vivible");
-			//logger.Log("")
-			panel=new Panel();
-			//panel.BackColor = System.Drawing.Color.FromArgb(100,100,100);
-			panel.Paint+=new PaintEventHandler(Paint_);
 
 			SuspendLayout();
 
-			panel.Location=new System.Drawing.Point(0, 0);
-			panel.Name="panel";
-			panel.Size=new System.Drawing.Size(WIDTH, HEIGHT);
-			panel.BorderStyle=BorderStyle.FixedSingle;
-			//this.panel.TabIndex=0;
-
-			//AutoScaleDimensions=new System.Drawing.SizeF(9F, 20F);
-			//AutoScaleMode=AutoScaleMode.Font;
 			AutoScaleMode=AutoScaleMode.None;
-			ClientSize=new System.Drawing.Size(WIDTH, HEIGHT);
-			Controls.Add(this.panel);
+			ClientSize=new System.Drawing.Size(Renderer.WIDTH, Renderer.HEIGHT);
 			Name="Client";
 			Text="Client";
+			
 			FormClosing+=Stop;
+			this.KeyDown+=new System.Windows.Forms.KeyEventHandler(this.KeyDown_);
+			this.KeyUp+=new System.Windows.Forms.KeyEventHandler(this.KeyUp_);
+
 			ResumeLayout(false);
 			PerformLayout();
 			logger.Log("performed layout");
 		}
 
 		private void StartThreads() {
-			connectionThread = new Thread(
+			connectionThread=new Thread(
 				() => {
+					handler = new NetHandler();
 					if(handler!=null) {
-						ParsableObstacle[] obstacles_ = handler.GetMap().obstacles;
-						List<Obstacle> list = new List<Obstacle>();
-						foreach(ParsableObstacle o in obstacles_)
-							list.Add(new Obstacle(o));
-						obstacles=list.ToArray();
+						//ParsableObstacle[] obstacles_ = handler.GetMap().obstacles;
+						//List<Obstacle> list = new List<Obstacle>();
+						//foreach(ParsableObstacle o in obstacles_)
+						//list.Add(new Obstacle(o));
+						//obstacles=list.ToArray();
 					}
 				}
 			);
-
 			connectionThread.Start();
 			logger.Log("start threads!");
 			renderThread = new Thread(
 					() => {
-						while(!this.CanRaiseEvents&&!stop) {
-							Thread.Sleep(100);
+						while(!CanRaiseEvents&&!stop) {
+							Thread.Sleep(10);
 						}
-						while(!stop)
-							renderer.Render(this);
+						while(!stop) {
+							Thread.Sleep(30);
+							Invalidate();
+						}
 					}
 			);
 			renderThread.Start();
-			//renderThread.Start();
+			logger.Log("started render thread");
+
+			playerMoveThread=new Thread(
+					() => {
+						while(!CanRaiseEvents&&!stop) {
+							Thread.Sleep(10);
+						}
+						while(!stop) {
+							foreach(Player p in players) {
+								if(p!=null)
+									if(p.Health!=-1)
+										p.Move();
+							}
+							if(player!=null)
+								if(player.Health!=-1)
+									player.Move();
+							Thread.Sleep(10);
+						}
+					}
+			);
+			playerMoveThread.Start();
+			logger.Log("started player move thread");
 		}
 
-		public void KeyUp(Object sender, KeyEventArgs e) {
-			if(e.KeyCode == Keys.W) {
+		private void KeyUp_(Object sender, KeyEventArgs e) {
+			if(e.KeyCode==Keys.W) {
 				keyUp=false;
-				player.OnKeyEvent(this);
+				player.OnKeyEvent(c: this);
 			};
 			if(e.KeyCode==Keys.S) {
 				keyDown=false;
-				player.OnKeyEvent(this);
+				player.OnKeyEvent(c: this);
 			};
 			if(e.KeyCode==Keys.A) {
 				keyLeft=false;
-				player.OnKeyEvent(this);
+				player.OnKeyEvent(c: this);
 			};
 			if(e.KeyCode==Keys.D) {
 				keyRight=false;
-				player.OnKeyEvent(this);
+				player.OnKeyEvent(c: this);
 			};
-			//						logger.log("key released", new MessageParameter("player",player.toString()));
+			//logger.Log("key released", new MessageParameter("player", player.toString()));
 		}
 
-		private delegate void RenderDelegate(Image im);
-
-		private void DoRender(Image im) {
-			logger.Log("doRender");
-			using(Graphics g = panel.CreateGraphics()) {
-				g.DrawImage(im, new Point(0, 0));
-			}
+		private void KeyDown_(Object sender, KeyEventArgs e) {
+			if(e.KeyCode==Keys.W) {
+				keyUp=true;
+				player.OnKeyEvent(c: this);
+			};
+			if(e.KeyCode==Keys.S) {
+				keyDown=true;
+				player.OnKeyEvent(c: this);
+			};
+			if(e.KeyCode==Keys.A) {
+				keyLeft=true;
+				player.OnKeyEvent(c: this);
+			};
+			if(e.KeyCode==Keys.D) {
+				keyRight=true;
+				player.OnKeyEvent(c: this);
+			};
+			//logger.Log("key released", new MessageParameter("player", player.toString()));
 		}
 
-		internal void RenderImage(Image im) {
-			if(!this.IsDisposed && this.CanRaiseEvents)
-				panel.Invoke(new RenderDelegate(DoRender), new object[] {im});
+		protected override void OnPaint(PaintEventArgs e) {
+			e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
 		}
 
-		private void Paint_(Object sender, PaintEventArgs a) {
-			logger.Log("repainting");
-			//if(sender==panel)
-				//renderer.Render(this);
+		protected override void OnPaintBackground(PaintEventArgs pevent) {
+			//Don't allow the background to paint
 		}
 
 		private void Stop(object sender, FormClosingEventArgs e) {
 			stop = true;
 			if(sender==this) {
 				logger.Log("stopping");
-				renderer.Stop();
+				renderer.Dispose();
+				Thread.Sleep(500);
+				Environment.Exit(0);
 				//System.Stop();
 			}
 		}

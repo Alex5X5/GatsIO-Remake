@@ -1,7 +1,5 @@
 ﻿using sh_game.game.Logic;
 using sh_game.game.net.protocoll;
-
-using SimpleLogging.logging;
 using System;
 
 namespace sh_game.game.client {
@@ -9,48 +7,42 @@ namespace sh_game.game.client {
 	public class Player {
 
 
-		public static readonly int PLAYER_BYTE_LENGTH = 44;
+		public const int PLAYER_BYTE_LENGTH = 48;
 
-		public Vector3d Pos {set; get;} = new Vector3d(0,0,0);
-		public Vector3d Dir {set; get;} = new Vector3d(0,0,0);
-		public double Speed {set; get;} = 1;
-		public double Health {set; get;} = 100;
+		public Vector3d Pos;
+		public Vector3d Dir = new Vector3d(0, 0, 0);
+		public int Speed = 1;
+		public int Health { set; get; } = 100;
+		public const int radius = 10;
+		public Int64 PlayerUUID;
 
-		public Player(Vector3d p) {
-			Pos=p;
+		public Player(Vector3d pos_, int health_, Int64 UUID_) {
+			Pos=pos_??new Vector3d(0, 0, 0);
+			Health=health_;
+			PlayerUUID=UUID_!=0 ? UUID_ : new Random().Next();
+
 		}
 
 		public Player(ParsablePlayer p) {
-			Health = p.HEALTH;
-			Pos = p.POS;
-			Dir = p.DIR;
+			Health=p.HEALTH;
+			Pos=p.POS;
+			Dir=p.DIR;
 		}
 
-		public bool keyUp;
-		public bool keyDown;
-		public bool keyLeft;
-		public bool keyRight;
-	
-		public static readonly int radius = 10;
-
-		public readonly long PlayerUUID;
-		public int scheduleRemoval = 0;
-
-		private readonly Logger logger;
-	
-	
-//	private Panel panel;
-
-		public override string ToString() {
-			return "game.graphics.client.player[health:"+Health+" speed:"+Speed+" pos:"+Pos.ToString()+" dir:"+Dir.ToString()+" UUID:"+Convert.ToString(PlayerUUID)+"]";
-		}
+		public override string ToString() => $"game.graphics.client.player[health:{Health} speed:{Speed} pos:{Pos} dir:{Dir} UUID:{Convert.ToString(PlayerUUID)}]";
 
 		public void Move() {
-			//		logger.log("move!");
-			Pos.Add(Dir.cpy().Nor().Scl(Speed));
+			//Console.WriteLine("move!");
+			//Console.WriteLine(ToString());
+			//Console.WriteLine(Pos.Add(Dir.cpy().Nor().Scl(Speed)));
+			Pos.Add(Dir.Cpy().Nor().Scl(Speed));
+			//Console.WriteLine(ToString());
 		}
 
-
+		public void Damage(int damage) {
+			if(damage>Health)
+				Health = 0;
+		}
 
 		//	public bool checkEdges() {
 		//		
@@ -83,6 +75,7 @@ namespace sh_game.game.client {
 						} else {
 							Dir.x=(-1)/Math.Sqrt(2); //wa
 							Dir.y=(-1)/Math.Sqrt(2);
+							//Console.WriteLine(Dir.ToString());
 						}
 					}
 				} else {
@@ -144,31 +137,49 @@ namespace sh_game.game.client {
 					}
 				}
 			}
-			//logger.log(dir.ToString());
 		}
 
 		public static void SerializePlayer(ref byte[] input, ref Player p, ref int offset) {
-			BitConverter.GetBytes(p.Pos.x).CopyTo(input, offset);
-			offset+=8;
-			BitConverter.GetBytes(p.Pos.y).CopyTo(input, offset);
-			offset+=8;
-			BitConverter.GetBytes(p.Dir.x).CopyTo(input, offset);
-			offset+=8;
-			BitConverter.GetBytes(p.Dir.y).CopyTo(input, offset);
-			offset+=8;
-			BitConverter.GetBytes(p.Speed).CopyTo(input, offset);
-			offset+=8;
+			if(p==null) {
+				BitConverter.GetBytes(-1).CopyTo(input, offset);
+				offset+=PLAYER_BYTE_LENGTH;
+				return;
+			}
 			BitConverter.GetBytes(p.Health).CopyTo(input, offset);
 			offset+=4;
+			BitConverter.GetBytes(p.Pos==null ? 0 : p.Pos.x).CopyTo(input, offset);
+			offset+=8;
+			BitConverter.GetBytes(p.Pos==null ? 0 : p.Pos.y).CopyTo(input, offset);
+			offset+=8;
+			BitConverter.GetBytes(p.Dir==null ? 0 : p.Dir.x).CopyTo(input, offset);
+			offset+=8;
+			BitConverter.GetBytes(p.Dir==null ? 0 : p.Dir.y).CopyTo(input, offset);
+			offset+=8;
+			BitConverter.GetBytes(p.Speed).CopyTo(input, offset);
+			offset+=4;
+			BitConverter.GetBytes(p.PlayerUUID).CopyTo(input, offset);
+			offset+=8;
 		}
 
 		public static void DeserializePlayer(ref byte[] input, ref Player player, ref int offset) {
-			player.Health=BitConverter.ToInt32(input, offset);
-			offset+=PLAYER_BYTE_LENGTH;
-			if(player.Health!=-1) {
+			player.Health = BitConverter.ToInt32(input, offset);
+			if(player.Health==-1) {
 				player = null;
+				offset+=PLAYER_BYTE_LENGTH;
 			} else {
-				
+				offset+=4;
+				player.Pos.x=BitConverter.ToDouble(input, offset);
+				offset+=8;
+				player.Pos.y=BitConverter.ToDouble(input, offset);
+				offset+=8;
+				player.Dir.x=BitConverter.ToDouble(input, offset);
+				offset+=8;
+				player.Dir.y=BitConverter.ToDouble(input, offset);
+				offset+=8;
+				player.Speed=BitConverter.ToInt32(input, offset);
+				offset+=4;
+				player.PlayerUUID = BitConverter.ToInt64(input, offset);
+				offset+=8;
 			}
 		}
 	}

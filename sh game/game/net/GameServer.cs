@@ -20,12 +20,12 @@ namespace sh_game.game.net{
 		private readonly Logger logger;
 		//private Socket serverSocket;
 
-		//private TcpClient
-		private readonly ServerConnection[] clients = new ServerConnection[50];
-		private readonly Player[] players = new Player[50];
-		private readonly Obstacle[] obstacles = new Obstacle[20];
+		public const int MAP_WIDTH = 1000, MAP_HEIGHT = 1000, MAX_PLAYER_COUNT = 10;
 
-		public readonly int MAP_WIDTH = 1000, MAP_HEIGHT = 1000;
+		//private TcpClient
+		private readonly ServerConnection[] clients = new ServerConnection[MAX_PLAYER_COUNT];
+		private readonly Player[] players = new Player[MAX_PLAYER_COUNT];
+		private readonly Obstacle[] obstacles = new Obstacle[20];
 
 		internal GameServer(int port) : base(new IPEndPoint(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], port).AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
 			logger = new Logger(new LoggingLevel("GameServer"));
@@ -65,7 +65,7 @@ namespace sh_game.game.net{
 			}
 		}
 
-		internal MapProtocoll OnMapRequest(Protocoll p) {
+		internal MapProtocoll OnMapRequest() {
 			logger.Log("OnMapRequest");
 			return new MapProtocoll(false,obstacles);
 		}

@@ -15,8 +15,8 @@ namespace sh_game.game.Logic {
 		//	public double length;
 
 		public LineSection3d(Line3d l, double ln) {
-			this.point1=l.origin.cpy();
-			this.point2=point1.cpy().Add(l.direction.cpy().Scl(ln));
+			this.point1=l.origin.Cpy();
+			this.point2=point1.Cpy().Add(l.direction.Cpy().Scl(ln));
 		}
 
 		public double GetLength() {
@@ -25,12 +25,12 @@ namespace sh_game.game.Logic {
 
 		public LineSection3d(Vector3d p1, Vector3d p2) {
 			//		System.out.println("[LineSection3d]: (constructor): p1="+p1.ToString()+" p2="+p2.ToString());
-			this.point1=p1.cpy();
-			this.point2=p2.cpy();
+			this.point1=p1.Cpy();
+			this.point2=p2.Cpy();
 		}
 
 		public double Dst(Vector3d point) {
-			return point.cpy().Sub(this.point1).Crs(point2.cpy().Sub(point1)).Len()/point2.cpy().Sub(point1).Len();
+			return point.Cpy().Sub(this.point1).Crs(point2.Cpy().Sub(point1)).Len()/point2.Cpy().Sub(point1).Len();
 		}
 
 		public bool Contains(Vector3d p) {

@@ -22,7 +22,7 @@ namespace sh_game.game.net.protocoll {
 	public readonly struct ParsablePlayer {
 		public readonly Vector3d POS;
 		public readonly Vector3d DIR;
-		public readonly double HEALTH;
+		public readonly int HEALTH;
 
 		public ParsablePlayer(Player p) {
 			HEALTH = p.Health;

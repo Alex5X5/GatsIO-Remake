@@ -46,7 +46,7 @@ namespace sh_game.game.Logic {
 			return this.Set(vector.x, vector.y, vector.z);
 		}
 
-		public Vector3d cpy() {
+		public Vector3d Cpy() {
 			return new Vector3d(this);
 		}
 
