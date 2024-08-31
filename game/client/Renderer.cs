@@ -1,12 +1,10 @@
-﻿using sh_game.game.Logic;
+﻿using ShGame.game.Logic;
+
 using SimpleLogging.logging;
 
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq.Expressions;
-using System.Threading;
-using System.Windows.Forms;
 
 namespace sh_game.game.client {
 
@@ -42,6 +40,8 @@ namespace sh_game.game.client {
 		private Vector3d logicalMouseVector = new Vector3d(0, 0, 0);
 
 		public Renderer() {
+
+
 			//Image temp;
 			image = new Bitmap(WIDTH, HEIGHT);
 			//renderLock = new Semaphore(1,1);
@@ -58,6 +58,7 @@ namespace sh_game.game.client {
 			using(Graphics g = Graphics.FromImage(image)) {
 				g.SmoothingMode=SmoothingMode.AntiAlias;
 				g.FillRectangle(SHADOW_COLOR, new RectangleF(0, 0, WIDTH, HEIGHT));
+
 				if(players!=null)
 					foreach(Player p in players) {
 						if(p!=null)
@@ -65,14 +66,17 @@ namespace sh_game.game.client {
 					}
 				if(player!=null)
 					DrawPlayer(player, g);
+
+				if(obstacles!=null)
+					RenderObstacles(obstacles, g);
+
 				if(player!=null&&obstacles!=null)
 					if(RESTRICTED_VIEW) {
 						//RenderBackHalf(c.player.Pos);
 						RenderObstacleShadows(player.Pos, obstacles);
 						GetVievRestrictions();
 					}
-				if(obstacles!=null)
-					RenderObstacles(obstacles, graphics);
+				g.Dispose();
 			}
 			return image;
 		}
@@ -82,12 +86,12 @@ namespace sh_game.game.client {
 			//		logger.log("",new MessageParameter("r",r.toString()));
 			double angle = Math.Tan(r.y / r.x);
 			angle -= (10)*Math.PI/180;
-			Vector3d v1 = new Vector3d(Math.Cos(angle), Math.Sin(angle), 0);
+			Vector3d v1 = new(Math.Cos(angle), Math.Sin(angle), 0);
 			angle += (20)*Math.PI/180;
-			Vector3d v2 = new Vector3d(Math.Cos(angle), Math.Sin(angle), 0);
+			Vector3d v2 = new(Math.Cos(angle), Math.Sin(angle), 0);
 			v1.Scl(100);
 			v2.Scl(100);
-			return new Vector3d[] { v1, v2 };
+			return [v1, v2];
 		}
 
 		private Dir GetRoundedVievDirection() {
@@ -149,57 +153,72 @@ namespace sh_game.game.client {
 		}
 
 		private void RenderObstacleShadows(Vector3d v, Obstacle[] l) {
+			//a list of points on the screen
+			PointF[] points = new PointF[3];
+			Vector3d ShadowPoint1 = new Vector3d(0, 0, 0);
+			Vector3d ShadowPoint2 = new Vector3d(0, 0, 0);
+			Vector3d ShadowPoint3 = new Vector3d(0, 0, 0);
+			Vector3d ShadowPoint4 = new Vector3d(0, 0, 0);
+			Vector3d[] sp;
+			//return;
 			foreach (Obstacle o in l)
 			{
-				Vector3d[] sp = o.GetShadowPoints(v);
-				Vector3d p1 = new Vector3d(0, 0, 0);
-				Vector3d p2 = new Vector3d(0, 0, 0);
+				o.GetShadowPoints(ref v, ref ShadowPoint1, ref ShadowPoint2);
+				//sp=o.GetShadowPoints(v);
 				if (!(v.x >= o.Pos.x && v.x <= o.Pos.x + o.WIDTH && v.y >= o.Pos.y && v.y <= o.Pos.y + o.HEIGHT)) {
 					switch (RelativeDir(v, o.Pos.Cpy().Add(new Vector3d(o.WIDTH / 2.0, o.HEIGHT / 2.0, 0).Nor()))) {
 						case Dir.T:
-							p1 = ShadowHit(v, sp[0], BORDER_TOP);
-							p2 = ShadowHit(v, sp[1], BORDER_TOP);
+							ShadowPoint3 = ShadowHit(v, ShadowPoint1, BORDER_TOP);
+							ShadowPoint4 = ShadowHit(v, ShadowPoint2, BORDER_TOP);
 							break;
 						case Dir.B:
-							p1 = ShadowHit(v, sp[0], BORDER_BOTTOM);
-							p2 = ShadowHit(v, sp[1], BORDER_BOTTOM);
+							ShadowPoint3=ShadowHit(v, ShadowPoint1, BORDER_BOTTOM);
+							ShadowPoint4=ShadowHit(v, ShadowPoint2, BORDER_BOTTOM);
 							break;
 						case Dir.R:
-							p1 = ShadowHit(v, sp[0], BORDER_RIGHT);
-							p2 = ShadowHit(v, sp[1], BORDER_RIGHT);
+							ShadowPoint3=ShadowHit(v, ShadowPoint1, BORDER_RIGHT);
+							ShadowPoint4=ShadowHit(v, ShadowPoint2, BORDER_RIGHT);
 							break;
 						case Dir.L:
-							p1 = ShadowHit(v, sp[0], BORDER_LEFT);
-							p2 = ShadowHit(v, sp[1], BORDER_LEFT);
+							ShadowPoint3=ShadowHit(v, ShadowPoint1, BORDER_LEFT);
+							ShadowPoint4=ShadowHit(v, ShadowPoint2, BORDER_LEFT);
 							break;
 						//default:
 						//	logger.warn("unexpected direction", new MessageParameter("direction", getRoundedVievDirection().toString()));
 					}
 					//.fillPolygon(new int[] { (int)p1.x / gScl, (int)sp[0].x / gScl, (int)sp[1].x / gScl }, new int[] { (int)p1.y / gScl, (int)sp[0].y / gScl, (int)sp[1].y / gScl }, 3);
-					graphics.FillPolygon(
-						SHADOW_COLOR,
-						new PointF[] {
-							new PointF((int)p1.x, (int)p1.y),
-							new PointF((int)p2.x, (int)p2.y),
-							new PointF((int)sp[1].x, (int)sp[1].y)
-						}
-					);
-					graphics.FillPolygon(
-						SHADOW_COLOR,
-						new PointF[] {
-							new PointF((int)p1.x, (int)p1.y),
-							new PointF((int)sp[0].x, (int)sp[0].y),
-							new PointF((int)sp[1].x, (int)sp[1].y)
-						}
-					);
-					graphics.FillPolygon(
-						SHADOW_COLOR,
-						new PointF[] {
-							new PointF((int)p1.x, (int)p1.y),
-							new PointF((int)p2.x, (int)p2.y),
-							new PointF((int)sp[1].x, (int)sp[1].y)
-						}
-					);
+
+					//DrawShadowTriangle(ref points, ref p1.x, ref p1.y, ref p2.x, ref p2.y, ref sp[1].x, ref sp[1].y);
+					//DrawShadowTriangle(ref points, ref p1.x, ref p1.y, ref sp[0].x, ref sp[0].y, ref sp[1].x, ref sp[1].y);
+					DrawShadowTriangle(ref points, ref ShadowPoint1.x, ref ShadowPoint1.y, ref ShadowPoint2.x, ref ShadowPoint2.y, ref ShadowPoint4.x, ref ShadowPoint4.y);
+					DrawShadowTriangle(ref points, ref ShadowPoint1.x, ref ShadowPoint1.y, ref ShadowPoint3.x, ref ShadowPoint3.y, ref ShadowPoint4.x, ref ShadowPoint4.y);
+
+
+
+					//graphics.FillPolygon(
+					//	SHADOW_COLOR,
+					//	new PointF[] {
+					//		new PointF((int)p1.x, (int)p1.y),
+					//		new PointF((int)p2.x, (int)p2.y),
+					//		new PointF((int)sp[1].x, (int)sp[1].y)
+					//	}
+					//);
+					//graphics.FillPolygon(
+					//	SHADOW_COLOR,
+					//	new PointF[] {
+					//		new PointF((int)p1.x, (int)p1.y),
+					//		new PointF((int)sp[0].x, (int)sp[0].y),
+					//		new PointF((int)sp[1].x, (int)sp[1].y)
+					//	}
+					//);
+					//graphics.FillPolygon(
+					//	SHADOW_COLOR,
+					//	new PointF[] {
+					//		new PointF((int)p1.x, (int)p1.y),
+					//		new PointF((int)p2.x, (int)p2.y),
+					//		new PointF((int)sp[1].x, (int)sp[1].y)
+					//	}
+					//);
 					//graphics2D.fillPolygon(new int[] { (int)p1.x / gScl, (int)p2.x / gScl, (int)sp[1].x / gScl }, new int[] { (int)p1.y / gScl, (int)p2.y / gScl, (int)sp[1].y / gScl }, 3);
 				}
 			}
@@ -223,6 +242,35 @@ namespace sh_game.game.client {
 			return new Vector3d(oth1X + u * (oth2X - oth1X), oth1Y + u * (oth2Y - oth1Y), oth1Z + u * (oth2Z - oth1Z));
 		}
 
+		private void DrawShadowTriangle(
+			ref PointF[] points,
+			ref double v1,
+			ref double v2,
+			ref double v3,
+			ref double v4,
+			ref double v5,
+			ref double v6
+			//ref int v7, ref int v8, ref int v9, ref int v10, ref int v11, ref int v12
+		) {
+			points[0].X=(float)v1;
+			points[0].Y=(float)v2;
+			points[1].X=(float)v3;
+			points[1].Y=(float)v4;
+			points[2].X=(float)v5;
+			points[2].Y=(float)v6;
+			//points[0].X = v1; points[1].X = v2; points[2].X = v3; points[3].X = v4; points[4].X = v5; points[5].X = v6;
+			//points[6].X = v7; points[7].X = v8; points[8].X = v9; points[9].X = v10; points[10].X = v11; points[11].X = v12;
+			graphics.FillPolygon(
+				SHADOW_COLOR,
+				//new PointF[] {
+				//	new PointF((int)p1.x, (int)p1.y),
+				//	new PointF((int)p2.x, (int)p2.y),
+				//	new PointF((int)sp[1].x, (int)sp[1].y)
+				//}
+				points
+			);
+		}
+
 		private void RenderObstacles(Obstacle[] l, Graphics g) {
 			foreach(Obstacle o in l) {
 				switch(o.type) {
@@ -243,7 +291,8 @@ namespace sh_game.game.client {
 			//graphics2D.SetStroke(new BasicStroke(1 / gScl));
 			//graphics2D.drawLine(0, 0, (int)p.pos.x / gScl, (int)p.pos.y / gScl);
 			//Console.WriteLine("drawing at"+p.Pos.ToString());
-			g.FillEllipse(PLAYER_RED_COLOR, new Rectangle((int)p.Pos.x, (int)p.Pos.y, Player.radius*2, Player.radius*2));
+			if(p.visible)
+				g.FillEllipse(PLAYER_RED_COLOR, new Rectangle((int)p.Pos.x, (int)p.Pos.y, Player.radius*2, Player.radius*2));
 			//		logger.log(String.valueOf(p.pos.x/gScl)+" "+String.valueOf(p.pos.y/gScl));
 		}
 

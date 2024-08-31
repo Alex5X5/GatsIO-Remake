@@ -1,4 +1,5 @@
 ﻿using sh_game.game.client;
+using sh_game.game.net;
 using sh_game.game.net.protocoll;
 
 using SimpleLogging.logging;
@@ -18,7 +19,7 @@ namespace sh_game.game.server {
 		//private readonly NetworkStream input;
 		//private readonly NetworkStream output;
 
-		private readonly BinaryFormatter formatter = new BinaryFormatter();
+		//private readonly BinaryFormatter formatter = new BinaryFormatter();
 
 		private readonly Logger logger = new Logger(new LoggingLevel("NetHandler"));
 
@@ -47,45 +48,52 @@ namespace sh_game.game.server {
 			}
 		}
 
-		private Protocoll RecievePacket() {
+		private byte[] RecievePacket() {
 			if(!Connected)
 				return null;
-			byte[] buffer = new byte[2048];
+			byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
 			int recieved = 0;
-			while(recieved<2084) {
-				int bytes = Receive(buffer, recieved, 2048-recieved, SocketFlags.None);
+			while(recieved<Protocoll.PACKET_BYTE_LENGTH) {
+				int bytes = Receive(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH-recieved, SocketFlags.None);
 				if(bytes==0)
 					break;
 				recieved+=bytes;
 			}
-			using(MemoryStream ms = new MemoryStream(buffer)) {
-				return (Protocoll)formatter.Deserialize(ms);
-			}
+			return buffer;
 		}
 
-		private void SendPacket(Protocoll send) {
+		private void SendPacket(byte[] send) {
 			if(send==null)
 				return;
-			using(MemoryStream ms = new MemoryStream()) {
-				formatter.Serialize(ms, send);
-				try {
-					_=Send(ms.ToArray());
-				} catch(SocketException e) {
-					logger.Error(e.ToString());
-				}
+			try {
+				_=Send(send);
+			} catch(SocketException e) {
+				logger.Error(e.ToString());
 			}
 		}
 
-		public MapProtocoll GetMap() {
+		public void GetMap(ref Obstacle[] obstacles) {
 			logger.Log("getting map");
-			SendPacket(new MapProtocoll(true,(Obstacle[])null));
-			return (MapProtocoll)RecievePacket();
+			SendPacket(Protocoll.PreparePacket(Protocoll.MAP_HEADER));
+			byte[] temp = RecievePacket();
+			int counter = 0;
+			for(int i = 0; i<20; i++) {
+				Obstacle.DeserializeObstacleCountable(ref temp, ref obstacles[i], ref counter);
+			}
 		}
 
-		public PlayerProtocoll ExchangePlayers(Player p) {
+		public void ExchangePlayers(Player p, ref Player[] players) {
 			logger.Log("exchanging players");
-			SendPacket(new PlayerProtocoll(true, p));
-			return (PlayerProtocoll)RecievePacket();
+			byte[] send = Protocoll.PreparePacket(Protocoll.PLAYER_HEADER);
+			Player.SerializePlayer(ref send, ref p, Protocoll.PAYLOAD_OFFSET);
+			SendPacket(Protocoll.PreparePacket(Protocoll.PLAYER_HEADER));
+			Console.WriteLine("NetHandler:"+p);
+			byte[] temp = RecievePacket();
+			int counter = 0;
+			for(int i = 0; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
+				Console.WriteLine("NetHandler:"+players[i]);
+				Player.DeserializePlayerCountable(ref temp, ref players[i], ref counter);
+			}
 		}
 
 		public override string ToString() {

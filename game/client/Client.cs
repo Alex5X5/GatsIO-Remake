@@ -1,3 +1,4 @@
+using sh_game.game.net;
 using sh_game.game.net.protocoll;
 using sh_game.game.server;
 
@@ -29,8 +30,7 @@ namespace sh_game.game.client{
 		internal Player player;
 		//internal readonly SemaphoreSlim playersLock;
 		private Player[] players;
-
-		internal Obstacle[] obstacles;
+		internal Obstacle[] obstacles = new Obstacle[20];
 
 		private Thread renderThread;
 		private Thread connectionThread;
@@ -46,19 +46,12 @@ namespace sh_game.game.client{
 			byte[] temp = new byte[8];
 			new Random().NextBytes(temp);
 			player=new Player(new Logic.Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
-			players=new Player[30];
+			players=new Player[GameServer.MAX_PLAYER_COUNT];
 
-			//for(int i = 1; i<players.Length; i++) {
-			//	players[i]=new Player(new Logic.Vector3d(0, 0, 0), -1);
-			//}
-			//if(handler != null ) {
-			//	ParsableObstacle[] obstacles_ = handler.GetMap().obstacles;
-			//	List<Obstacle> list = new List<Obstacle>();
-			//	foreach(ParsableObstacle o in obstacles_)
-			//		list.Add(new Obstacle(o));
-			//	obstacles=list.ToArray();
-			//}
-
+			for(int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
+				players[i]=new Player(new Logic.Vector3d(0, 0, 0), -1, 1);
+			for(int i = 0; i<obstacles.Length; i++)
+				obstacles[i]=new Obstacle(null, 0);
 			renderer=new Renderer();
 			StartThreads();
 		}
@@ -69,13 +62,13 @@ namespace sh_game.game.client{
 			SuspendLayout();
 
 			AutoScaleMode=AutoScaleMode.None;
-			ClientSize=new System.Drawing.Size(Renderer.WIDTH, Renderer.HEIGHT);
+			ClientSize=new Size(Renderer.WIDTH, Renderer.HEIGHT);
 			Name="Client";
 			Text="Client";
 			
 			FormClosing+=Stop;
-			this.KeyDown+=new System.Windows.Forms.KeyEventHandler(this.KeyDown_);
-			this.KeyUp+=new System.Windows.Forms.KeyEventHandler(this.KeyUp_);
+			KeyDown+=new KeyEventHandler(KeyDown_);
+			KeyUp+=new KeyEventHandler(KeyUp_);
 
 			ResumeLayout(false);
 			PerformLayout();
@@ -86,22 +79,21 @@ namespace sh_game.game.client{
 			connectionThread=new Thread(
 				() => {
 					handler = new NetHandler();
+					handler?.GetMap(ref obstacles);
+					Console.WriteLine(player);
+					handler?.ExchangePlayers(player, ref players);
 					if(handler!=null) {
-						//ParsableObstacle[] obstacles_ = handler.GetMap().obstacles;
-						//List<Obstacle> list = new List<Obstacle>();
-						//foreach(ParsableObstacle o in obstacles_)
-						//list.Add(new Obstacle(o));
-						//obstacles=list.ToArray();
+						
 					}
 				}
 			);
 			connectionThread.Start();
+
 			logger.Log("start threads!");
 			renderThread = new Thread(
 					() => {
-						while(!CanRaiseEvents&&!stop) {
+						while(!CanRaiseEvents&&!stop)
 							Thread.Sleep(10);
-						}
 						while(!stop) {
 							Thread.Sleep(30);
 							Invalidate();
@@ -113,9 +105,8 @@ namespace sh_game.game.client{
 
 			playerMoveThread=new Thread(
 					() => {
-						while(!CanRaiseEvents&&!stop) {
+						while(!CanRaiseEvents&&!stop)
 							Thread.Sleep(10);
-						}
 						while(!stop) {
 							foreach(Player p in players) {
 								if(p!=null)
@@ -134,42 +125,43 @@ namespace sh_game.game.client{
 		}
 
 		private void KeyUp_(Object sender, KeyEventArgs e) {
-			if(e.KeyCode==Keys.W) {
-				keyUp=false;
-				player.OnKeyEvent(c: this);
-			};
-			if(e.KeyCode==Keys.S) {
-				keyDown=false;
-				player.OnKeyEvent(c: this);
-			};
-			if(e.KeyCode==Keys.A) {
-				keyLeft=false;
-				player.OnKeyEvent(c: this);
-			};
-			if(e.KeyCode==Keys.D) {
-				keyRight=false;
-				player.OnKeyEvent(c: this);
-			};
+			switch(e.KeyCode) {
+				case Keys.W:
+					keyUp=false;
+					break;
+				case Keys.S:
+					keyDown=false;
+					break;
+				case Keys.A:
+					keyLeft=false;
+					break;
+				case Keys.D:
+					keyRight=false;
+					break;
+			}
+			player.OnKeyEvent(c: this);
 			//logger.Log("key released", new MessageParameter("player", player.toString()));
 		}
 
 		private void KeyDown_(Object sender, KeyEventArgs e) {
-			if(e.KeyCode==Keys.W) {
-				keyUp=true;
-				player.OnKeyEvent(c: this);
-			};
-			if(e.KeyCode==Keys.S) {
-				keyDown=true;
-				player.OnKeyEvent(c: this);
-			};
-			if(e.KeyCode==Keys.A) {
-				keyLeft=true;
-				player.OnKeyEvent(c: this);
-			};
-			if(e.KeyCode==Keys.D) {
-				keyRight=true;
-				player.OnKeyEvent(c: this);
-			};
+			switch(e.KeyCode) {
+				case Keys.W:
+					keyUp=true;
+					break;
+				case Keys.S:
+					keyDown=true;
+					break;
+				case Keys.A:
+					keyLeft=true;
+					break;
+				case Keys.D:
+					keyRight=true;
+					break;
+				case Keys.Escape:
+					Stop(this, null);
+					break;
+			}
+			player.OnKeyEvent(c: this);
 			//logger.Log("key released", new MessageParameter("player", player.toString()));
 		}
 

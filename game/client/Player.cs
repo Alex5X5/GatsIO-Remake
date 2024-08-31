@@ -1,6 +1,10 @@
-﻿using sh_game.game.Logic;
-using sh_game.game.net.protocoll;
+﻿using sh_game.game.net.protocoll;
+
+using ShGame.game.Logic;
+
 using System;
+using System.Runtime.InteropServices;
+using System.Windows.Markup;
 
 namespace sh_game.game.client {
 
@@ -15,33 +19,35 @@ namespace sh_game.game.client {
 		public int Health { set; get; } = 100;
 		public const int radius = 10;
 		public Int64 PlayerUUID;
+		public bool visible;
 
 		public Player(Vector3d pos_, int health_, Int64 UUID_) {
 			Pos=pos_??new Vector3d(0, 0, 0);
 			Health=health_;
 			PlayerUUID=UUID_!=0 ? UUID_ : new Random().Next();
-
-		}
-
-		public Player(ParsablePlayer p) {
-			Health=p.HEALTH;
-			Pos=p.POS;
-			Dir=p.DIR;
+			visible=Health!=-1;
 		}
 
 		public override string ToString() => $"game.graphics.client.player[health:{Health} speed:{Speed} pos:{Pos} dir:{Dir} UUID:{Convert.ToString(PlayerUUID)}]";
 
 		public void Move() {
-			//Console.WriteLine("move!");
-			//Console.WriteLine(ToString());
-			//Console.WriteLine(Pos.Add(Dir.cpy().Nor().Scl(Speed)));
 			Pos.Add(Dir.Cpy().Nor().Scl(Speed));
-			//Console.WriteLine(ToString());
 		}
 
 		public void Damage(int damage) {
 			if(damage>Health)
-				Health = 0;
+				Health=0;
+		}
+
+		public void Deactivate() {
+			visible = false;
+			Pos.x=0;
+			Pos.y=0;
+			Pos.z=0;
+			Dir.x=0;
+			Dir.y=0;
+			Dir.z=0;
+			Health=0;
 		}
 
 		//	public bool checkEdges() {
@@ -139,7 +145,12 @@ namespace sh_game.game.client {
 			}
 		}
 
-		public static void SerializePlayer(ref byte[] input, ref Player p, ref int offset) {
+		public static void SerializePlayer(ref byte[] input, ref Player p, int offset) {
+			int offset_ = offset;
+			SerializePlayerCountable(ref input, ref p, ref offset_);
+		}
+
+		public static void SerializePlayerCountable(ref byte[] input, ref Player p, ref int offset) {
 			if(p==null) {
 				BitConverter.GetBytes(-1).CopyTo(input, offset);
 				offset+=PLAYER_BYTE_LENGTH;
@@ -161,10 +172,18 @@ namespace sh_game.game.client {
 			offset+=8;
 		}
 
-		public static void DeserializePlayer(ref byte[] input, ref Player player, ref int offset) {
+		public static void DeserializePlayer(ref byte[] input, ref Player player, int offset) {
+			int offset_ = offset;
+			DeserializePlayerCountable(ref input, ref player, ref offset_);
+		}
+		
+		public static void DeserializePlayerCountable(ref byte[] input, ref Player player, ref int offset) {
+			if(player==null) {
+				player = new Player(null, 0, 0);
+			}
 			player.Health = BitConverter.ToInt32(input, offset);
 			if(player.Health==-1) {
-				player = null;
+				player.Deactivate();
 				offset+=PLAYER_BYTE_LENGTH;
 			} else {
 				offset+=4;

@@ -1,5 +1,8 @@
 ﻿using sh_game.game.Logic;
 using sh_game.game.net.protocoll;
+
+using ShGame.game.Logic;
+
 using System;
 
 namespace sh_game.game.client {
@@ -15,17 +18,16 @@ namespace sh_game.game.client {
 		public const int OBSTACLE_BYTE_LENGTH = 36;
 
 		public int WIDTH, HEIGHT;
-		private LineSection3d boundL, boundT, boundR, boundB;
+		public readonly LineSection3d boundL, boundT, boundR, boundB;
 		public int type;
 
 		//public Obsticle(int x, int y) {
 		//	this.pos=new Vector3d((double)x, (double)x, 0);
 		//}
 
-		public Obstacle(Vector3d position, int type) {
-			//new Random().;
-			Pos=position;
-			this.type=type;
+		public Obstacle(Vector3d pos_, int type_) {
+			Pos=pos_??new Vector3d(0, 0, 0);
+			type=type_;
 			switch(type) {
 				case 1:
 					//logger.log("setting bounds", new MessageParameter("type", type));
@@ -108,25 +110,55 @@ namespace sh_game.game.client {
 			return null;
 		}
 
-		public Vector3d[] GetShadowPoints(Vector3d v) {
-			if(RelativeX(v)==1&&RelativeY(v)==1) {
-				return new Vector3d[] { boundR.point1, boundL.point2 };
-			} else if(RelativeX(v)==2&&RelativeY(v)==1) {
-				return new Vector3d[] { boundL.point1, boundR.point1 };
-			} else if(RelativeX(v)==3&&RelativeY(v)==1) {
-				return new Vector3d[] { boundL.point1, boundR.point2 };
-			} else if(RelativeX(v)==1&&RelativeY(v)==2) {
-				return new Vector3d[] { boundL.point1, boundL.point2 };
-			} else if(RelativeX(v)==3&&RelativeY(v)==2) {
-				return new Vector3d[] { boundR.point1, boundR.point2 };
-			} else if(RelativeX(v)==1&&RelativeY(v)==3) {
-				return new Vector3d[] { boundL.point1, boundR.point2 };
-			} else if(RelativeX(v)==2&&RelativeY(v)==3) {
-				return new Vector3d[] { boundL.point2, boundR.point2 };
-			} else if(RelativeX(v)==3&&RelativeY(v)==3) {
-				return new Vector3d[] { boundR.point1, boundL.point2 };
+		public void GetShadowPoints(ref Vector3d pos, ref Vector3d point1, ref Vector3d point2) {
+			if(RelativeX(pos)==1&&RelativeY(pos)==1) {
+				//return new Vector3d[] { boundR.point1, boundL.point2 };
+				point1.x=boundR.point1.x;
+				point1.y=boundR.point1.y;
+				point2.x=boundL.point2.x;
+				point2.y=boundL.point2.y;
+			} else if(RelativeX(pos)==2&&RelativeY(pos)==1) {
+				//return new Vector3d[] { boundL.point1, boundR.point1 };
+				point1.x=boundL.point1.x;
+				point1.y=boundL.point1.y;
+				point2.x=boundR.point1.x;
+				point2.y=boundR.point1.y;
+			} else if(RelativeX(pos)==3&&RelativeY(pos)==1) {
+				//return new Vector3d[] { boundL.point1, boundR.point2 };
+				point1.x=boundL.point1.x;
+				point1.y=boundL.point1.y;
+				point2.x=boundR.point2.x;
+				point2.y=boundR.point2.y;
+			} else if(RelativeX(pos)==1&&RelativeY(pos)==2) {
+				//return new Vector3d[] { boundL.point1, boundL.point2 };
+				point1.x=boundL.point1.x;
+				point1.y=boundL.point1.y;
+				point2.x=boundL.point2.x;
+				point2.y=boundL.point2.y;
+			} else if(RelativeX(pos)==3&&RelativeY(pos)==2) {
+				//return new Vector3d[] { boundR.point1, boundR.point2 };
+				point1.x=boundR.point1.x;
+				point1.y=boundR.point1.y;
+				point2.x=boundR.point2.x;
+				point2.y=boundR.point2.y;
+			} else if(RelativeX(pos)==1&&RelativeY(pos)==3) {
+				point1.x=boundL.point1.x;
+				point1.y=boundL.point1.y;
+				point2.x=boundR.point2.x;
+				point2.y=boundR.point2.y;
+			} else if(RelativeX(pos)==2&&RelativeY(pos)==3) {
+				point1.x=boundL.point2.x;
+				point1.y=boundL.point2.y;
+				point2.x=boundR.point2.x;
+				point2.y=boundR.point2.y;
+			} else if(RelativeX(pos)==3&&RelativeY(pos)==3) {
+				point1.x=boundR.point1.x;
+				point1.y=boundR.point1.y;
+				point2.x=boundL.point2.x;
+				point2.y=boundL.point2.y;
+				//return new Vector3d[] { boundR.point1, boundL.point2 };
 			}
-			return null;
+			//return null;
 		}
 
 		private int RelativeX(Vector3d v) {
@@ -162,7 +194,12 @@ namespace sh_game.game.client {
 			obstacle.boundB.point2.Set(obstacle.boundR.point2);
 		}
 
-		public static void SerializeObstacle(ref byte[] input, ref Obstacle o, ref int offset) {
+		public static void SerializeObstacle(ref byte[] input, ref Obstacle o, int offset) {
+			int offset_ = offset;
+			SerializeObstacleCountable(ref input, ref o, ref offset_);
+		}
+
+		public static void SerializeObstacleCountable(ref byte[] input, ref Obstacle o, ref int offset) {
 			if(o==null) {
 				BitConverter.GetBytes(-1).CopyTo(input, offset);
 				offset+=OBSTACLE_BYTE_LENGTH;
@@ -180,14 +217,21 @@ namespace sh_game.game.client {
 			}
 		}
 
-		public static void DeserializeObstacle(ref byte[] input, ref Obstacle obstacle, ref int offset) {
+		public static void DeserializeObstacle(ref byte[] input, ref Obstacle obstacle, int offset) {
+			int offset_ = offset;
+			DeserializeObstacleCountable(ref input, ref obstacle, ref offset_);
+		}
+
+		public static void DeserializeObstacleCountable(ref byte[] input, ref Obstacle obstacle, ref int offset) {
 			int type_ = BitConverter.ToInt32(input, offset);
 			if(type_==-1) {
-				obstacle=null;
+				//obstacle=null;
 				offset+=OBSTACLE_BYTE_LENGTH;
 			} else {
 				if(obstacle==null)
 					obstacle=new Obstacle(new Vector3d(0, 0, 0), type_);
+				else
+					obstacle.type=type_;
 				offset+=4;
 				obstacle.Pos.x=BitConverter.ToDouble(input, offset);
 				offset+=8;

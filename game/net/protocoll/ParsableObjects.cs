@@ -1,5 +1,7 @@
 ﻿using sh_game.game.client;
-using sh_game.game.Logic;
+
+using ShGame.game.Logic;
+
 using System;
 
 namespace sh_game.game.net.protocoll {
