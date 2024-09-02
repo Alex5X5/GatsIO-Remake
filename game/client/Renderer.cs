@@ -59,7 +59,7 @@ internal class Renderer:IDisposable {
 					if(p!=null)
 						DrawPlayer(p, g);
 				}
-			if(player!=null)
+			if (player != null)
 				DrawPlayer(player, g);
 
 			if(obstacles!=null)

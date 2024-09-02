@@ -1,20 +1,32 @@
 ﻿using System.Diagnostics;
-using System.Windows.Forms;
 using System.Threading;
-using ShGame.game.Net;
-using System.DirectoryServices;
-using System;
-
+using System.Windows.Forms;
+using ShGame.game.Logic;
 namespace ShGame.game;
 
 public static class Programm {
 
 	[STAThread]
 	public static void Main() {
-		Logging.DisableColors();
-		Logging.DisableDebug();
-		Logging.DisableLog();
-		Console.WriteLine("start");
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Logging.DisableColors();
+        //Logging.DisableDebug();
+        //Logging.DisableLog();
+        //new Thread(
+        //		() =>{
+        //			String s = "";
+        //			while (true) {
+        //				s+=Console.ReadLine();
+        //				if (s!="") {
+        //					Debug.WriteLine(s);
+        //					s = "";
+        //				}
+        //			}
+        //		}
+        //).Start();
+        //Console.SetOut(new ConsoleRedirector());
+        Console.WriteLine("start");
 		Debug.WriteLine("test");
 		//byte[] temp = new byte[8];
 		//new Random().NextBytes(temp);
@@ -34,14 +46,16 @@ public static class Programm {
 
 		//return;
 
-		//unsafe {
-		//	TempData<PrimitiveVector3I> tempData;
-		//	tempData = TempStorageAllocator<PrimitiveVector3I>.Get();
-		//	tempData.data->X=1;
-		//	Console.WriteLine(tempData.data->ToString());
-		//	Console.WriteLine(tempData.data->X);
-		//	//return;
-		//}
+		unsafe
+		{
+			Debug.WriteLine("test");
+			TempData<PrimitiveVector3I> tempData;
+			tempData = TempStorageAllocator<PrimitiveVector3I>.Get();
+			tempData.data->X = 1;
+			Debug.WriteLine(tempData.data->ToString());
+			Debug.WriteLine(tempData.data->X);
+			//return;
+		}
 
 		//unsafe {
 		//	Console.WriteLine($"Size of MyStruct: {sizeof(PrimitiveVector3I)} bytes"); // This will output 12 bytes

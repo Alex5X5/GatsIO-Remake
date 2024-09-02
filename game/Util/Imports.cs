@@ -2,3 +2,4 @@
 global using SimpleLogging.logging;
 global using ShGame.game.Logic;
 global using ShGame.game.Client;
+global using ShGame.game.Util;
