@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace ShGame.game.Net;
 
-namespace sh_game.game.server {
-	internal class ConnectException:Exception{
-	
-		public ConnectException():base() {}
+internal class ConnectException:Exception{
 
-		public ConnectException(string message):base(message) {}	
-	}
+	public ConnectException():base() {}
+
+	public ConnectException(string message):base(message) {}	
 }

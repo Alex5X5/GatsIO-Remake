@@ -1,10 +1,21 @@
-﻿namespace ShGame.game;
-internal static class Programm {
+﻿using System.Diagnostics;
+using System.Windows.Forms;
+using System.Threading;
+using ShGame.game.Net;
+using System.DirectoryServices;
+using System;
 
-	//[STAThread]
+namespace ShGame.game;
+
+public static class Programm {
+
+	[STAThread]
 	public static void Main() {
 		Logging.DisableColors();
-
+		Logging.DisableDebug();
+		Logging.DisableLog();
+		Console.WriteLine("start");
+		Debug.WriteLine("test");
 		//byte[] temp = new byte[8];
 		//new Random().NextBytes(temp);
 		//Player player = new Player(new Logic.Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0)) {
@@ -22,14 +33,25 @@ internal static class Programm {
 		//Console.WriteLine(p2.ToString());
 
 		//return;
-		unsafe {
-			Console.WriteLine($"Size of MyStruct: {sizeof(MyStruct)} bytes"); // This will output 12 bytes
-		}
 
-		new Logger(new LoggingLevel("programm")).Log("Main");
+		//unsafe {
+		//	TempData<PrimitiveVector3I> tempData;
+		//	tempData = TempStorageAllocator<PrimitiveVector3I>.Get();
+		//	tempData.data->X=1;
+		//	Console.WriteLine(tempData.data->ToString());
+		//	Console.WriteLine(tempData.data->X);
+		//	//return;
+		//}
+
+		//unsafe {
+		//	Console.WriteLine($"Size of MyStruct: {sizeof(PrimitiveVector3I)} bytes"); // This will output 12 bytes
+		//}
+
+		//new Logger(new LoggingLevel("programm")).Log("Main");
 		//new GameServer(100);
-		//Thread.Sleep(1000);
-		Control.CheckForIllegalCrossThreadCalls=true;
-		Application.Run(new Client());
+		//while (true)
+		//Thread.Sleep(100);
+		//Control.CheckForIllegalCr'ossThreadCalls=true;
+		Application.Run(new Client.Client());
 	}
 }

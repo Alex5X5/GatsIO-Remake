@@ -1,4 +1,5 @@
 ﻿namespace ShGame.game.Logic;
+
 public class Line3d {
 
 	public required Vector3d origin;
@@ -44,29 +45,41 @@ public class Line3d {
 	//		return interception;
 	//	}
 
-	public Vector3d Intercept(Line3d other) {
-		double th1X = origin.x;
-		double th1Y = origin.y;
+	public Vector3d Intercept(ref Line3d other) {
+		//double th1X = origin.x;
+		//double th1Y = origin.y;
 
-		Vector3d th2 = origin.Cpy().Add(direction);
-		double th2X = th2.x;
-		double th2Y = th2.y;
+		//Vector3d th2 = origin.Cpy().Add(direction);
+		//double th2X = th2.x;
+		//double th2Y = th2.y;
 
-		double oth1X = other.origin.x;
-		double oth1Y = other.origin.y;
-		double oth1Z = other.origin.z;
+		//double oth1X = other.origin.x;
+		//double oth1Y = other.origin.y;
+		//double oth1Z = other.origin.z;
+		//TempMeshData<PrimitiveVector3I> data;
 
-		Vector3d oth2 = other.origin.Cpy().Add(other.direction);
-		double oth2X = oth2.x;
-		double oth2Y = oth2.y;
-		double oth2Z = oth2.z;
+		Vector3d this2 = origin.Cpy().Add(direction);
+		Vector3d other2 = other.origin.Cpy().Add(other.direction);
+		//double oth2X = other2.x;
+		//double oth2Y = other2.y;
+		//double oth2Z = other2.z;
 
-		double u = ((oth1X-th1X)*(th2Y-th1Y)-(oth1Y-th1Y)*(th2X-th1X))/
-				((oth2Y-oth1Y)*(th2X-th1X)-(oth2X-oth1X)*(th2Y-th1Y));
+		double u = (
+					(other.origin.x-origin.x)*(this2.y-origin.y)-
+					(other.origin.y-origin.y)*(this2.x-origin.x)
+				)/
+				(
+					(other2.y-other.origin.y)*(this2.x-origin.x)-
+					(other2.x-other.origin.x)*(this2.y-origin.y)
+		);
 		//		System.out.println(u);
 		//		System.out.println(((oth1X-th1X)*(th2Y-th1Y)-(oth1Y-th1Y)*(th2X-th1X)));
 		//		System.out.println(((oth2Y-oth1Y)*(th2X-th1X)-(oth2X-oth1X)*(th2Y-th1Y)));
-		return new Vector3d(oth1X+u*(oth2X-oth1X), oth1Y+u*(oth2Y-oth1Y), oth1Z+u*(oth2Z-oth1Z));
+		return new Vector3d(
+			other2.x+u*(other2.x-other.origin.x),
+			other.origin.y+u*(other2.y-other.origin.y),
+			other.origin.z+u*(other2.y-other.origin.z)
+		);
 	}
 
 	public static Line3d FromDirection(Vector3d origin, Vector3d direction) {
