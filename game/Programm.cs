@@ -48,12 +48,18 @@ public static class Programm {
 
 		unsafe
 		{
-			Debug.WriteLine("test");
+			Console.WriteLine("test");
 			TempData<PrimitiveVector3I> tempData;
 			tempData = TempStorageAllocator<PrimitiveVector3I>.Get();
 			tempData.data->X = 1;
-			Debug.WriteLine(tempData.data->ToString());
-			Debug.WriteLine(tempData.data->X);
+			Console.WriteLine(tempData);
+			Console.WriteLine(tempData.data->ToString());
+			Console.WriteLine(tempData.data->X);
+			//TempStorageAllocator<PrimitiveVector3I>.Recycle(ref tempData);
+			Console.WriteLine(tempData);
+			PrimitiveVector3I vec = *tempData.data;
+            Console.WriteLine(tempData.data->X);
+			TempStorageAllocator<PrimitiveVector3I>.Recycle(ref tempData);
 			//return;
 		}
 
@@ -66,6 +72,6 @@ public static class Programm {
 		//while (true)
 		//Thread.Sleep(100);
 		//Control.CheckForIllegalCr'ossThreadCalls=true;
-		Application.Run(new Client.Client());
+		//Application.Run(new Client.Client());
 	}
 }
