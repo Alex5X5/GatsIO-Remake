@@ -73,6 +73,9 @@ public class NetHandler:Socket {
 		for(int i = 0; i<20; i++) {
 			Obstacle.DeserializeObstacleCountable(ref temp, ref obstacles[i], ref counter);
 		}
+		foreach(Obstacle obstacle in obstacles)
+			if(obstacle!=null)
+				Console.WriteLine(obstacle.ToString());
 	}
 
 	public void ExchangePlayers(Player p, ref Player[] players) {

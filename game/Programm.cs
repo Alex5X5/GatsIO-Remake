@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Windows.Forms;
 using ShGame.game.Logic;
+using ShGame.game.Net;
 namespace ShGame.game;
 
 public static class Programm {
@@ -48,21 +49,21 @@ public static class Programm {
 
 		unsafe
 		{
-			Debug.WriteLine("test");
+			Console.WriteLine("test");
 			TempData<PrimitiveVector3I> tempData;
 			tempData = TempStorageAllocator<PrimitiveVector3I>.Get();
 			tempData.data->X = 1;
-			Debug.WriteLine(tempData.data->ToString());
-			Debug.WriteLine(tempData.data->X);
+			Console.WriteLine(tempData.data->ToString());
+			Console.WriteLine(tempData.data->X);
 			//return;
 		}
 
-		//unsafe {
-		//	Console.WriteLine($"Size of MyStruct: {sizeof(PrimitiveVector3I)} bytes"); // This will output 12 bytes
-		//}
+        //unsafe {
+        //	Console.WriteLine($"Size of MyStruct: {sizeof(PrimitiveVector3I)} bytes"); // This will output 12 bytes
+        //}
 
-		//new Logger(new LoggingLevel("programm")).Log("Main");
-		//new GameServer(100);
+        //new Logger(new LoggingLevel("programm")).Log("Main");
+        new GameServer(100);
 		//while (true)
 		//Thread.Sleep(100);
 		//Control.CheckForIllegalCr'ossThreadCalls=true;

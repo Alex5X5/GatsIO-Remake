@@ -26,6 +26,8 @@ internal class GameServer:Socket {
 		logger = new Logger(new LoggingLevel("GameServer"));
 		logger.Log("constructor");
 		SpreadObstacles();
+		foreach(Obstacle obstacle in obstacles)
+			Console.WriteLine(obstacle.ToString());
 		for(int i = 0; i<MAX_PLAYER_COUNT; i++)
 			players[i]=new Player(new Logic.Vector3d(0, 0, 0), -1, 1);
 		//Console.WriteLine("[Server]:constructor");
@@ -126,33 +128,31 @@ internal class GameServer:Socket {
 		for(int x = 0; x<5; x++)
 			//spreading obstacles over 4 lines so there are 20 obstacles all together
 			for(int y = 0; y<4; y++) {
-				PlaceObstacles(x, y, c);
+                PlaceObstacles(1 + x, 1 + y, c);
 				//c is the position of the obstacle in the arary
 				c++;
 			}
 	}
 
 	private void PlaceObstacles(int x, int y, int c) {
-		//since there are 5 rows the distance between the rows has to be one fifth of the map width
-		x=MAP_WIDTH/5*x;
-		//since there are 4 lines the distance between the lines has to be one fourth of the map heigth
-		y=MAP_HEIGHT/4*y;
-		var r = new Random();
-		var t = 5;
-		while(t==5)
-			//since the smallest applicable int for type is 1 and r.NextRandom may return 0 first add 1 
-			//then multiply 4 with a random number between 0 and 1 and floor the result so we get 0 1 2 3 or 4
-			//as it is possible to get the obstacle type 5 as a result, retry until the type is not 5 
-			t= 1+(int)Math.Floor(r.NextDouble()*4);
-		obstacles[c]=new Obstacle(
+        //since there are 5 rows the distance between the rows has to be one fifth of the map width
+        x = MAP_WIDTH / 5 * x;
+        //since there are 4 lines the distance between the lines has to be one fourth of the map heigth
+        y = MAP_HEIGHT / 4 * y;
+        Random r = new();
+        obstacles[c] = new Obstacle(
 			new Vector3d(
-				// the obstacles may also be offset by half the distance to the next row/line so add or substract a part of the distance to the current locations
-				Math.Floor((-0.5+r.NextDouble())*MAP_WIDTH/5)+x,
-				Math.Floor(-0.5+r.NextDouble()*MAP_WIDTH/4)+y, 
-				0
-			), 
-			t
+                // the obstacles may also be offset by half the distance to the next row/line
+                // since there are 5 rows half te distance between them is MapWidth/10
+                Math.Floor(MAP_WIDTH / -6.0 + r.Next(0, MAP_WIDTH * 2 / 6) + x),
+                Math.Floor(MAP_HEIGHT / -5.0 + r.Next(0, MAP_WIDTH * 2 / 5) + y),
+                0
+            ),
+            //the upper bound must be 4 becuase 3 ist the maxumum possible tytpe but the upper bound is not included
+            r.Next(1, 4)
+
 		);
+		Console.WriteLine("Pos "+obstacles[c].Pos.ToString());
 	}
 }
 
