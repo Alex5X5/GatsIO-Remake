@@ -12,28 +12,31 @@ namespace ShGame.game
 {
     public partial class Form1 : Form
     {
-        public Form1()
-        {
+        public Form1() {
             InitializeComponent();
         }
 
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
+        private void PortFieldChanged(object sender, EventArgs e) {
 
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
+        private void IpFieldChanged(object sender, EventArgs e) {
+            
+        }
+
+        private void PortFieldClicked(object sender, EventArgs e) {
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
+        private void IpFieldClicked(object sender, EventArgs e) {
+            
+        }
+
+        private void StartServer(object sender, EventArgs e) {
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
+        private void StartClient(object sender, EventArgs e) {
 
         }
     }

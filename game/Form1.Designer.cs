@@ -28,81 +28,78 @@
         /// </summary>
         private void InitializeComponent()
         {
-            textBox1 = new System.Windows.Forms.TextBox();
-            textBox2 = new System.Windows.Forms.TextBox();
-            textBox3 = new System.Windows.Forms.TextBox();
-            button1 = new System.Windows.Forms.Button();
-            button2 = new System.Windows.Forms.Button();
+            portTextBox = new System.Windows.Forms.TextBox();
+            ipTextBox = new System.Windows.Forms.TextBox();
+            serverButton = new System.Windows.Forms.Button();
+            clientButton = new System.Windows.Forms.Button();
+            startLabel = new System.Windows.Forms.Label();
             SuspendLayout();
             // 
             // textBox1
             // 
-            textBox1.Font = new System.Drawing.Font("Segoe UI", 15F);
-            textBox1.Location = new System.Drawing.Point(19, 61);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new System.Drawing.Size(271, 34);
-            textBox1.TabIndex = 0;
-            textBox1.Text = "enter port (100 by default)";
-            textBox1.TextChanged += textBox1_TextChanged;
+            portTextBox.Font = new System.Drawing.Font("Segoe UI", 15F);
+            portTextBox.Location = new System.Drawing.Point(19, 61);
+            portTextBox.Name = "textBox1";
+            portTextBox.Size = new System.Drawing.Size(271, 34);
+            portTextBox.TabIndex = 0;
+            portTextBox.Text = "enter port (100 by default)";
+            //portTextBox.Click+=
+            portTextBox.TextChanged += PortFieldChanged;
             // 
             // textBox2
             // 
-            textBox2.Font = new System.Drawing.Font("Segoe UI", 15F);
-            textBox2.Location = new System.Drawing.Point(19, 12);
-            textBox2.Name = "textBox2";
-            textBox2.ReadOnly = true;
-            textBox2.ShortcutsEnabled = false;
-            textBox2.Size = new System.Drawing.Size(271, 34);
-            textBox2.TabIndex = 0;
-            textBox2.TabStop = false;
-            textBox2.Text = "enter IP (localhost by default)";
-            textBox2.TextChanged += textBox2_TextChanged;
-            // 
-            // textBox3
-            // 
-            textBox3.Font = new System.Drawing.Font("Segoe UI", 15F);
-            textBox3.Location = new System.Drawing.Point(296, 12);
-            textBox3.Name = "textBox3";
-            textBox3.ReadOnly = true;
-            textBox3.ShortcutsEnabled = false;
-            textBox3.Size = new System.Drawing.Size(396, 34);
-            textBox3.TabIndex = 0;
-            textBox3.TabStop = false;
-            textBox3.Text = "what to start";
-            textBox3.TextChanged += textBox2_TextChanged;
+            ipTextBox.Font = new System.Drawing.Font("Segoe UI", 15F);
+            ipTextBox.Location = new System.Drawing.Point(19, 12);
+            ipTextBox.Name = "textBox2";
+            ipTextBox.ShortcutsEnabled = false;
+            ipTextBox.Size = new System.Drawing.Size(271, 34);
+            ipTextBox.TabIndex = 0;
+            ipTextBox.TabStop = false;
+            ipTextBox.Text = "enter IP (localhost by default)";
+            ipTextBox.TextChanged += IpFieldChanged;
             // 
             // button1
             // 
-            button1.Font = new System.Drawing.Font("Segoe UI", 15F);
-            button1.Location = new System.Drawing.Point(296, 52);
-            button1.Name = "button1";
-            button1.Size = new System.Drawing.Size(187, 43);
-            button1.TabIndex = 1;
-            button1.Text = "Server";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            serverButton.Font = new System.Drawing.Font("Segoe UI", 15F);
+            serverButton.Location = new System.Drawing.Point(296, 52);
+            serverButton.Name = "button1";
+            serverButton.Size = new System.Drawing.Size(187, 43);
+            serverButton.TabIndex = 1;
+            serverButton.Text = "Server";
+            serverButton.UseVisualStyleBackColor = true;
+            serverButton.Click += StartServer;
             // 
             // button2
             // 
-            button2.Font = new System.Drawing.Font("Segoe UI", 15F);
-            button2.Location = new System.Drawing.Point(499, 52);
-            button2.Name = "button2";
-            button2.Size = new System.Drawing.Size(193, 43);
-            button2.TabIndex = 1;
-            button2.Text = "Client";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
+            clientButton.Font = new System.Drawing.Font("Segoe UI", 15F);
+            clientButton.Location = new System.Drawing.Point(499, 52);
+            //clientButton.Name = "button2";
+            clientButton.Size = new System.Drawing.Size(193, 43);
+            clientButton.TabIndex = 1;
+            clientButton.Text = "Client";
+            clientButton.UseVisualStyleBackColor = true;
+            clientButton.Click += StartClient;
+            // 
+            // label1
+            // 
+            startLabel.AutoSize = true;
+            startLabel.Font = new System.Drawing.Font("Segoe UI", 15F);
+            startLabel.Location = new System.Drawing.Point(429, 15);
+            startLabel.Name = "label1";
+            startLabel.Size = new System.Drawing.Size(122, 28);
+            startLabel.TabIndex = 2;
+            startLabel.Text = "what to start";
             // 
             // Form1
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(750, 118);
-            Controls.Add(button2);
-            Controls.Add(button1);
-            Controls.Add(textBox3);
-            Controls.Add(textBox2);
-            Controls.Add(textBox1);
+            Controls.Add(startLabel);
+            Controls.Add(clientButton);
+            Controls.Add(serverButton);
+            Controls.Add(ipTextBox);
+            Controls.Add(portTextBox);
             Name = "Form1";
             Text = "Form1";
             ResumeLayout(false);
@@ -111,10 +108,10 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.TextBox portTextBox;
+        private System.Windows.Forms.TextBox ipTextBox;
+        private System.Windows.Forms.Button serverButton;
+        private System.Windows.Forms.Button clientButton;
+        private System.Windows.Forms.Label startLabel;
     }
 }
