@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Windows.Forms;
 using ShGame.game.Logic;
+using ShGame.game.Net;
 namespace ShGame.game;
 
 public static class Programm {
@@ -28,41 +29,51 @@ public static class Programm {
         //Console.SetOut(new ConsoleRedirector());
         Console.WriteLine("start");
 		Debug.WriteLine("test");
-		//byte[] temp = new byte[8];
-		//new Random().NextBytes(temp);
-		//Player player = new Player(new Logic.Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0)) {
-		//	Dir=new Logic.Vector3d(10, 3, 0).Nor()
-		//};
-		//Console.WriteLine(player.ToString());
-		//byte[] buffer = new byte[Player.PLAYER_BYTE_LENGTH];
-		//int counter = 0;
-		//Player.SerializePlayer(ref buffer, ref player, ref counter);
 
-		//Player p2 = new Player(null, 100, 0);
+        //byte[] temp = new byte[8];
+        //new Random().NextBytes(temp);
+        //Player player = new Player(new Logic.Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0)) {
+        //	Dir=new Logic.Vector3d(10, 3, 0).Nor()
+        //};
+        //Console.WriteLine(player.ToString());
+        //byte[] buffer = new byte[Player.PLAYER_BYTE_LENGTH];
+        //int counter = 0;
+        //Player.SerializePlayer(ref buffer, ref player, ref counter);
 
-		//int counter2 = 0;
-		//Player.DeserializePlayer(ref buffer, ref p2, ref counter2);
-		//Console.WriteLine(p2.ToString());
+        //Player p2 = new Player(null, 100, 0);
 
-		//return;
+        //int counter2 = 0;
+        //Player.DeserializePlayer(ref buffer, ref p2, ref counter2);
+        //Console.WriteLine(p2.ToString());
 
-		//unsafe
-		//{
-		//	Console.WriteLine("test");
-		//	TempData<PrimitiveVector3I> tempData;
-		//	tempData = TempStorageAllocator<PrimitiveVector3I>.Get();
-		//	tempData.data->X = 1;
-		//	Console.WriteLine(tempData);
-		//	Console.WriteLine(tempData.data->ToString());
-		//	Console.WriteLine(tempData.data->X);
-		//	//TempStorageAllocator<PrimitiveVector3I>.Recycle(ref tempData);
-		//	Console.WriteLine(tempData);
-		//	PrimitiveVector3I vec = *tempData.data;
-		//          Console.WriteLine(tempData.data->X);
-		//	TempStorageAllocator<PrimitiveVector3I>.Recycle(ref tempData);
-		//	//return;
-		//}
+        //return;
 
+        //unsafe
+        //{
+        //	Console.WriteLine("test");
+        //	TempData<PrimitiveVector3I> tempData;
+        //	tempData = TempStorageAllocator<PrimitiveVector3I>.Get();
+        //	tempData.data->X = 1;
+        //	Console.WriteLine(tempData);
+        //	Console.WriteLine(tempData.data->ToString());
+        //	Console.WriteLine(tempData.data->X);
+        //	//TempStorageAllocator<PrimitiveVector3I>.Recycle(ref tempData);
+        //	Console.WriteLine(tempData);
+        //	PrimitiveVector3I vec = *tempData.data;
+        //          Console.WriteLine(tempData.data->X);
+        //	TempStorageAllocator<PrimitiveVector3I>.Recycle(ref tempData);
+        //	//return;
+        //}
+        unsafe
+		{
+			Console.WriteLine("test");
+			TempData<PrimitiveVector3I> tempData;
+			tempData = TempStorageAllocator<PrimitiveVector3I>.Get();
+			tempData.data->X = 1;
+			Console.WriteLine(tempData.data->ToString());
+			Console.WriteLine(tempData.data->X);
+			//return;
+		}
 		//unsafe {
 		//	Console.WriteLine($"Size of MyStruct: {sizeof(PrimitiveVector3I)} bytes"); // This will output 12 bytes
 		//}
