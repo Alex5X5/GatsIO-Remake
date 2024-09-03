@@ -74,15 +74,16 @@ public static class Programm {
 			Console.WriteLine(tempData.data->X);
 			//return;
 		}
-		//unsafe {
-		//	Console.WriteLine($"Size of MyStruct: {sizeof(PrimitiveVector3I)} bytes"); // This will output 12 bytes
-		//}
 
-		new Logger(new LoggingLevel("programm")).Log("Main");
-		//new GameServer(100);
+        //unsafe {
+        //	Console.WriteLine($"Size of MyStruct: {sizeof(PrimitiveVector3I)} bytes"); // This will output 12 bytes
+        //}
+
+        //new Logger(new LoggingLevel("programm")).Log("Main");
+        new GameServer(100);
 		//while (true)
 		//Thread.Sleep(100);
 		//Control.CheckForIllegalCr'ossThreadCalls=true;
-		//Application.Run(new Client.Client());
+		Application.Run(new Client.Client());
 	}
 }
