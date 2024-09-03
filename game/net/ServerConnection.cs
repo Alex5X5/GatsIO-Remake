@@ -45,21 +45,22 @@ internal class ServerConnection:Socket {
 	//	}
 	//}
 
-	private byte[] RecievePacket() {
-		if(!Connected)
-			return null;
-		byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
+	private void RecievePacket(ref byte[] buffer) {
+		if (!Connected)
+			return;
+		Array.Resize(ref buffer, Protocoll.PACKET_BYTE_LENGTH);
+		buffer.Initialize();
 		int recieved = 0;
-		while(recieved<Protocoll.PACKET_BYTE_LENGTH) {
-			int bytes = Receive(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH-recieved, SocketFlags.None);
-			if(bytes==0)
+		while (recieved < Protocoll.PACKET_BYTE_LENGTH) {
+			int bytes = Receive(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH - recieved, SocketFlags.None);
+			if (bytes == 0)
 				break;
-			recieved+=bytes;
+			recieved += bytes;
 		}
-		return buffer;
+		
 	}
 
-	private void SendPacket(byte[] send) {
+    private void SendPacket(byte[] send) {
 		if(send==null)
 			return;
 		try {
@@ -71,10 +72,10 @@ internal class ServerConnection:Socket {
 
 	private void Run(GameServer gs) {
 		logger.Log("run");
+        byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
 		while(!stop) {
-			byte[] buffer = RecievePacket();
+			RecievePacket(ref buffer);
 			switch(Protocoll.AnalyzePacket(buffer)) {
-
 				case Protocoll.PING_HEADER:
 					SendPacket(gs.OnPingRequest(buffer));
 					break;

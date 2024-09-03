@@ -41,11 +41,9 @@ public class Client:Form {
 		new Random().NextBytes(temp);
 		player=new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
 		players=new Player[GameServer.MAX_PLAYER_COUNT];
-
 		for(int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
-			players[i]=new Player(new Vector3d(0, 0, 0), -1, 1);
-		for(int i = 0; i<obstacles.Length; i++)
-			obstacles[i]=new Obstacle(null, 0);
+            players[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
+		obstacles.Initialize();
 		renderer=new Renderer();
 		StartThreads();
 	}
@@ -152,7 +150,7 @@ public class Client:Form {
 				keyRight=true;
 				break;
 			case Keys.Escape:
-				Stop(this, null);
+                Stop(this, null);
 				break;
 		}
 		player.OnKeyEvent(c: this);
@@ -160,22 +158,23 @@ public class Client:Form {
 	}
 
 	protected override void OnPaint(PaintEventArgs e) {
-		e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
+		if(!stop)
+			e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
 	}
 
-	protected override void OnPaintBackground(PaintEventArgs pevent) {
+	protected override void OnPaintBackground(PaintEventArgs e) {
 		//Don't allow the background to paint
 	}
 
-	private void Stop(object sender, FormClosingEventArgs e) {
+	private void Stop(object sender, FormClosingEventArgs? e) {
 		stop=true;
 		if(sender==this) {
 			logger.Log("stopping");
 			renderer.Dispose();
+			Dispose();
 			Thread.Sleep(500);
 			//Environment.Exit(1);
 			//System.Stop();
 		}
 	}
 }
-

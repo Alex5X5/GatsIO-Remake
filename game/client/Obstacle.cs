@@ -87,25 +87,25 @@ public class Obstacle {
 		boundR=new LineSection3d(boundT.point2, boundB.point2);
 	}
 
-	public LineSection3d[] GetVisibleSides(Vector3d v) {
+	public LineSection3d[]? GetVisibleSides(Vector3d v) {
 		if(RelativeX(v)==1&&RelativeY(v)==1) {
-			return new LineSection3d[] { boundL, boundT };
+			return [boundL, boundT];
 		} else if(RelativeX(v)==2&&RelativeY(v)==1) {
-			return new LineSection3d[] { boundT };
+			return [boundT];
 		} else if(RelativeX(v)==3&&RelativeY(v)==1) {
-			return new LineSection3d[] { boundT, boundR };
+			return [boundT, boundR];
 		} else if(RelativeX(v)==1&&RelativeY(v)==2) {
-			return new LineSection3d[] { boundL };
+            return [boundL];
 		} else if(RelativeX(v)==3&&RelativeY(v)==2) {
-			return new LineSection3d[] { boundR };
+			return [boundR];
 		} else if(RelativeX(v)==1&&RelativeY(v)==3) {
-			return new LineSection3d[] { boundL, boundB };
+            return [boundL, boundB];
 		} else if(RelativeX(v)==2&&RelativeY(v)==3) {
-			return new LineSection3d[] { boundB };
+            return [boundB];
 		} else if(RelativeX(v)==3&&RelativeY(v)==3) {
-			return new LineSection3d[] { boundR, boundB };
+            return [boundR, boundB];
 		}
-		return null;
+        return null;
 	}
 
 	public void GetShadowPoints(ref Vector3d pos, ref Vector3d point1, ref Vector3d point2) {
@@ -209,9 +209,9 @@ public class Obstacle {
 			BitConverter.GetBytes(o.Pos==null ? 0 : o.Pos.y).CopyTo(input, offset);
 			offset+=8;
 			BitConverter.GetBytes(o.WIDTH==0 ? 0 : o.WIDTH).CopyTo(input, offset);
-			offset+=8;
+			offset+=4;
 			BitConverter.GetBytes(o.HEIGHT==0 ? 0 : o.HEIGHT).CopyTo(input, offset);
-			offset+=8;
+			offset+=4;
 		}
 	}
 

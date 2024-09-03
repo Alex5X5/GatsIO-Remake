@@ -68,7 +68,7 @@ internal class Renderer:IDisposable {
 			if(player!=null&&obstacles!=null)
 				if(RESTRICTED_VIEW) {
 					//RenderBackHalf(c.player.Pos);
-					RenderObstacleShadows(player.Pos, obstacles);
+					//RenderObstacleShadows(player.Pos, obstacles);
 					GetVievRestrictions();
 				}
 			g.Dispose();
