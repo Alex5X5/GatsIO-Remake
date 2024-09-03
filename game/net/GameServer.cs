@@ -136,16 +136,16 @@ internal class GameServer:Socket {
 
 	private void PlaceObstacles(int x, int y, int c) {
         //since there are 5 rows the distance between the rows has to be one fifth of the map width
-        x = MAP_WIDTH / 5 * x;
+        x = MAP_WIDTH / 5 * x - MAP_WIDTH / 10;
         //since there are 4 lines the distance between the lines has to be one fourth of the map heigth
-        y = MAP_HEIGHT / 4 * y;
+        y = MAP_HEIGHT / 4 * y - MAP_HEIGHT / 8;
         Random r = new();
         obstacles[c] = new Obstacle(
 			new Vector3d(
                 // the obstacles may also be offset by half the distance to the next row/line
                 // since there are 5 rows half te distance between them is MapWidth/10
-                Math.Floor(MAP_WIDTH / -6.0 + r.Next(0, MAP_WIDTH * 2 / 6) + x),
-                Math.Floor(MAP_HEIGHT / -5.0 + r.Next(0, MAP_WIDTH * 2 / 5) + y),
+                Math.Floor(MAP_WIDTH / -5.0 + r.Next(0, MAP_WIDTH * 2 / 5) + x),
+                Math.Floor(MAP_HEIGHT / -4.0 + r.Next(0, MAP_WIDTH * 2 / 4) + y),
                 0
             ),
             //the upper bound must be 4 becuase 3 ist the maxumum possible tytpe but the upper bound is not included

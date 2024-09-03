@@ -209,9 +209,9 @@ public class Obstacle {
 			BitConverter.GetBytes(o.Pos==null ? 0 : o.Pos.y).CopyTo(input, offset);
 			offset+=8;
 			BitConverter.GetBytes(o.WIDTH==0 ? 0 : o.WIDTH).CopyTo(input, offset);
-			offset+=8;
+			offset+=4;
 			BitConverter.GetBytes(o.HEIGHT==0 ? 0 : o.HEIGHT).CopyTo(input, offset);
-			offset+=8;
+			offset+=4;
 		}
 	}
 
