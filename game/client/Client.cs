@@ -19,7 +19,7 @@ public class Client : Form {
 
 	private readonly Renderer renderer;
 	private readonly LoggingLevel mlvl = new LoggingLevel("Client");
-	private NetHandler handler;
+	private  NetHandler handler;
 
 	internal Player player;
 	//internal readonly SemaphoreSlim playersLock;

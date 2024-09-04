@@ -1,12 +1,13 @@
 ﻿namespace ShGame.game.Net;
 
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
-
+using System.Runtime.Loader;
 
 public class NetHandler:Socket {
 
-	private readonly IPAddress IP = null;
+	private readonly IPAddress IP = new([0,0,0,0]);
 	private readonly int PORT = 100;
 
 	//private readonly NetworkStream input;
@@ -14,19 +15,19 @@ public class NetHandler:Socket {
 
 	//private readonly BinaryFormatter formatter = new BinaryFormatter();
 
-	private readonly Logger logger = new Logger(new LoggingLevel("NetHandler"));
+	private readonly Logger logger = new(new LoggingLevel("NetHandler"));
 
 	internal NetHandler() : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], 100) {
 		logger.Log("Constructor 1");
 	}
 
-	internal NetHandler(string ip, int port) : this(IPAddress.Parse(ip), port) {
+	internal NetHandler(int port) : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], port) {
 		logger.Log("Constructor2");
 	}
 
-	internal NetHandler(IPAddress ip, int port) : base(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
+	internal NetHandler(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
 		logger.Log("Constructor 3");
-		IP=ip;
+		IP=address;
 		PORT=port;
 		try {
 			logger.Log("trying to connect");
@@ -43,7 +44,7 @@ public class NetHandler:Socket {
 
 	private byte[] RecievePacket() {
 		if(!Connected)
-			throw new ConnectException("no Connection");
+			throw new ConnectException("not connected");
 		byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
 		int recieved = 0;
 		while(recieved<Protocoll.PACKET_BYTE_LENGTH) {

@@ -1,4 +1,6 @@
-﻿namespace ShGame.game
+﻿using System.Net;
+
+namespace ShGame.game
 {
 
     partial class Form1
@@ -50,11 +52,11 @@
             ipTextBox.Location = new System.Drawing.Point(19, 12);
             ipTextBox.Name = "textBox2";
             ipTextBox.ShortcutsEnabled = false;
-            ipTextBox.Size = new System.Drawing.Size(271, 34);
+            ipTextBox.Size = new System.Drawing.Size(395, 34);
             ipTextBox.TabIndex = 0;
             ipTextBox.TabStop = false;
-            ipTextBox.Text = "enter IP (localhost by default)";
-            ipTextBox.TextChanged += IpField_Changed;
+            ipTextBox.Text = "enter IP (leave empty to use "+Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString()+")";
+			ipTextBox.TextChanged += IpField_Changed;
             ipTextBox.Click += IpField_Clicked;
 			// 
 			// button1

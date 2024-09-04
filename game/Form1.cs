@@ -38,10 +38,14 @@ namespace ShGame.game
 
         private void StartServer(object sender, EventArgs e) {
             _ = new Net.GameServer();
+            Parent?.Dispose();
         }
 
         private void StartClient(object sender, EventArgs e) {
-            _ = new Client.Client();
-        }
+			Parent?.Dispose();
+            Client.Client c = new Client.Client();
+            c.ShowDialog();
+            //_ = new Client.Client();
+		}
     }
 }
