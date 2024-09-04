@@ -1,6 +1,6 @@
-﻿namespace ShGame.game.Util;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
+namespace ShGame.game.Util;
 public unsafe class TempData<T> where T : unmanaged {
 
 	public T* data;
@@ -23,9 +23,9 @@ public unsafe class TempData<T> where T : unmanaged {
 }
 
 public static unsafe class TempStorageAllocator<T> where T : unmanaged {
-	// Have 32 visiters active but allow higher bursts for when meshing the entire map at once
 
 	const int BURST_THRESHOLD = 32;
+	//a collection TempData objects
 	private static readonly BlockingCollection<TempData<T>> storage = [];
 
 	public static TempData<T> Get() {

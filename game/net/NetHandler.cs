@@ -43,7 +43,7 @@ public class NetHandler:Socket {
 
 	private byte[] RecievePacket() {
 		if(!Connected)
-			return null;
+			throw new ConnectException("no Connection");
 		byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
 		int recieved = 0;
 		while(recieved<Protocoll.PACKET_BYTE_LENGTH) {
@@ -57,7 +57,7 @@ public class NetHandler:Socket {
 
 	private void SendPacket(byte[] send) {
 		if(send==null)
-			return;
+			throw new ArgumentException("cannot send null");
 		try {
 			_=Send(send);
 		} catch(SocketException e) {
@@ -71,7 +71,8 @@ public class NetHandler:Socket {
 		byte[] temp = RecievePacket();
 		int counter = 0;
 		for(int i = 0; i<20; i++) {
-			Obstacle.DeserializeObstacleCountable(ref temp, ref obstacles[i], ref counter);
+			if(temp!=null)
+				Obstacle.DeserializeObstacleCountable(ref temp, ref obstacles[i], ref counter);
 		}
 		foreach(Obstacle obstacle in obstacles)
 			if(obstacle!=null)
@@ -82,13 +83,13 @@ public class NetHandler:Socket {
 		logger.Log("exchanging players");
 		byte[] send = Protocoll.PreparePacket(Protocoll.PLAYER_HEADER);
 		Player.SerializePlayer(ref send, ref p, Protocoll.PAYLOAD_OFFSET);
-		SendPacket(Protocoll.PreparePacket(Protocoll.PLAYER_HEADER));
 		Console.WriteLine("NetHandler:"+p);
 		byte[] temp = RecievePacket();
 		int counter = 0;
 		for(int i = 0; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
 			Console.WriteLine("NetHandler:"+players[i]);
-			Player.DeserializePlayerCountable(ref temp, ref players[i], ref counter);
+            if (temp != null)
+				Player.DeserializePlayerCountable(ref temp, ref players[i], ref counter);
 		}
 	}
 

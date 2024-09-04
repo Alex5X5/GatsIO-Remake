@@ -12,10 +12,12 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <WarningLevel>1</WarningLevel>
+    <NoWarn>1701;1702;IDE0055</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <WarningLevel>1</WarningLevel>
+    <NoWarn>1701;1702;IDE0055</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="libs\Simplelogging.dll" />

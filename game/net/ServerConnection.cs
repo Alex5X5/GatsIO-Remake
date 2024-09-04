@@ -1,7 +1,4 @@
-﻿using SimpleLogging.logging;
-
-using System;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Threading;
 
 namespace ShGame.game.Net;
@@ -60,7 +57,7 @@ internal class ServerConnection:Socket {
 		
 	}
 
-    private void SendPacket(byte[] send) {
+    private void SendPacket(byte[]? send) {
 		if(send==null)
 			return;
 		try {
@@ -95,11 +92,9 @@ internal class ServerConnection:Socket {
 		}
 	}
 
-	public override string ToString() {
-		return base.ToString();
-	}
+    public override string? ToString() => base.ToString();
 
-	internal void Stop() {
+    internal void Stop() {
 		stop=true;
 	}
 }

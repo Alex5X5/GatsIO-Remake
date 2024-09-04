@@ -42,7 +42,7 @@ internal class GameServer:Socket {
 		Console.WriteLine("[Server]:OnAccept("+s.ToString()+")");
 		for(int i = 0; i<clients.Length; i++) {
 			if(clients[i]==null) {
-				clients[i]=new ServerConnection(s.DuplicateAndClose(Process.GetCurrentProcess().Id), this);
+				clients[i]=new ServerConnection(s.DuplicateAndClose(Environment.ProcessId), this);
 				break;
 			}
 		}
@@ -72,7 +72,7 @@ internal class GameServer:Socket {
 		return result;
 	}
 
-	internal byte[] OnPingRequest(byte[] packet) {
+	internal byte[]? OnPingRequest(byte[] packet) {
 		if(Protocoll.UnloadPing(packet)) {
 			logger.Log("answering ping");
 			return Protocoll.LoadPing(false);
@@ -81,23 +81,20 @@ internal class GameServer:Socket {
 		return null;
 	}
 
-	internal byte[] OnPlayerRequest(byte[] packet) {
+	internal byte[]? OnPlayerRequest(byte[] packet) {
 		if(Protocoll.AnalyzePacket(packet)==Protocoll.PLAYER_HEADER) {
-			Player player = null;
+            Player player = new(null, 0, 0);
 			Player.DeserializePlayer(ref packet, ref player, Protocoll.PAYLOAD_OFFSET);
 			int resultCount=-1;
-			for(int i = 0; i<MAX_PLAYER_COUNT-1; i++) {
-				if(
-					players[i].Health!=-1&&
-					players[i].PlayerUUID==player.PlayerUUID
-				) {
-					players[i].Dir=player.Dir.Nor();
+			for(int i = 0; i<MAX_PLAYER_COUNT; i++) {
+				if(players[i].PlayerUUID == player.PlayerUUID) {
+					players[i].Dir = player.Dir.Nor();
 					resultCount=i;
 					break;
 				}
 			}
-			if(resultCount!=-1)
-				for(int i = 0;i<MAX_PLAYER_COUNT-1;i++) {
+			if(resultCount==-1)
+				for(int i = 0;i<MAX_PLAYER_COUNT;i++) {
 					if(players[i].Health==-1) {
 						players[i]=player;
 						break;
@@ -111,7 +108,7 @@ internal class GameServer:Socket {
 			return result;
 		} else
 			logger.Log("not request");
-		return null;
+        return null;
 	}
 
 	public void Stop() {

@@ -47,8 +47,7 @@ public static class Programm {
 
 		//return;
 
-		unsafe
-		{
+		unsafe {
 			Console.WriteLine("test");
 			TempData<PrimitiveVector3I> tempData;
 			tempData = TempStorageAllocator<PrimitiveVector3I>.Get();

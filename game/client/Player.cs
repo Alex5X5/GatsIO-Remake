@@ -12,11 +12,18 @@ public class Player {
 	public Int64 PlayerUUID;
 	public bool visible;
 
-	public Player(Vector3d pos_, int health_, Int64 UUID_) {
-		Pos=pos_??new Vector3d(0, 0, 0);
-		Health=health_;
-		PlayerUUID=UUID_!=0 ? UUID_ : new Random().Next();
+	public Player(Vector3d? pos, int health, Int64 UUID) {
+		Pos=pos??new Vector3d(0, 0, 0);
+		Health=health;
+		PlayerUUID=UUID!=0 ? UUID : new Random().Next();
 		visible=Health!=-1;
+	}
+
+	public Player() {
+		Pos = new(0, 0, 0);
+		Health = -1;
+        PlayerUUID = 0;
+		visible=false;
 	}
 
 	public override string ToString() => $"game.graphics.client.player[health:{Health} speed:{Speed} pos:{Pos} dir:{Dir} UUID:{Convert.ToString(PlayerUUID)}]";
@@ -171,9 +178,7 @@ public class Player {
 	public static void DeserializePlayerCountable(ref byte[] input, ref Player player, ref int offset) {
 		if(input==null)
 			return;
-		if(player==null) {
-			player = new Player(null, 0, 0);
-		}
+		player ??= new Player(null, 0, 0);
 		player.Health = BitConverter.ToInt32(input, offset);
 		if(player.Health==-1) {
 			player.Deactivate();

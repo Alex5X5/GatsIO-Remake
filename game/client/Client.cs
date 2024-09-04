@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Drawing;
 
-public class Client:Form {
+public class Client : Form {
 
 	internal bool keyUp = false;
 	internal bool keyDown = false;
@@ -23,12 +23,12 @@ public class Client:Form {
 
 	internal Player player;
 	//internal readonly SemaphoreSlim playersLock;
+
 	private Player[] players;
 	internal Obstacle[] obstacles = new Obstacle[20];
-
-	private Thread renderThread;
-	private Thread connectionThread;
-	private Thread playerMoveThread;
+	private Thread renderThread = new(() =>{});
+	private Thread connectionThread = new(() => { });
+	private Thread playerMoveThread = new(() => { });
 
 	public Client() : base() {
 		logger=new Logger(mlvl);
@@ -60,7 +60,7 @@ public class Client:Form {
 
 		FormClosing+=Stop;
 		KeyDown+=new KeyEventHandler(KeyDown_);
-		KeyUp+=new KeyEventHandler(KeyUp_);
+        KeyUp += new KeyEventHandler(KeyUp_);
 
 		ResumeLayout(false);
 		PerformLayout();
@@ -73,10 +73,11 @@ public class Client:Form {
 				handler=new NetHandler();
 				handler?.GetMap(ref obstacles);
 				Console.WriteLine(player);
-				handler?.ExchangePlayers(player, ref players);
-				if(handler!=null) {
-
+				while (!stop) {
+					handler?.ExchangePlayers(player, ref players);
+					Thread.Sleep(1000);
 				}
+				handler?.Dispose();
 			}
 		);
 		connectionThread.Start();
@@ -166,7 +167,7 @@ public class Client:Form {
 		//Don't allow the background to paint
 	}
 
-	private void Stop(object sender, FormClosingEventArgs? e) {
+	private void Stop(object? sender, FormClosingEventArgs e) {
 		stop=true;
 		if(sender==this) {
 			logger.Log("stopping");
