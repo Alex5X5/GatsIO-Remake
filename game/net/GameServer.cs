@@ -22,16 +22,20 @@ internal class GameServer:Socket {
 	internal Player[] players = new Player[MAX_PLAYER_COUNT];
 	private readonly Obstacle[] obstacles = new Obstacle[OBSTACLE_COUNT];
 
-	internal GameServer(int port) : base(new IPEndPoint(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], port).AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
+	public GameServer(int port) : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], port) { }
+
+	public GameServer() : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], 100) { }
+
+	public GameServer(IPAddress adress, int port) : base(adress.AddressFamily, SocketType.Stream, ProtocolType.Tcp){
 		logger = new Logger(new LoggingLevel("GameServer"));
 		logger.Log("constructor");
 		SpreadObstacles();
-		foreach(Obstacle obstacle in obstacles)
+		foreach (Obstacle obstacle in obstacles)
 			Console.WriteLine(obstacle.ToString());
-		for(int i = 0; i<MAX_PLAYER_COUNT; i++)
-			players[i]=new Player(new Logic.Vector3d(0, 0, 0), -1, 1);
+		for (int i = 0; i < MAX_PLAYER_COUNT; i++)
+			players[i] = new Player(new Logic.Vector3d(0, 0, 0), -1, 1);
 		//Console.WriteLine("[Server]:constructor");
-		logger.Log("binding", new MessageParameter("server",this.ToString()));
+		logger.Log("binding", new MessageParameter("server", this.ToString()));
 		Bind(new IPEndPoint(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], port));
 		new Thread(
 				() => Run()

@@ -64,16 +64,17 @@ public static class Programm {
         //	TempStorageAllocator<PrimitiveVector3I>.Recycle(ref tempData);
         //	//return;
         //}
-        unsafe
-		{
-			Console.WriteLine("test");
-			TempData<PrimitiveVector3I> tempData;
-			tempData = TempStorageAllocator<PrimitiveVector3I>.Get();
-			tempData.data->X = 1;
-			Console.WriteLine(tempData.data->ToString());
-			Console.WriteLine(tempData.data->X);
-			//return;
-		}
+
+  //      unsafe
+		//{
+		//	Console.WriteLine("test");
+		//	TempData<PrimitiveVector3I> tempData;
+		//	tempData = TempStorageAllocator<PrimitiveVector3I>.Get();
+		//	tempData.data->X = 1;
+		//	Console.WriteLine(tempData.data->ToString());
+		//	Console.WriteLine(tempData.data->X);
+		//	//return;
+		//}
 
         //unsafe {
         //	Console.WriteLine($"Size of MyStruct: {sizeof(PrimitiveVector3I)} bytes"); // This will output 12 bytes

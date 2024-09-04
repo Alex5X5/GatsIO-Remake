@@ -1,5 +1,6 @@
 ﻿namespace ShGame.game
 {
+
     partial class Form1
     {
         /// <summary>
@@ -11,10 +12,8 @@
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
+        protected override void Dispose(bool disposing) {
+            if (disposing && (components != null)) {
                 components.Dispose();
             }
             base.Dispose(disposing);
@@ -26,8 +25,7 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
-        {
+        private void InitializeComponent() {
             portTextBox = new System.Windows.Forms.TextBox();
             ipTextBox = new System.Windows.Forms.TextBox();
             serverButton = new System.Windows.Forms.Button();
@@ -43,11 +41,11 @@
             portTextBox.Size = new System.Drawing.Size(271, 34);
             portTextBox.TabIndex = 0;
             portTextBox.Text = "enter port (100 by default)";
-            //portTextBox.Click+=
-            portTextBox.TextChanged += PortFieldChanged;
+            portTextBox.TextChanged += PortField_Changed;
+			portTextBox.Click+=PortField_Clicked;
             // 
             // textBox2
-            // 
+            //
             ipTextBox.Font = new System.Drawing.Font("Segoe UI", 15F);
             ipTextBox.Location = new System.Drawing.Point(19, 12);
             ipTextBox.Name = "textBox2";
@@ -56,11 +54,12 @@
             ipTextBox.TabIndex = 0;
             ipTextBox.TabStop = false;
             ipTextBox.Text = "enter IP (localhost by default)";
-            ipTextBox.TextChanged += IpFieldChanged;
-            // 
-            // button1
-            // 
-            serverButton.Font = new System.Drawing.Font("Segoe UI", 15F);
+            ipTextBox.TextChanged += IpField_Changed;
+            ipTextBox.Click += IpField_Clicked;
+			// 
+			// button1
+			// 
+			serverButton.Font = new System.Drawing.Font("Segoe UI", 15F);
             serverButton.Location = new System.Drawing.Point(296, 52);
             serverButton.Name = "button1";
             serverButton.Size = new System.Drawing.Size(187, 43);
@@ -95,6 +94,7 @@
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(750, 118);
+            Load += Form_Load;
             Controls.Add(startLabel);
             Controls.Add(clientButton);
             Controls.Add(serverButton);
@@ -106,9 +106,9 @@
             PerformLayout();
         }
 
-        #endregion
+		#endregion
 
-        private System.Windows.Forms.TextBox portTextBox;
+		private System.Windows.Forms.TextBox portTextBox;
         private System.Windows.Forms.TextBox ipTextBox;
         private System.Windows.Forms.Button serverButton;
         private System.Windows.Forms.Button clientButton;

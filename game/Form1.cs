@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ShGame.game.Net;
+using System.Drawing.Printing;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace ShGame.game
@@ -16,28 +11,37 @@ namespace ShGame.game
             InitializeComponent();
         }
 
-        private void PortFieldChanged(object sender, EventArgs e) {
+        private void Form_Load(object sender, EventArgs e) {
+            startLabel.Focus();
+            Console.WriteLine(ActiveControl);
+		}
 
-        }
-
-        private void IpFieldChanged(object sender, EventArgs e) {
+        private void PortField_Changed(object sender, EventArgs e) {
             
         }
 
-        private void PortFieldClicked(object sender, EventArgs e) {
-
-        }
-
-        private void IpFieldClicked(object sender, EventArgs e) {
+        private void IpField_Changed(object sender, EventArgs e) {
             
         }
+
+        private void PortField_Clicked(object sender, EventArgs e) {
+            portTextBox.Text = "";
+        }
+
+        private void PortField_FocusLost(object sender, EventArgs e) {
+            
+        }
+
+        private void IpField_Clicked(object sender, EventArgs e) {
+            ipTextBox.Text = "";
+		}
 
         private void StartServer(object sender, EventArgs e) {
-
+            _ = new Net.GameServer();
         }
 
         private void StartClient(object sender, EventArgs e) {
-
+            _ = new Client.Client();
         }
     }
 }
