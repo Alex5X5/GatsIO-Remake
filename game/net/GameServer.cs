@@ -43,7 +43,7 @@ internal class GameServer:Socket {
 		logger.Log(point.ToString());
 		Bind(point);
 		logger.Log("a2 "+adress.ToString());
-		Console.WriteLine(IsBound);
+		logger.Log(Convert.ToString(IsBound));
 		new Thread(
 				start: Run
 		).Start();
