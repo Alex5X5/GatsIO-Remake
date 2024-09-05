@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using ShGame.game.Net;
+
+using System.Net;
 
 namespace ShGame.game
 {
@@ -53,7 +55,7 @@ namespace ShGame.game
             ipTextBox.Size = new System.Drawing.Size(395, 34);
             ipTextBox.TabIndex = 0;
             ipTextBox.TabStop = false;
-            ipTextBox.Text = "enter IP (leave empty to use "+Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString()+")";
+            ipTextBox.Text = "enter IP (leave empty to use "+GameServer.GetLocalIPv4().ToString()+")";
             ipTextBox.Click += IpField_Clicked;
 			// 
 			// button1

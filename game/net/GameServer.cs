@@ -22,32 +22,32 @@ internal class GameServer:Socket {
 	internal Player[] players = new Player[MAX_PLAYER_COUNT];
 	private readonly Obstacle[] obstacles = new Obstacle[OBSTACLE_COUNT];
 
-	public GameServer(int port) : this( GetLocalIPv4(), port) { }
+    public GameServer(int port) : this(GetLocalIPv4(), port) { }
 
-	public GameServer() : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], 100) { }
+    public GameServer() : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], 100) { }
 
-	public GameServer(IPAddress adress, int port) : base(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp){
-		console = new(this);
-		console.Writeline("test");
+    public GameServer(IPAddress adress, int port) : base(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp) {
+        console = new(this);
+        console.Writeline("test");
         new Thread(
                 () => console.ShowDialog()
         ).Start();
-		logger = new Logger(new LoggingLevel("GameServer"));
-		logger.Log("constructor");
-		SpreadObstacles();
-		players.Initialize();
-		foreach (Obstacle obstacle in obstacles)
-			Console.WriteLine(obstacle.ToString());
-		//Console.WriteLine("[Server]:constructor");
-		logger.Log("binding", new MessageParameter("server", this.ToString()));
-		Bind(new IPEndPoint(adress, port));
-		Console.WriteLine(value: adress.ToString());
-		new Thread(
-				start: Run
-		).Start();
-	}
+        logger = new Logger(new LoggingLevel("GameServer"));
+        logger.Log("constructor");
+        SpreadObstacles();
+        players.Initialize();
+        foreach (Obstacle obstacle in obstacles)
+            Console.WriteLine(obstacle.ToString());
+        //Console.WriteLine("[Server]:constructor");
+        logger.Log("binding", new MessageParameter("server", this.ToString()));
+        Bind(new IPEndPoint(adress, port));
+        Console.WriteLine(value: adress.ToString());
+        new Thread(
+                start: Run
+        ).Start();
+    }
 
-	private void OnAccept(Socket s) {
+    private void OnAccept(Socket s) {
 		Console.WriteLine("[Server]:OnAccept("+s.ToString()+")");
 		for(int i = 0; i<clients.Length; i++) {
 			if(clients[i]==null) {

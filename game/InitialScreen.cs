@@ -20,6 +20,25 @@ namespace ShGame.game {
 		}
 
         private void StartServer(object sender, EventArgs e) {
+            _ = new Thread(
+                    () => {
+                        _=new Net.GameServer();
+                        //return;
+                        //try {
+                        //    IPAddress address = IPAddress.Parse(ipTextBox.Text);
+                        //    int port = Convert.ToInt32(portTextBox.Text);
+                        //    _ = new Net.GameServer(address, port);
+                        //} catch {
+                        //    _ = new Net.GameServer();
+                        //}
+                        //Enabled = false;
+                        //while (!c.IsDisposed) {
+                        //Thread.Sleep(1000);
+                        //Dispose();
+                        //}
+                    }
+            );
+            //.Start();
             new Thread(
                     () => {
                         _ = new Net.GameServer();
@@ -32,6 +51,9 @@ namespace ShGame.game {
         private void StartClient(object sender, EventArgs e) {
             new Thread(
                     () => {
+                        Client.Client cl = new Client.Client(null,-1);
+                        cl.ShowDialog();
+                        return;
                     try{
                         IPAddress address = IPAddress.Parse(ipTextBox.Text);
                         int port = Convert.ToInt32(portTextBox.Text);
