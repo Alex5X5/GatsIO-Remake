@@ -7,7 +7,7 @@ using System.Runtime.Loader;
 
 public class NetHandler:Socket {
 
-	private readonly IPAddress IP = new([0,0,0,0]);
+	private readonly IPAddress IP = new([0, 0, 0, 0]);
 	private readonly int PORT = 100;
 
 	//private readonly NetworkStream input;
@@ -17,21 +17,22 @@ public class NetHandler:Socket {
 
 	private readonly Logger logger = new(new LoggingLevel("NetHandler"));
 
-	internal NetHandler() : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], 100) {
-		logger.Log("Constructor 1");
+	internal NetHandler() : this(GameServer.GetLocalIPv4(), 100) {
+		logger.Log("enpty constructor");
 	}
 
-	internal NetHandler(int port) : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], port) {
-		logger.Log("Constructor2");
+	internal NetHandler(int port) : this(GameServer.GetLocalIPv4(), port) {
+		logger.Log("port constructor");
 	}
 
-	internal NetHandler(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
-		logger.Log("Constructor 3");
+	internal NetHandler(IPAddress address, int port) : base(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) {
+		logger.Log("port addresss constructor");
 		IP=address;
 		PORT=port;
+		logger.Log(ToString());
 		try {
 			logger.Log("trying to connect");
-			Connect(new IPEndPoint(IP, PORT));
+			Connect(new IPEndPoint(address, port));
 		} catch(SocketException e) {
 			logger.Log("failed to bind (reason="+e.ToString()+")");
 		}
@@ -96,6 +97,6 @@ public class NetHandler:Socket {
     }
 
 	public override string ToString() {
-		return "sh_game.game.net.NetHandler:[ip="+IP.ToString()+";port="+Convert.ToString(PORT)+"]";
+		return "sh_game.game.net.NetHandler:[ip="+IP.ToString()+", port="+Convert.ToString(PORT)+"]";
 	}
 }

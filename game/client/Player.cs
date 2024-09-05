@@ -26,7 +26,7 @@ public class Player {
 		visible=false;
 	}
 
-	public override string ToString() => $"game.graphics.client.player[health:{Health} speed:{Speed} pos:{Pos} dir:{Dir} UUID:{Convert.ToString(PlayerUUID)}]";
+	public override string ToString() => $"game.graphics.client.player[health:{Health}, speed:{Speed}, pos:{Pos} dir:{Dir} UUID:{PlayerUUID}]";
 
 	public void Move() {
 		Pos.Add(Dir.Cpy().Nor().Scl(Speed));

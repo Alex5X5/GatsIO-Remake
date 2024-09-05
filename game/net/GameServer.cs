@@ -22,11 +22,11 @@ internal class GameServer:Socket {
 	internal Player[] players = new Player[MAX_PLAYER_COUNT];
 	private readonly Obstacle[] obstacles = new Obstacle[OBSTACLE_COUNT];
 
-	public GameServer(int port) : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], port) { }
+	public GameServer(int port) : this( GetLocalIPv4(), port) { }
 
 	public GameServer() : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], 100) { }
 
-	public GameServer(IPAddress adress, int port) : base(adress.AddressFamily, SocketType.Stream, ProtocolType.Tcp){
+	public GameServer(IPAddress adress, int port) : base(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp){
 		console = new(this);
 		console.Writeline("test");
         new Thread(
@@ -40,9 +40,10 @@ internal class GameServer:Socket {
 			Console.WriteLine(obstacle.ToString());
 		//Console.WriteLine("[Server]:constructor");
 		logger.Log("binding", new MessageParameter("server", this.ToString()));
-		Bind(new IPEndPoint(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], port));
+		Bind(new IPEndPoint(adress, port));
+		Console.WriteLine(value: adress.ToString());
 		new Thread(
-				() => Run()
+				start: Run
 		).Start();
 	}
 
@@ -60,13 +61,17 @@ internal class GameServer:Socket {
 		logger.Log("run");
 		while(!stop) {
 			Listen(1);
-			while(true) {
+			while(!stop) {
 				try {
-					Socket handler = await Task.Factory.FromAsync(this.BeginAccept, this.EndAccept, null);
-					_=Task.Run(() => OnAccept(handler));
+					Socket clientConnection = await Task.Factory.FromAsync(this.BeginAccept, this.EndAccept, null);
+					_=Task.Run(() => OnAccept(clientConnection));
 				} catch(Exception e) {
-					Console.WriteLine(e.ToString());
-					break;
+					if(!stop){
+						Console.WriteLine(e.ToString());
+					} else {
+						
+						break;
+					}
 				}
 			}
 		}
@@ -122,9 +127,12 @@ internal class GameServer:Socket {
 	public void Stop() {
 		Console.WriteLine("[Gameserver] stopping");
 		stop = true;
-		Thread.Sleep(2000);
+		Thread.Sleep(1000);
 		foreach(ServerConnection c in clients)
 			c?.Stop();
+		Thread.Sleep(1000);
+		Close();
+		Dispose();
 	}
 
 	private void SpreadObstacles() {
@@ -160,5 +168,8 @@ internal class GameServer:Socket {
 		);
 		Console.WriteLine("Pos "+obstacles[c].Pos.ToString());
 	}
+
+	public static IPAddress GetLocalIPv4() => 
+		Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].MapToIPv4();
 }
 

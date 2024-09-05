@@ -5,6 +5,7 @@ using ShGame.game.Net;
 using System.Windows.Forms;
 using System.Threading;
 using System.Drawing;
+using System.Net;
 
 public class Client : Form {
 
@@ -30,7 +31,7 @@ public class Client : Form {
 	private Thread connectionThread = new(() => { });
 	private Thread playerMoveThread = new(() => { });
 
-	public Client() : base() {
+	public Client(IPAddress? address, int port) : base() {
 		logger=new Logger(mlvl);
 		logger.Log("Costructor");
 
@@ -45,7 +46,7 @@ public class Client : Form {
             players[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
 		obstacles.Initialize();
 		renderer=new Renderer();
-		StartThreads();
+		StartThreads(address, port);
 	}
 
 	private void SetVisible() {
@@ -67,10 +68,15 @@ public class Client : Form {
 		logger.Log("performed layout");
 	}
 
-	private void StartThreads() {
+	private void StartThreads(IPAddress? address, int port) {
 		connectionThread=new Thread(
 			() => {
-				handler=new NetHandler();
+				if(address!=null&&port!=-1){
+					handler=new NetHandler(address, port);
+				} else {
+					handler = new();
+				}
+
                 if (NetHandlerConnected())
                     handler.GetMap(ref obstacles);
                 Console.WriteLine(player);

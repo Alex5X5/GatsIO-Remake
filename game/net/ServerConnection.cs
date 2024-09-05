@@ -48,7 +48,7 @@ internal class ServerConnection:Socket {
 		Array.Resize(ref buffer, Protocoll.PACKET_BYTE_LENGTH);
 		buffer.Initialize();
 		int recieved = 0;
-		while (recieved < Protocoll.PACKET_BYTE_LENGTH) {
+		while (recieved < Protocoll.PACKET_BYTE_LENGTH && !stop) {
 			int bytes = Receive(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH - recieved, SocketFlags.None);
 			if (bytes == 0)
 				break;

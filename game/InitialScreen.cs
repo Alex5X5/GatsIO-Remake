@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Net;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace ShGame.game {
@@ -31,8 +32,15 @@ namespace ShGame.game {
         private void StartClient(object sender, EventArgs e) {
             new Thread(
                     () => {
-                        Client.Client c = new();
+                    try{
+                        IPAddress address = IPAddress.Parse(ipTextBox.Text);
+                        int port = Convert.ToInt32(portTextBox.Text);
+                        Client.Client c = new(address, port);
                         c.ShowDialog();
+                    } catch { 
+                        Client.Client c = new(IPAddress.None,-1);
+                        c.ShowDialog();
+                    }
                         //Enabled = false;
                         //while (!c.IsDisposed) {
                             //Thread.Sleep(1000);
