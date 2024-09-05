@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Loader;
+using System.Threading;
 
 public class NetHandler:Socket {
 
@@ -17,7 +18,7 @@ public class NetHandler:Socket {
 
 	private readonly Logger logger = new(new LoggingLevel("NetHandler"));
 
-	internal NetHandler() : this(GameServer.GetLocalIPv4(), 100) {
+	internal NetHandler() : this(100) {
 		logger.Log("enpty constructor");
 	}
 
@@ -32,15 +33,35 @@ public class NetHandler:Socket {
 		logger.Log(ToString());
 		try {
 			logger.Log("trying to connect");
-			Connect(new IPEndPoint(address, port));
+			//Connect_(address, port);
+			Connect(address, port);
 		} catch(SocketException e) {
 			logger.Log("failed to bind (reason="+e.ToString()+")");
-		}
-		if(Connected) {
+		} 
+		if(Connected)
+			logger.Log("connected!");
+		else
+			logger.Log("no connection");
 			//output=new NetworkStream(this, FileAccess.Write);
 			//output.Flush();
 			//input=new NetworkStream(this, FileAccess.Read);
+	}
+
+	private bool Connect_(IPAddress address, int port) {
+		IPEndPoint point = new(address, port);
+		logger.Log("connecting "+point);
+		IAsyncResult result = BeginConnect(point, null, null);
+		bool success = result.AsyncWaitHandle.WaitOne(5000, true);
+		Thread.Sleep(6000);
+		logger.Log(Convert.ToString(Connected));
+		if (Connected) {
+			EndConnect(result);
+			return success;
+		} else {
+			Close();
+			throw new SocketException(0, "Connect Timeout");
 		}
+		return success;
 	}
 
 	private byte[] RecievePacket() {

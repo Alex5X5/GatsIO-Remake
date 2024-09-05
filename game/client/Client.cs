@@ -34,7 +34,7 @@ public class Client : Form {
 	public Client(IPAddress? address, int port) : base() {
 		logger=new Logger(mlvl);
 		logger.Log("Costructor");
-
+		logger.Log(address+" "+port);
 		SetVisible();
 		//Thread.Sleep(500);
 		//handler=new NetHandler();

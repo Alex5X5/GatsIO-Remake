@@ -24,24 +24,26 @@ internal class GameServer:Socket {
 
 	public GameServer(int port) : this( GetLocalIPv4(), port) { }
 
-	public GameServer() : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], 100) { }
+	public GameServer() : this(100) { }
 
 	public GameServer(IPAddress adress, int port) : base(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp){
-		console = new(this);
-		console.Writeline("test");
-        new Thread(
-                () => console.ShowDialog()
-        ).Start();
 		logger = new Logger(new LoggingLevel("GameServer"));
-		logger.Log("constructor");
+		console = new(this);
+		new Thread(
+				() => console.ShowDialog()
+		).Start();
+		//console.Writeline("test");
+		logger.Log("adress port constructor");
 		SpreadObstacles();
 		players.Initialize();
 		foreach (Obstacle obstacle in obstacles)
 			Console.WriteLine(obstacle.ToString());
 		//Console.WriteLine("[Server]:constructor");
-		logger.Log("binding", new MessageParameter("server", this.ToString()));
-		Bind(new IPEndPoint(adress, port));
-		Console.WriteLine(value: adress.ToString());
+		IPEndPoint point = new(adress, port);
+		logger.Log(point.ToString());
+		Bind(point);
+		logger.Log("a2 "+adress.ToString());
+		Console.WriteLine(IsBound);
 		new Thread(
 				start: Run
 		).Start();
@@ -67,7 +69,7 @@ internal class GameServer:Socket {
 					_=Task.Run(() => OnAccept(clientConnection));
 				} catch(Exception e) {
 					if(!stop){
-						Console.WriteLine(e.ToString());
+						//Console.WriteLine(e.ToString());
 					} else {
 						
 						break;
