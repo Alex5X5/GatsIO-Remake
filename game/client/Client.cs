@@ -18,8 +18,8 @@ public class Client : Form {
 	private readonly Logger logger;
 
 	private readonly Renderer renderer;
-	private readonly LoggingLevel mlvl = new LoggingLevel("Client");
-	private  NetHandler handler;
+	private readonly LoggingLevel mlvl = new("Client");
+	private NetHandler? handler;
 
 	internal Player player;
 	//internal readonly SemaphoreSlim playersLock;
@@ -60,7 +60,7 @@ public class Client : Form {
 
 		FormClosing+=Stop;
 		KeyDown+=new KeyEventHandler(KeyDown_);
-        KeyUp += new KeyEventHandler(KeyUp_);
+        KeyUp+=new KeyEventHandler(KeyUp_);
 
 		ResumeLayout(false);
 		PerformLayout();
@@ -71,12 +71,13 @@ public class Client : Form {
 		connectionThread=new Thread(
 			() => {
 				handler=new NetHandler();
-				handler?.GetMap(ref obstacles);
-				Console.WriteLine(player);
-				while (!stop) {
-					handler?.ExchangePlayers(player, ref players);
-					Thread.Sleep(1000);
-				}
+                if (NetHandlerConnected())
+                    handler.GetMap(ref obstacles);
+                Console.WriteLine(player);
+                while (!stop && NetHandlerConnected()) {
+                    handler.ExchangePlayers(player, ref players);
+                    Thread.Sleep(500);
+                }
 				handler?.Dispose();
 			}
 		);
@@ -167,7 +168,14 @@ public class Client : Form {
 		//Don't allow the background to paint
 	}
 
-	private void Stop(object? sender, FormClosingEventArgs e) {
+	private bool NetHandlerConnected() {
+		if(handler != null)
+			if(handler.Connected)
+				return true;
+		return false;
+	}
+
+	private void Stop(object? sender, FormClosingEventArgs? e) {
 		stop=true;
 		if(sender==this) {
 			logger.Log("stopping");

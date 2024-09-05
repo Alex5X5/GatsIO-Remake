@@ -48,7 +48,7 @@ public static class Programm {
 		//	Console.WriteLine($"Size of MyStruct: {sizeof(PrimitiveVector3I)} bytes"); // This will output 12 bytes
 		//}
 
-		Application.Run(new Form1());
+		Application.Run(new InitialScreen());
         //new Logger(new LoggingLevel("programm")).Log("Main");
         //new GameServer(100);
 		//while (true)

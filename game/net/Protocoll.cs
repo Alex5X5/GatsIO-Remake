@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ShGame.game.Net;
+﻿namespace ShGame.game.Net;
 
 public static class Protocoll {
 

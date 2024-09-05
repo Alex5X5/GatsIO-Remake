@@ -269,21 +269,23 @@ internal class Renderer:IDisposable {
 
 	private void RenderObstacles(Obstacle[] l, Graphics g) {
 		foreach(Obstacle o in l) {
-			switch(o.type) {
-				case 1:
-					DrawObstacle1(o.Pos, g: g);
-					break;
-				case 2:
-					DrawObstacle2(o.Pos, g: g);
-					break;
-				case 3:
-					DrawObstacle3(o.Pos, g: g);
-					break;
-			}
-		}
-	}
+            switch (o?.type) {
+                case 1:
+                    DrawObstacle1(o.Pos, g: g);
+                    break;
+                case 2:
+                    DrawObstacle2(o.Pos, g: g);
+                    break;
+                case 3:
+                    DrawObstacle3(o.Pos, g: g);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
-	private void DrawPlayer(Player p, Graphics g) {
+    private void DrawPlayer(Player p, Graphics g) {
 		//graphics2D.SetStroke(new BasicStroke(1 / gScl));
 		//graphics2D.drawLine(0, 0, (int)p.pos.x / gScl, (int)p.pos.y / gScl);
 		//Console.WriteLine("drawing at"+p.Pos.ToString());
@@ -323,21 +325,21 @@ internal class Renderer:IDisposable {
 		T, B, L, R,
 	}
 
-	//public String toString()
-	//{
-	//	switch (this)
-	//	{
-	//		case T:
-	//			return "game.graphics.client.Renderer.Dir.Top";
-	//		case B:
-	//			return "game.graphics.client.Renderer.Dir.Top";
-	//		case L:
-	//			return "game.graphics.client.Renderer.Dir.Left";
-	//		case R:
-	//			return "game.graphics.client.Renderer.Dir.Right";
-	//		default:
-	//			return "";
+    //public String toString()
+    //{
+    //	switch (this)
+    //	{
+    //		case T:
+    //			return "game.graphics.client.Renderer.Dir.Top";
+    //		case B:
+    //			return "game.graphics.client.Renderer.Dir.Top";
+    //		case L:
+    //			return "game.graphics.client.Renderer.Dir.Left";
+    //		case R:
+    //			return "game.graphics.client.Renderer.Dir.Right";
+    //		default:
+    //			return "";
 
-	//	}
-	//}
+    //	}
+    //}
 }

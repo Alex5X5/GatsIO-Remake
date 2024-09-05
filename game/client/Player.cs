@@ -5,7 +5,7 @@ public class Player {
 	public const int PLAYER_BYTE_LENGTH = 48;
 
 	public Vector3d Pos;
-	public Vector3d Dir = new Vector3d(0, 0, 0);
+	public Vector3d Dir = new(0, 0, 0);
 	public int Speed = 1;
 	public int Health { set; get; } = 100;
 	public const int radius = 10;

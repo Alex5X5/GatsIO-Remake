@@ -3,8 +3,7 @@
 namespace ShGame.game
 {
 
-    partial class Form1
-    {
+    partial class InitialScreen {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -14,11 +13,11 @@ namespace ShGame.game
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing) {
-            if (disposing && (components != null)) {
+        protected void Dispose() {
+            if ((components != null)) {
                 components.Dispose();
             }
-            base.Dispose(disposing);
+            base.Dispose(true);
         }
 
         #region Windows Form Designer generated code
@@ -43,7 +42,6 @@ namespace ShGame.game
             portTextBox.Size = new System.Drawing.Size(271, 34);
             portTextBox.TabIndex = 0;
             portTextBox.Text = "enter port (100 by default)";
-            portTextBox.TextChanged += PortField_Changed;
 			portTextBox.Click+=PortField_Clicked;
             // 
             // textBox2
@@ -56,7 +54,6 @@ namespace ShGame.game
             ipTextBox.TabIndex = 0;
             ipTextBox.TabStop = false;
             ipTextBox.Text = "enter IP (leave empty to use "+Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString()+")";
-			ipTextBox.TextChanged += IpField_Changed;
             ipTextBox.Click += IpField_Clicked;
 			// 
 			// button1

@@ -2,17 +2,17 @@
 
 using ShGame.game.Client;
 
-using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 internal class GameServer:Socket {
 
 	private bool stop = false;
 	private readonly Logger logger;
+	private readonly ServerConsole console;
 	//private Socket serverSocket;
 
 	public const int MAP_WIDTH = 1000, MAP_HEIGHT = 1000, MAX_PLAYER_COUNT = 10, OBSTACLE_COUNT = 20;
@@ -27,13 +27,17 @@ internal class GameServer:Socket {
 	public GameServer() : this(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], 100) { }
 
 	public GameServer(IPAddress adress, int port) : base(adress.AddressFamily, SocketType.Stream, ProtocolType.Tcp){
+		console = new(this);
+		console.Writeline("test");
+        new Thread(
+                () => console.ShowDialog()
+        ).Start();
 		logger = new Logger(new LoggingLevel("GameServer"));
 		logger.Log("constructor");
 		SpreadObstacles();
+		players.Initialize();
 		foreach (Obstacle obstacle in obstacles)
 			Console.WriteLine(obstacle.ToString());
-		for (int i = 0; i < MAX_PLAYER_COUNT; i++)
-			players[i] = new Player(new Logic.Vector3d(0, 0, 0), -1, 1);
 		//Console.WriteLine("[Server]:constructor");
 		logger.Log("binding", new MessageParameter("server", this.ToString()));
 		Bind(new IPEndPoint(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0], port));
@@ -116,10 +120,11 @@ internal class GameServer:Socket {
 	}
 
 	public void Stop() {
+		Console.WriteLine("[Gameserver] stopping");
 		stop = true;
 		Thread.Sleep(2000);
 		foreach(ServerConnection c in clients)
-			c.Stop();
+			c?.Stop();
 	}
 
 	private void SpreadObstacles() {

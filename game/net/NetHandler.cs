@@ -91,8 +91,9 @@ public class NetHandler:Socket {
 			Console.WriteLine("NetHandler:"+players[i]);
             if (temp != null)
 				Player.DeserializePlayerCountable(ref temp, ref players[i], ref counter);
-		}
-	}
+            Console.WriteLine("NetHandler:"+players[i]);
+        }
+    }
 
 	public override string ToString() {
 		return "sh_game.game.net.NetHandler:[ip="+IP.ToString()+";port="+Convert.ToString(PORT)+"]";

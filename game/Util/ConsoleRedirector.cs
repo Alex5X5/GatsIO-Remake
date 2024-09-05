@@ -8,13 +8,11 @@ namespace ShGame.game.Util
 	{
 		private readonly string LogDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
 
-		private static ConsoleRedirector _outputSingleton;
+		private static ConsoleRedirector? _outputSingleton;
 		private static ConsoleRedirector OutputSingleton {
 			get
 			{
-				if (_outputSingleton == null) {
-					_outputSingleton = new ConsoleRedirector();
-				}
+				_outputSingleton ??= new ConsoleRedirector();
 				return _outputSingleton;
 			}
 		}
@@ -59,9 +57,10 @@ namespace ShGame.game.Util
 			string filePath = Path.Combine(LogDirPath, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")) + ".txt";
 			try
 			{
-				SW = new StreamWriter(filePath);
-				SW.AutoFlush = true;
-			}
+                SW = new StreamWriter(filePath) {
+                    AutoFlush = true
+                };
+            }
 			catch (UnauthorizedAccessException ex)
 			{
 				throw new ApplicationException(string.Format("Access denied. Could not instantiate StreamWriter using path: {0}.", filePath), ex);
