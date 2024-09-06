@@ -223,17 +223,17 @@ internal class Renderer:IDisposable {
 	//		return v.x>=0&&v.x<=UNSCALED_WIDTH&&v.y>=0&&v.y<=UNSCALED_HEIGHT;
 	//	}
 
-	private Vector3d ShadowHit(Vector3d pp, Vector3d sp, Line3d l) {
-		double oth1X = l.origin.x;
-		double oth1Y = l.origin.y;
-		double oth1Z = l.origin.z;
+	private Vector3d ShadowHit(Vector3d playerPosition, Vector3d shadowPoint, Line3d border) {
+		double oth1X = border.origin.x;
+		double oth1Y = border.origin.y;
+		double oth1Z = border.origin.z;
 
-		Vector3d oth2 = l.origin.Cpy().Add(l.direction);
+		Vector3d oth2 = border.origin.Cpy().Add(border.direction);
 		double oth2X = oth2.x;
 		double oth2Y = oth2.y;
 		double oth2Z = oth2.z;
 
-		double u = ((oth1X - pp.x) * (sp.y - pp.y) - (oth1Y - pp.y) * (sp.x - pp.x)) / ((oth2Y - oth1Y) * (sp.x - pp.x) - (oth2X - oth1X) * (sp.y - pp.y));
+		double u = ((oth1X - playerPosition.x) * (shadowPoint.y - playerPosition.y) - (oth1Y - playerPosition.y) * (shadowPoint.x - playerPosition.x)) / ((oth2Y - oth1Y) * (shadowPoint.x - playerPosition.x) - (oth2X - oth1X) * (shadowPoint.y - playerPosition.y));
 		return new Vector3d(oth1X + u * (oth2X - oth1X), oth1Y + u * (oth2Y - oth1Y), oth1Z + u * (oth2Z - oth1Z));
 	}
 
