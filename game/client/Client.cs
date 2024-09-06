@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Drawing;
 using System.Net;
+using System.Drawing.Imaging;
 
 public class Client : Form {
 
@@ -18,6 +19,7 @@ public class Client : Form {
 
 	private readonly Logger logger;
 
+	private Client.Panel panel;
 	private readonly Renderer renderer;
 	private readonly LoggingLevel mlvl = new("Client");
 	private NetHandler? handler;
@@ -27,13 +29,13 @@ public class Client : Form {
 
 	private Player[] players;
 	internal Obstacle[] obstacles = new Obstacle[20];
-	private Thread renderThread = new(() =>{});
+	private Thread renderThread = new(() => { });
 	private Thread connectionThread = new(() => { });
 	private Thread playerMoveThread = new(() => { });
 
 	public Client() : this(100) { }
 
-	public Client(int port) : this(GameServer.GetLocalIPv4(), port) { }
+	public Client(int port) : this(GameServer.GetLocalhost(), port) { }
 
 	public Client(IPAddress address, int port) : base() {
 		logger=new Logger(mlvl);
@@ -46,7 +48,7 @@ public class Client : Form {
 		new Random().NextBytes(temp);
 		player=new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
 		players=new Player[GameServer.MAX_PLAYER_COUNT];
-		for(int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
+		for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
 			players[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
 		obstacles.Initialize();
 		renderer=new Renderer();
@@ -63,6 +65,10 @@ public class Client : Form {
 		Name="Client";
 		Text="Client";
 
+		panel = new() {
+			ClientSize=new Size(Renderer.WIDTH, Renderer.HEIGHT),
+			Name="Panel"
+		};
 		FormClosing+=Stop;
 		KeyDown+=new KeyEventHandler(KeyDown_);
 		KeyUp+=new KeyEventHandler(KeyUp_);
@@ -92,9 +98,9 @@ public class Client : Form {
 		logger.Log("start threads!");
 		renderThread=new Thread(
 				() => {
-					while(!CanRaiseEvents&&!stop)
+					while (!CanRaiseEvents&&!stop)
 						Thread.Sleep(10);
-					while(!stop) {
+					while (!stop) {
 						Thread.Sleep(30);
 						Invalidate();
 					}
@@ -105,16 +111,16 @@ public class Client : Form {
 
 		playerMoveThread=new Thread(
 				() => {
-					while(!CanRaiseEvents&&!stop)
+					while (!CanRaiseEvents&&!stop)
 						Thread.Sleep(10);
-					while(!stop) {
-						foreach(Player p in players) {
-							if(p!=null)
-								if(p.Health!=-1)
+					while (!stop) {
+						foreach (Player p in players) {
+							if (p!=null)
+								if (p.Health!=-1)
 									p.Move();
 						}
-						if(player!=null)
-							if(player.Health!=-1)
+						if (player!=null)
+							if (player.Health!=-1)
 								player.Move();
 						Thread.Sleep(10);
 					}
@@ -125,7 +131,7 @@ public class Client : Form {
 	}
 
 	private void KeyUp_(object sender, KeyEventArgs e) {
-		switch(e.KeyCode) {
+		switch (e.KeyCode) {
 			case Keys.W:
 				keyUp=false;
 				break;
@@ -144,7 +150,7 @@ public class Client : Form {
 	}
 
 	private void KeyDown_(object sender, KeyEventArgs e) {
-		switch(e.KeyCode) {
+		switch (e.KeyCode) {
 			case Keys.W:
 				keyUp=true;
 				break;
@@ -166,7 +172,7 @@ public class Client : Form {
 	}
 
 	protected override void OnPaint(PaintEventArgs e) {
-		if(!stop)
+		if (!stop)
 			e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
 	}
 
@@ -175,15 +181,15 @@ public class Client : Form {
 	}
 
 	private bool NetHandlerConnected() {
-		if(handler != null)
-			if(handler.Connected)
+		if (handler != null)
+			if (handler.Connected)
 				return true;
 		return false;
 	}
 
 	private void Stop(object? sender, FormClosingEventArgs? e) {
 		stop=true;
-		if(sender==this) {
+		if (sender==this) {
 			logger.Log("stopping");
 			renderer.Dispose();
 			Dispose();
@@ -192,4 +198,15 @@ public class Client : Form {
 			//System.Stop();
 		}
 	}
+
+	private class Panel : System.Windows.Forms.Panel {
+		public Panel() : base() { 
+		}
+        protected override void OnPaintBackground(PaintEventArgs e) {}
+
+        protected override void OnPaint(PaintEventArgs e) {
+            //if (!stop)
+                //e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
+        }
+    }
 }

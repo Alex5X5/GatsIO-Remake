@@ -26,7 +26,7 @@ public class NetHandler:Socket {
 		logger.Log("port constructor");
 	}
 
-	internal NetHandler(IPAddress address, int port) : base(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) {
+	internal NetHandler(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
 		logger.Log("port addresss constructor");
 		IP=address;
 		PORT=port;

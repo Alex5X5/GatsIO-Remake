@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Windows.Forms;
 namespace ShGame.game;
 
@@ -47,13 +48,6 @@ public static class Programm {
 		//unsafe {
 		//	Console.WriteLine($"Size of MyStruct: {sizeof(PrimitiveVector3I)} bytes"); // This will output 12 bytes
 		//}
-
 		Application.Run(new InitialScreen());
-		//new Logger(new LoggingLevel("programm")).Log("Main");
-		//new GameServer(100);
-		//while (true)
-		//Thread.Sleep(100);
-		//Control.CheckForIllegalCr'ossThreadCalls=true;
-		//Application.Run(new Client.Client());
 	}
 }

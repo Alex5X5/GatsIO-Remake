@@ -23,39 +23,21 @@ namespace ShGame.game {
 			new Thread(
 					() => {
 						int port = -1;
-						IPAddress? address = null;
 						try {
-							address = IPAddress.Parse(ipTextBox.Text);
 							port = Convert.ToInt32(portTextBox.Text);
 							Console.WriteLine("read successfully");
-							if (port!=-1&&address!=null) {
-								Console.WriteLine("Initial Screen: ip="+address+" port="+port);
-								Console.WriteLine("starting non localhost server");
-								_ = new Net.GameServer(address, port);
-							}
-							return;
+							//if (port!=-1) {
+								Console.WriteLine("Initial Screen: port="+port);
+								_ = new Net.GameServer(port);
+							//}
 						} catch {
-							if (address==null|port==-1) {
-								Console.WriteLine("Initial Screen: ip="+address+" port="+port);
-								Console.WriteLine("starting localhost server");
+								Console.WriteLine("Initial Screen: port="+port);
 								_ = new Net.GameServer();
-							}
 						}
-						//Enabled = false;
-						//while (!c.IsDisposed) {
-						//Thread.Sleep(1000);
-						//Dispose();
-						//}
-						//new Thread(
-						//		() => {
-						//			_ = new Net.GameServer();
-						//		}
-						//).Start();
-						//Enabled = false;
-						//Dispose();
 					}
 			).Start();
 		}
+
 		private void StartClient(object sender, EventArgs e) {
 			new Thread(
 					() => {
@@ -63,29 +45,17 @@ namespace ShGame.game {
 						IPAddress? address = null;
 						try {
 							address = IPAddress.Parse(ipTextBox.Text);
-							port = Convert.ToInt32(portTextBox.Text);
-							Console.WriteLine("read successfully");
-							if (port>=0&&address!=null) {
-								Console.WriteLine("[Initial Screen]: ip="+address+" port="+port);
-								Console.WriteLine("[Initial Screen]: starting non localhost clienet");
-								Client.Client c = new(IPAddress.None, -1);
-								c.ShowDialog();
-							}
-							return;
-						} catch {
-							if (address==null|port==-1) {
-								Console.WriteLine("Initial Screen: ip="+address+" port="+port);
-								Console.WriteLine("starting localhost server");
-								Client.Client c = new();
-								c.ShowDialog();
-							}
-						}
+						} catch {}
+                        try {
+                            port = Convert.ToInt32(portTextBox.Text);
+                        } catch {}
+                        Client.Client c = new(
+							address!=null ? address : GameServer.GetLocalhost(),
+							port>=0 ? port : 100
+						);
+                        Console.WriteLine("Initial Screen: ip="+address+" port="+port);
+                        c.ShowDialog();
 					}
-						//Enabled = false;
-						//while (!c.IsDisposed) {
-							//Thread.Sleep(1000);
-							//Dispose();
-						//}
 			).Start();
 		}
 	}
