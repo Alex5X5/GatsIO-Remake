@@ -9,10 +9,10 @@ public static class Programm {
 	public static void Main() {
 		//_=new ConsoleRedirector();
 		ConsoleRedirector.WriteLine("test");
-        Application.EnableVisualStyles();
-        Application.SetCompatibleTextRenderingDefault(false);
-        Logging.DisableColors();
-        Console.WriteLine("start");
+		Application.EnableVisualStyles();
+		Application.SetCompatibleTextRenderingDefault(false);
+		Logging.DisableColors();
+		Console.WriteLine("start");
 
 		//return;
 
@@ -28,12 +28,12 @@ public static class Programm {
 		//	//TempStorageAllocator<PrimitiveVector3I>.Recycle(ref tempData);
 		//	Console.WriteLine(tempData);
 		//	PrimitiveVector3I vec = *tempData.data;
-		//          Console.WriteLine(tempData.data->X);
+		//		  Console.WriteLine(tempData.data->X);
 		//	TempStorageAllocator<PrimitiveVector3I>.Recycle(ref tempData);
 		//	//return;
 		//}
 
-		//      unsafe
+		//	  unsafe
 		//{
 		//	Console.WriteLine("test");
 		//	TempData<PrimitiveVector3I> tempData;
@@ -49,8 +49,8 @@ public static class Programm {
 		//}
 
 		Application.Run(new InitialScreen());
-        //new Logger(new LoggingLevel("programm")).Log("Main");
-        //new GameServer(100);
+		//new Logger(new LoggingLevel("programm")).Log("Main");
+		//new GameServer(100);
 		//while (true)
 		//Thread.Sleep(100);
 		//Control.CheckForIllegalCr'ossThreadCalls=true;

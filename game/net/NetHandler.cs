@@ -30,11 +30,13 @@ public class NetHandler:Socket {
 		logger.Log("port addresss constructor");
 		IP=address;
 		PORT=port;
-		logger.Log(ToString());
+		//logger.Log(ToString());
+		IPEndPoint point = new(address, port);
+		logger.Log(point.ToString());
 		try {
 			logger.Log("trying to connect");
 			//Connect_(address, port);
-			Connect(address, port);
+			Connect(point);
 		} catch(SocketException e) {
 			logger.Log("failed to bind (reason="+e.ToString()+")");
 		} 
@@ -52,7 +54,8 @@ public class NetHandler:Socket {
 		logger.Log("connecting "+point);
 		IAsyncResult result = BeginConnect(point, null, null);
 		bool success = result.AsyncWaitHandle.WaitOne(5000, true);
-		Thread.Sleep(6000);
+		while (!success)
+			Thread.Sleep(100);
 		logger.Log(Convert.ToString(Connected));
 		if (Connected) {
 			EndConnect(result);
@@ -111,11 +114,11 @@ public class NetHandler:Socket {
 		int counter = 0;
 		for(int i = 0; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
 			Console.WriteLine("NetHandler:"+players[i]);
-            if (temp != null)
+			if (temp != null)
 				Player.DeserializePlayerCountable(ref temp, ref players[i], ref counter);
-            Console.WriteLine("NetHandler:"+players[i]);
-        }
-    }
+			Console.WriteLine("NetHandler:"+players[i]);
+		}
+	}
 
 	public override string ToString() {
 		return "sh_game.game.net.NetHandler:[ip="+IP.ToString()+", port="+Convert.ToString(PORT)+"]";

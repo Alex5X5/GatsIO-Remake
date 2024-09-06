@@ -31,7 +31,11 @@ public class Client : Form {
 	private Thread connectionThread = new(() => { });
 	private Thread playerMoveThread = new(() => { });
 
-	public Client(IPAddress? address, int port) : base() {
+	public Client() : this(100) { }
+
+	public Client(int port) : this(GameServer.GetLocalIPv4(), port) { }
+
+	public Client(IPAddress address, int port) : base() {
 		logger=new Logger(mlvl);
 		logger.Log("Costructor");
 		logger.Log(address+" "+port);
@@ -43,7 +47,7 @@ public class Client : Form {
 		player=new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
 		players=new Player[GameServer.MAX_PLAYER_COUNT];
 		for(int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
-            players[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
+			players[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
 		obstacles.Initialize();
 		renderer=new Renderer();
 		StartThreads(address, port);
@@ -61,29 +65,25 @@ public class Client : Form {
 
 		FormClosing+=Stop;
 		KeyDown+=new KeyEventHandler(KeyDown_);
-        KeyUp+=new KeyEventHandler(KeyUp_);
+		KeyUp+=new KeyEventHandler(KeyUp_);
 
 		ResumeLayout(false);
 		PerformLayout();
 		logger.Log("performed layout");
 	}
 
-	private void StartThreads(IPAddress? address, int port) {
+	private void StartThreads(IPAddress address, int port) {
 		connectionThread=new Thread(
 			() => {
-				if(address!=null&&port!=-1){
-					handler=new NetHandler(address, port);
-				} else {
-					handler = new();
-				}
+				handler = new(address, port);
 
-                if (NetHandlerConnected())
-                    handler.GetMap(ref obstacles);
-                Console.WriteLine(player);
-                while (!stop && NetHandlerConnected()) {
-                    handler.ExchangePlayers(player, ref players);
-                    Thread.Sleep(500);
-                }
+				if (NetHandlerConnected())
+					handler.GetMap(ref obstacles);
+				Console.WriteLine(player);
+				while (!stop && NetHandlerConnected()) {
+					handler.ExchangePlayers(player, ref players);
+					Thread.Sleep(500);
+				}
 				handler?.Dispose();
 			}
 		);
@@ -158,7 +158,7 @@ public class Client : Form {
 				keyRight=true;
 				break;
 			case Keys.Escape:
-                Stop(this, null);
+				Stop(this, null);
 				break;
 		}
 		player.OnKeyEvent(c: this);

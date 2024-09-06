@@ -22,9 +22,9 @@ internal class GameServer:Socket {
 	internal Player[] players = new Player[MAX_PLAYER_COUNT];
 	private readonly Obstacle[] obstacles = new Obstacle[OBSTACLE_COUNT];
 
-    public GameServer(int port) : this(GetLocalIPv4(), port) { }
-
 	public GameServer() : this(100) { }
+	public GameServer(int port) : this(GetLocalIPv4(), port) { }
+
 
 	public GameServer(IPAddress adress, int port) : base(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp){
 		logger = new Logger(new LoggingLevel("GameServer"));
@@ -33,7 +33,7 @@ internal class GameServer:Socket {
 				() => console.ShowDialog()
 		).Start();
 		//console.Writeline("test");
-		logger.Log("adress port constructor");
+		logger.Log("address port constructor");
 		SpreadObstacles();
 		players.Initialize();
 		foreach (Obstacle obstacle in obstacles)
@@ -42,14 +42,14 @@ internal class GameServer:Socket {
 		IPEndPoint point = new(adress, port);
 		logger.Log(point.ToString());
 		Bind(point);
-		logger.Log("a2 "+adress.ToString());
+		logger.Log("a2 "+point.ToString());
 		logger.Log(Convert.ToString(IsBound));
 		new Thread(
 				start: Run
 		).Start();
 	}
 
-    private void OnAccept(Socket s) {
+	private void OnAccept(Socket s) {
 		Console.WriteLine("[Server]:OnAccept("+s.ToString()+")");
 		for(int i = 0; i<clients.Length; i++) {
 			if(clients[i]==null) {
@@ -69,7 +69,7 @@ internal class GameServer:Socket {
 					_=Task.Run(() => OnAccept(clientConnection));
 				} catch(Exception e) {
 					if(!stop){
-						//Console.WriteLine(e.ToString());
+						Console.WriteLine(e.ToString());
 					} else {
 						
 						break;
@@ -98,7 +98,7 @@ internal class GameServer:Socket {
 
 	internal byte[]? OnPlayerRequest(byte[] packet) {
 		if(Protocoll.AnalyzePacket(packet)==Protocoll.PLAYER_HEADER) {
-            Player player = new(null, 0, 0);
+			Player player = new(null, 0, 0);
 			Player.DeserializePlayer(ref packet, ref player, Protocoll.PAYLOAD_OFFSET);
 			int resultCount=-1;
 			for(int i = 0; i<MAX_PLAYER_COUNT; i++) {
@@ -123,7 +123,7 @@ internal class GameServer:Socket {
 			return result;
 		} else
 			logger.Log("not request");
-        return null;
+		return null;
 	}
 
 	public void Stop() {
@@ -144,28 +144,28 @@ internal class GameServer:Socket {
 		for(int x = 0; x<5; x++)
 			//spreading obstacles over 4 lines so there are 20 obstacles all together
 			for(int y = 0; y<4; y++) {
-                PlaceObstacles(1 + x, 1 + y, c);
+				PlaceObstacles(1 + x, 1 + y, c);
 				//c is the position of the obstacle in the arary
 				c++;
 			}
 	}
 
 	private void PlaceObstacles(int x, int y, int c) {
-        //since there are 5 rows the distance between the rows has to be one fifth of the map width
-        x = MAP_WIDTH / 5 * x - MAP_WIDTH / 10;
-        //since there are 4 lines the distance between the lines has to be one fourth of the map heigth
-        y = MAP_HEIGHT / 4 * y - MAP_HEIGHT / 8;
-        Random r = new();
-        obstacles[c] = new Obstacle(
+		//since there are 5 rows the distance between the rows has to be one fifth of the map width
+		x = MAP_WIDTH / 5 * x - MAP_WIDTH / 10;
+		//since there are 4 lines the distance between the lines has to be one fourth of the map heigth
+		y = MAP_HEIGHT / 4 * y - MAP_HEIGHT / 8;
+		Random r = new();
+		obstacles[c] = new Obstacle(
 			new Vector3d(
-                // the obstacles may also be offset by half the distance to the next row/line
-                // since there are 5 rows half te distance between them is MapWidth/10
-                Math.Floor(MAP_WIDTH / -5.0 + r.Next(0, MAP_WIDTH * 2 / 5) + x),
-                Math.Floor(MAP_HEIGHT / -4.0 + r.Next(0, MAP_WIDTH * 2 / 4) + y),
-                0
-            ),
-            //the upper bound must be 4 becuase 3 ist the maxumum possible tytpe but the upper bound is not included
-            r.Next(1, 4)
+				// the obstacles may also be offset by half the distance to the next row/line
+				// since there are 5 rows half te distance between them is MapWidth/10
+				Math.Floor(MAP_WIDTH / -5.0 + r.Next(0, MAP_WIDTH * 2 / 5) + x),
+				Math.Floor(MAP_HEIGHT / -4.0 + r.Next(0, MAP_WIDTH * 2 / 4) + y),
+				0
+			),
+			//the upper bound must be 4 becuase 3 ist the maxumum possible tytpe but the upper bound is not included
+			r.Next(1, 4)
 
 		);
 		Console.WriteLine("Pos "+obstacles[c].Pos.ToString());

@@ -22,7 +22,7 @@ public class Player {
 	public Player() {
 		Pos = new(0, 0, 0);
 		Health = -1;
-        PlayerUUID = 0;
+		PlayerUUID = 0;
 		visible=false;
 	}
 

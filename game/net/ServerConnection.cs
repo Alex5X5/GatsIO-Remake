@@ -57,7 +57,7 @@ internal class ServerConnection:Socket {
 		
 	}
 
-    private void SendPacket(byte[]? send) {
+	private void SendPacket(byte[]? send) {
 		if(send==null)
 			return;
 		try {
@@ -69,7 +69,7 @@ internal class ServerConnection:Socket {
 
 	private void Run(GameServer gs) {
 		logger.Log("run");
-        byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
+		byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
 		while(!stop) {
 			RecievePacket(ref buffer);
 			switch(Protocoll.AnalyzePacket(buffer)) {
@@ -92,9 +92,9 @@ internal class ServerConnection:Socket {
 		}
 	}
 
-    public override string? ToString() => base.ToString();
+	public override string? ToString() => base.ToString();
 
-    internal void Stop() {
+	internal void Stop() {
 		stop=true;
 	}
 }
