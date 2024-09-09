@@ -5,13 +5,9 @@ using System.Drawing.Drawing2D;
 
 internal class Renderer:IDisposable {
 
-	//public static readonly int gScl = 1;
-	private static readonly bool RESTRICTED_VIEW = true;
+	#region fields
 
-	//public static readonly int UNSCALED_WIDTH = 1125;
-	//public static readonly double SCALED_WIDTH = UNSCALED_WIDTH / gScl;
-	//public static readonly int UNSCALED_HEIGHT = 900;
-	//public static readonly double SCALED_HEIGHT = UNSCALED_HEIGHT / gScl;
+	private static readonly bool RESTRICTED_VIEW = true;
 
 	public const int WIDTH = 1000, HEIGHT = 1000;
 
@@ -26,27 +22,17 @@ internal class Renderer:IDisposable {
 
 	private readonly Logger logger = new Logger(new LoggingLevel("Renderer"));
 
-	//private readonly Semaphore renderLock;
-
 	private readonly Bitmap image;
 	private readonly Graphics graphics;
 
 	private Vector3d mouseVector = new Vector3d(0, 0, 0);
 	private Vector3d logicalMouseVector = new Vector3d(0, 0, 0);
 
-	public Renderer() {
+    #endregion fields
 
-
-		//Image temp;
+    public Renderer() {
 		image = new Bitmap(WIDTH, HEIGHT);
-		//renderLock = new Semaphore(1,1);
 		graphics = Graphics.FromImage(image);
-		//logger.log("",
-		//		new MessageParameter("bt", BORDER_TOP.toString()),
-		//		new MessageParameter("bb", BORDER_BOTTOM.toString()),
-		//		new MessageParameter("bl", BORDER_LEFT.toString()),
-		//		new MessageParameter("br", BORDER_RIGHT.toString())
-		//);
 	}
 
 	public Image Render(ref Player[] players, ref Player player, ref Obstacle[] obstacles) {
@@ -76,7 +62,27 @@ internal class Renderer:IDisposable {
 		return image;
 	}
 
-	private Vector3d[] GetVievRestrictions() {
+    private void RenderObstacles(Obstacle[] l, Graphics g) {
+        foreach (Obstacle o in l) {
+            switch (o?.type) {
+                case 1:
+                    DrawObstacle1(o.Pos, g: g);
+                    break;
+                case 2:
+                    DrawObstacle2(o.Pos, g: g);
+                    break;
+                case 3:
+                    DrawObstacle3(o.Pos, g: g);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    #region direction calculations
+
+    private Vector3d[] GetVievRestrictions() {
 		Vector3d r = logicalMouseVector.Cpy();
 		//		logger.log("",new MessageParameter("r",r.toString()));
 		double angle = Math.Tan(r.y / r.x);
@@ -104,7 +110,8 @@ internal class Renderer:IDisposable {
 		}
 	}
 
-	private Dir RelativeDir(Vector3d pos, Vector3d relativeTo)
+
+    private Dir RelativeDir(Vector3d pos, Vector3d relativeTo)
 	{
 		Vector3d dir = relativeTo.Cpy().Sub(pos).Nor();
 		if (dir.y > 1.0 / Math.Sqrt(2))
@@ -123,12 +130,13 @@ internal class Renderer:IDisposable {
 		{
 			return Dir.L;
 		}
-	}
+    }
 
-	//	private Dir relativeDir(Vector3d pos, Obstacle relativeTo) {
-	//		return (Dir)null;
-	//	}
-	private void RenderBackHalf(Vector3d pos) {
+    #endregion direction calculations
+
+    #region shadow rendering
+
+    private void RenderBackHalf(Vector3d pos) {
 		switch (GetRoundedVievDirection()) {
 			case Dir.T:
 				graphics.FillRectangle(SHADOW_COLOR, new Rectangle(-1, -1, WIDTH + 2, (int)(pos.y + 1)));
@@ -146,8 +154,7 @@ internal class Renderer:IDisposable {
 			//	logger.warn("unexpected direction", new MessageParameter("direction", getRoundedVievDirection().toString()));
 		}
 	}
-
-	private void RenderObstacleShadows(Vector3d v, Obstacle[] l) {
+    private void RenderObstacleShadows(Vector3d v, Obstacle[] l) {
 		//a list of points on the screen
 		PointF[] points = new PointF[3];
 		Vector3d ShadowPoint1 = new Vector3d(0, 0, 0);
@@ -267,25 +274,11 @@ internal class Renderer:IDisposable {
 		);
 	}
 
-	private void RenderObstacles(Obstacle[] l, Graphics g) {
-		foreach(Obstacle o in l) {
-			switch (o?.type) {
-				case 1:
-					DrawObstacle1(o.Pos, g: g);
-					break;
-				case 2:
-					DrawObstacle2(o.Pos, g: g);
-					break;
-				case 3:
-					DrawObstacle3(o.Pos, g: g);
-					break;
-				default:
-					break;
-			}
-		}
-	}
+    #endregion shadow rendering
 
-	private void DrawPlayer(Player p, Graphics g) {
+    #region draw methods
+
+    private void DrawPlayer(Player p, Graphics g) {
 		//graphics2D.SetStroke(new BasicStroke(1 / gScl));
 		//graphics2D.drawLine(0, 0, (int)p.pos.x / gScl, (int)p.pos.y / gScl);
 		//Console.WriteLine("drawing at"+p.Pos.ToString());
@@ -311,7 +304,9 @@ internal class Renderer:IDisposable {
 		logicalMouseVector = mouseVector.Cpy().Sub(pos).Nor();
 	}
 
-	public void Dispose() {
+    #endregion draw methods
+
+    public void Dispose() {
 		logger.Log("stoppping");
 		//renderLock.Dispose();
 		image.Dispose();
@@ -324,22 +319,4 @@ internal class Renderer:IDisposable {
 	public enum Dir {
 		T, B, L, R,
 	}
-
-	//public String toString()
-	//{
-	//	switch (this)
-	//	{
-	//		case T:
-	//			return "game.graphics.client.Renderer.Dir.Top";
-	//		case B:
-	//			return "game.graphics.client.Renderer.Dir.Top";
-	//		case L:
-	//			return "game.graphics.client.Renderer.Dir.Left";
-	//		case R:
-	//			return "game.graphics.client.Renderer.Dir.Right";
-	//		default:
-	//			return "";
-
-	//	}
-	//}
 }

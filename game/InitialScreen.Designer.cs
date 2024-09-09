@@ -1,7 +1,5 @@
 ﻿using ShGame.game.Net;
 
-using System.Net;
-
 namespace ShGame.game
 {
 

@@ -1,7 +1,5 @@
-﻿using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
+
 namespace ShGame.game;
 
 public static class Programm {

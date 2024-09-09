@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Drawing;
 using System.Net;
-using System.Drawing.Imaging;
 
 public class Client : Form {
 
@@ -22,7 +21,7 @@ public class Client : Form {
 	private Client.Panel panel;
 	private readonly Renderer renderer;
 	private readonly LoggingLevel mlvl = new("Client");
-	private NetHandler? handler;
+	private NetHandler? netHandler;
 
 	internal Player player;
 	//internal readonly SemaphoreSlim playersLock;
@@ -39,9 +38,12 @@ public class Client : Form {
 
 	public Client(IPAddress address, int port) : base() {
 		logger=new Logger(mlvl);
-		logger.Log("Costructor");
-		logger.Log(address+" "+port);
-		SetVisible();
+        logger.Log(
+            "address port constructor",
+            new MessageParameter("address", address.ToString()),
+            new MessageParameter("port", port)
+        );
+        SetVisible();
 		//Thread.Sleep(500);
 		//handler=new NetHandler();
 		byte[] temp = new byte[8];
@@ -81,16 +83,16 @@ public class Client : Form {
 	private void StartThreads(IPAddress address, int port) {
 		connectionThread=new Thread(
 			() => {
-				handler = new(address, port);
+				netHandler = new(address, port);
 
 				if (NetHandlerConnected())
-					handler.GetMap(ref obstacles);
+					netHandler.GetMap(ref obstacles);
 				Console.WriteLine(player);
 				while (!stop && NetHandlerConnected()) {
-					handler.ExchangePlayers(player, ref players);
+					netHandler.ExchangePlayers(player, ref players);
 					Thread.Sleep(500);
 				}
-				handler?.Dispose();
+				netHandler?.Dispose();
 			}
 		);
 		connectionThread.Start();
@@ -181,8 +183,8 @@ public class Client : Form {
 	}
 
 	private bool NetHandlerConnected() {
-		if (handler != null)
-			if (handler.Connected)
+		if (netHandler != null)
+			if (netHandler.Connected)
 				return true;
 		return false;
 	}
