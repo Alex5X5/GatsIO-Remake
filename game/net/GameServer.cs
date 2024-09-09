@@ -27,7 +27,7 @@ internal class GameServer:Socket {
     #region constructors
 
 
-    private GameServer(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp){
+    public GameServer(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp){
 		logger = new Logger(new LoggingLevel("GameServer"));
 		console = new(this);
 		new Thread(

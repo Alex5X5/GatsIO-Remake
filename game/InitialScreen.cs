@@ -23,17 +23,15 @@ public partial class InitialScreen : Form {
 		new Thread(
 				() => {
 					int port = -1;
+					IPAddress? address = null;
+					try {
+						address = IPAddress.Parse(ipTextBox.Text);
+					} catch { }
 					try {
 						port = Convert.ToInt32(portTextBox.Text);
-						Console.WriteLine("read successfully");
-						//if (port!=-1) {
-							Console.WriteLine("Initial Screen: port="+port);
-							_ = new Net.GameServer(port);
-						//}
-					} catch {
-							Console.WriteLine("Initial Screen: port="+port);
-							_ = new Net.GameServer();
-					}
+					} catch { }
+					Console.WriteLine("Initial Screen: ip="+address+" port="+port);
+					_ = new Net.GameServer(address??GameServer.GetLocalhost(), port>=0 ? port : 100);
 				}
 		).Start();
 	}
@@ -46,11 +44,11 @@ public partial class InitialScreen : Form {
 					try {
 						address = IPAddress.Parse(ipTextBox.Text);
 					} catch {}
-                        try {
-                            port = Convert.ToInt32(portTextBox.Text);
-                        } catch {}
-                        Client.Client c = new(
-                            address??GameServer.GetLocalhost(),
+                    try {
+                        port = Convert.ToInt32(portTextBox.Text);
+                    } catch {}
+                    Client.Client c = new(
+                        address??GameServer.GetLocalhost(),
 						port>=0 ? port : 100
 					);
                         Console.WriteLine("Initial Screen: ip="+address+" port="+port);
