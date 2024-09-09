@@ -34,9 +34,9 @@ public class Client : Form {
 
 	public Client() : this(100) { }
 
-	public Client(int port) : this(GameServer.GetLocalhost(), port) { }
+	public Client(uint port) : this(GameServer.GetLocalhost(), port) { }
 
-	public Client(IPAddress address, int port) : base() {
+	public Client(IPAddress address, uint port) : base() {
 		logger=new Logger(mlvl);
         logger.Log(
             "address port constructor",
@@ -54,7 +54,7 @@ public class Client : Form {
 			players[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
 		obstacles.Initialize();
 		renderer=new Renderer();
-		StartThreads(address, port);
+		StartThreads(address, (int)port);
 	}
 
 	private void SetVisible() {

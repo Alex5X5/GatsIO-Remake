@@ -53,7 +53,7 @@ namespace ShGame.game
 			ipTextBox.Size = new System.Drawing.Size(395, 34);
 			ipTextBox.TabIndex = 0;
 			ipTextBox.TabStop = false;
-			ipTextBox.Text = "enter IP (leave empty to use "+GameServer.GetLocalIPv4().ToString()+")";
+			ipTextBox.Text = "enter IP (leave empty to use "+GameServer.GetLocalhost().ToString()+")";
 			ipTextBox.Click += IpField_Clicked;
 			// 
 			// button1

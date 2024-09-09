@@ -6,6 +6,9 @@ using System.Windows.Forms;
 
 namespace ShGame.game; 
 public partial class InitialScreen : Form {
+
+	private bool portInitialClick=true;
+	private bool ipInitialClick=true;
 	public InitialScreen() {
 		InitializeComponent();
 	}
@@ -13,25 +16,26 @@ public partial class InitialScreen : Form {
 	private void Form_Load(object sender, EventArgs e) {
 	}
 
-	private void PortField_Clicked(object sender, EventArgs e) => portTextBox.Text = "";
+	private void PortField_Clicked(object sender, EventArgs e) {
+			if(portInitialClick){
+			portTextBox.Text = "";
+			portInitialClick = false;
+		}
+	}
 
 	private void IpField_Clicked(object sender, EventArgs e) {
-		ipTextBox.Text = "";
+		if(ipInitialClick) {
+			ipTextBox.Text="";
+			ipInitialClick=false;
+		}
 	}
 
 	private void StartServer(object sender, EventArgs e) {
 		new Thread(
 				() => {
-					int port = -1;
-					IPAddress? address = null;
-					try {
-						address = IPAddress.Parse(ipTextBox.Text);
-					} catch { }
-					try {
-						port = Convert.ToInt32(portTextBox.Text);
-					} catch { }
+					GetStartValues(out IPAddress address, out uint port);
 					Console.WriteLine("Initial Screen: ip="+address+" port="+port);
-					_ = new Net.GameServer(address??GameServer.GetLocalhost(), port>=0 ? port : 100);
+					_ = new Net.GameServer(address, (uint)Math.Abs(port));
 				}
 		).Start();
 	}
@@ -39,21 +43,26 @@ public partial class InitialScreen : Form {
 	private void StartClient(object sender, EventArgs e) {
 		new Thread(
 				() => {
-					int port = -1;
-					IPAddress? address = null;
-					try {
-						address = IPAddress.Parse(ipTextBox.Text);
-					} catch {}
-                    try {
-                        port = Convert.ToInt32(portTextBox.Text);
-                    } catch {}
-                    Client.Client c = new(
-                        address??GameServer.GetLocalhost(),
-						port>=0 ? port : 100
+					GetStartValues(out IPAddress address, out uint port);
+					Client.Client c = new(
+                       address, port
 					);
                         Console.WriteLine("Initial Screen: ip="+address+" port="+port);
                         c.ShowDialog();
 				}
 		).Start();
+	}
+
+	private void GetStartValues(out IPAddress address, out uint port) {
+		int port_ = -1;
+		IPAddress? address_ = null;
+		try {
+			address_ = IPAddress.Parse(ipTextBox.Text);
+		} catch {}
+        try {
+            port_ = Convert.ToInt32(portTextBox.Text);
+        } catch {}
+		address=address_??GameServer.GetLocalhost();
+		port=port_>=0 ? (uint)Math.Abs(port_) : 100;
 	}
 }

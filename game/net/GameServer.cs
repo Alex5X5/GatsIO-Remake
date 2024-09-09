@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,14 +21,14 @@ internal class GameServer:Socket {
 	private readonly Obstacle[] obstacles = new Obstacle[OBSTACLE_COUNT];
 
 	public GameServer() : this(100) { }
-	public GameServer(int port) : this(GetLocalhost(), port) { }
+	public GameServer(int port) : this(GetLocalhost(), (uint)Math.Abs(port)) { }
 
 	#endregion fields
 
     #region constructors
 
 
-    public GameServer(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp){
+    public GameServer(IPAddress address, uint port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp){
 		logger = new Logger(new LoggingLevel("GameServer"));
 		console = new(this);
 		new Thread(
@@ -45,7 +46,7 @@ internal class GameServer:Socket {
 		foreach (Obstacle obstacle in obstacles)
 			Console.WriteLine(obstacle.ToString());
 		//create an IPEndpoint wwith the givven address and the given port and bind the server to it
-		IPEndPoint point = new(address, port);
+		IPEndPoint point = new(address, (int)port);
 		logger.Log("binding, endPoint = "+point.ToString());
 		Bind(point);
 		logger.Log("bound endPoint="+point.ToString());
@@ -202,7 +203,11 @@ internal class GameServer:Socket {
 		Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].MapToIPv4();
     public static IPAddress GetLocalIPv6() =>
         Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].MapToIPv6();
-    public static IPAddress GetLocalhost() =>
-        Dns.GetHostEntry(Dns.GetHostName()).AddressList[0];
+    public static IPAddress GetLocalhost(){
+		NetworkInterface ni = NetworkInterface.GetAllNetworkInterfaces()[1];
+		return ni.GetIPProperties().UnicastAddresses[^1].Address;
+		//return Dns.GetHostEntry(Dns.GetHostName()).AddressList[0];
+
+	}
 }
 

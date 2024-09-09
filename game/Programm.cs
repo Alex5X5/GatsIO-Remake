@@ -1,4 +1,9 @@
-﻿using System.Windows.Forms;
+﻿using System.Linq;
+using System.Net;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Windows.Forms;
 
 namespace ShGame.game;
 
@@ -6,6 +11,29 @@ public static class Programm {
 
 	[STAThread]
 	public static void Main() {
+
+
+
+		//foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+		//{
+		//	if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+		//	{
+		//		//Console.WriteLine(ni.Name);
+		//		Console.WriteLine(ni.GetIPProperties().UnicastAddresses[ni.GetIPProperties().UnicastAddresses.Count-1]);
+		//		//foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
+		//		//{
+		//		//	if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+		//		//	{
+		//		//		Console.WriteLine(ip.Address.ToString());
+		//		//	}
+		//		//}
+		//	}
+		//}
+		NetworkInterface ni = NetworkInterface.GetAllNetworkInterfaces()[1];
+		Console.WriteLine(ni.GetIPProperties().UnicastAddresses[ni.GetIPProperties().UnicastAddresses.Count-1].Address);
+
+		Console.WriteLine(Dns.GetHostEntry("srhk.srh.de").AddressList[1]);
+
 		//_=new ConsoleRedirector();
 		ConsoleRedirector.WriteLine("test");
 		Application.EnableVisualStyles();
@@ -13,8 +41,6 @@ public static class Programm {
 		Logging.DisableColors();
 		Console.WriteLine("start");
 		Application.Run(new InitialScreen());
-
-		//		//return;
 
 		//unsafe
 		//{
