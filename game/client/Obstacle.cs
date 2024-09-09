@@ -23,14 +23,14 @@ public class Obstacle {
 	//	this.pos=new Vector3d((double)x, (double)x, 0);
 	//}
 	public Obstacle() {
-        Pos = new(0, 0, 0);
+		Pos = new(0, 0, 0);
 		WIDTH = 0;
 		HEIGHT = 0;
-        boundL = new LineSection3d(Pos, Pos.Cpy().Add(0, HEIGHT, 0));
-        boundT = new LineSection3d(Pos, Pos.Cpy().Add(WIDTH, 0, 0));
-        boundB = new LineSection3d(boundL.point2, boundL.point2.Cpy().Add(WIDTH, 0, 0));
-        boundR = new LineSection3d(boundT.point2, boundB.point2);
-    }
+		boundL = new LineSection3d(Pos, Pos.Cpy().Add(0, HEIGHT, 0));
+		boundT = new LineSection3d(Pos, Pos.Cpy().Add(WIDTH, 0, 0));
+		boundB = new LineSection3d(boundL.point2, boundL.point2.Cpy().Add(WIDTH, 0, 0));
+		boundR = new LineSection3d(boundT.point2, boundB.point2);
+	}
 
 	public Obstacle(Vector3d pos_, int type_) {
 		Pos=pos_??new Vector3d(0, 0, 0);
@@ -104,17 +104,17 @@ public class Obstacle {
 		} else if(RelativeX(v)==3&&RelativeY(v)==1) {
 			return [boundT, boundR];
 		} else if(RelativeX(v)==1&&RelativeY(v)==2) {
-            return [boundL];
+			return [boundL];
 		} else if(RelativeX(v)==3&&RelativeY(v)==2) {
 			return [boundR];
 		} else if(RelativeX(v)==1&&RelativeY(v)==3) {
-            return [boundL, boundB];
+			return [boundL, boundB];
 		} else if(RelativeX(v)==2&&RelativeY(v)==3) {
-            return [boundB];
+			return [boundB];
 		} else if(RelativeX(v)==3&&RelativeY(v)==3) {
-            return [boundR, boundB];
+			return [boundR, boundB];
 		}
-        return null;
+		return null;
 	}
 
 	public void GetShadowPoints(ref Vector3d pos, ref Vector3d point1, ref Vector3d point2) {
@@ -187,7 +187,7 @@ public class Obstacle {
 	}
 
 	public override string ToString() {
-        return "game.client.graphics.Obstacle[type:" + Convert.ToString(type) + " posX:" + Convert.ToString(Pos.x) + " Convert.ToString(posY:" + Convert.ToString(Pos.y) + "]";
+		return "game.client.graphics.Obstacle[type:" + Convert.ToString(type) + " posX:" + Convert.ToString(Pos.x) + " Convert.ToString(posY:" + Convert.ToString(Pos.y) + "]";
 	}
 
 	private static void UpdateBounds(ref Obstacle obstacle) {

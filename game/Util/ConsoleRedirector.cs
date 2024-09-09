@@ -57,10 +57,10 @@ namespace ShGame.game.Util
 			string filePath = Path.Combine(LogDirPath, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")) + ".txt";
 			try
 			{
-                SW = new StreamWriter(filePath) {
-                    AutoFlush = true
-                };
-            }
+				SW = new StreamWriter(filePath) {
+					AutoFlush = true
+				};
+			}
 			catch (UnauthorizedAccessException ex)
 			{
 				throw new ApplicationException(string.Format("Access denied. Could not instantiate StreamWriter using path: {0}.", filePath), ex);

@@ -18,32 +18,40 @@ public class Client : Form {
 
 	private readonly Logger logger;
 
+	private Client.Panel panel;
 	private readonly Renderer renderer;
 	private readonly LoggingLevel mlvl = new("Client");
-	private NetHandler? handler;
+	private NetHandler? netHandler;
 
 	internal Player player;
 	//internal readonly SemaphoreSlim playersLock;
 
 	private Player[] players;
 	internal Obstacle[] obstacles = new Obstacle[20];
-	private Thread renderThread = new(() =>{});
+	private Thread renderThread = new(() => { });
 	private Thread connectionThread = new(() => { });
 	private Thread playerMoveThread = new(() => { });
 
-	public Client(IPAddress? address, int port) : base() {
+	public Client() : this(100) { }
+
+	public Client(int port) : this(GameServer.GetLocalhost(), port) { }
+
+	public Client(IPAddress address, int port) : base() {
 		logger=new Logger(mlvl);
-		logger.Log("Costructor");
-		logger.Log(address+" "+port);
-		SetVisible();
+        logger.Log(
+            "address port constructor",
+            new MessageParameter("address", address.ToString()),
+            new MessageParameter("port", port)
+        );
+        SetVisible();
 		//Thread.Sleep(500);
 		//handler=new NetHandler();
 		byte[] temp = new byte[8];
 		new Random().NextBytes(temp);
 		player=new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
 		players=new Player[GameServer.MAX_PLAYER_COUNT];
-		for(int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
-            players[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
+		for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
+			players[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
 		obstacles.Initialize();
 		renderer=new Renderer();
 		StartThreads(address, port);
@@ -59,32 +67,32 @@ public class Client : Form {
 		Name="Client";
 		Text="Client";
 
+		panel = new() {
+			ClientSize=new Size(Renderer.WIDTH, Renderer.HEIGHT),
+			Name="Panel"
+		};
 		FormClosing+=Stop;
 		KeyDown+=new KeyEventHandler(KeyDown_);
-        KeyUp+=new KeyEventHandler(KeyUp_);
+		KeyUp+=new KeyEventHandler(KeyUp_);
 
 		ResumeLayout(false);
 		PerformLayout();
 		logger.Log("performed layout");
 	}
 
-	private void StartThreads(IPAddress? address, int port) {
+	private void StartThreads(IPAddress address, int port) {
 		connectionThread=new Thread(
 			() => {
-				if(address!=null&&port!=-1){
-					handler=new NetHandler(address, port);
-				} else {
-					handler = new();
-				}
+				netHandler = new(address, port);
 
-                if (NetHandlerConnected())
-                    handler.GetMap(ref obstacles);
-                Console.WriteLine(player);
-                while (!stop && NetHandlerConnected()) {
-                    handler.ExchangePlayers(player, ref players);
-                    Thread.Sleep(500);
-                }
-				handler?.Dispose();
+				if (NetHandlerConnected())
+					netHandler.GetMap(ref obstacles);
+				Console.WriteLine(player);
+				while (!stop && NetHandlerConnected()) {
+					netHandler.ExchangePlayers(player, ref players);
+					Thread.Sleep(500);
+				}
+				netHandler?.Dispose();
 			}
 		);
 		connectionThread.Start();
@@ -92,9 +100,9 @@ public class Client : Form {
 		logger.Log("start threads!");
 		renderThread=new Thread(
 				() => {
-					while(!CanRaiseEvents&&!stop)
+					while (!CanRaiseEvents&&!stop)
 						Thread.Sleep(10);
-					while(!stop) {
+					while (!stop) {
 						Thread.Sleep(30);
 						Invalidate();
 					}
@@ -105,16 +113,16 @@ public class Client : Form {
 
 		playerMoveThread=new Thread(
 				() => {
-					while(!CanRaiseEvents&&!stop)
+					while (!CanRaiseEvents&&!stop)
 						Thread.Sleep(10);
-					while(!stop) {
-						foreach(Player p in players) {
-							if(p!=null)
-								if(p.Health!=-1)
+					while (!stop) {
+						foreach (Player p in players) {
+							if (p!=null)
+								if (p.Health!=-1)
 									p.Move();
 						}
-						if(player!=null)
-							if(player.Health!=-1)
+						if (player!=null)
+							if (player.Health!=-1)
 								player.Move();
 						Thread.Sleep(10);
 					}
@@ -125,7 +133,7 @@ public class Client : Form {
 	}
 
 	private void KeyUp_(object sender, KeyEventArgs e) {
-		switch(e.KeyCode) {
+		switch (e.KeyCode) {
 			case Keys.W:
 				keyUp=false;
 				break;
@@ -144,7 +152,7 @@ public class Client : Form {
 	}
 
 	private void KeyDown_(object sender, KeyEventArgs e) {
-		switch(e.KeyCode) {
+		switch (e.KeyCode) {
 			case Keys.W:
 				keyUp=true;
 				break;
@@ -158,7 +166,7 @@ public class Client : Form {
 				keyRight=true;
 				break;
 			case Keys.Escape:
-                Stop(this, null);
+				Stop(this, null);
 				break;
 		}
 		player.OnKeyEvent(c: this);
@@ -166,7 +174,7 @@ public class Client : Form {
 	}
 
 	protected override void OnPaint(PaintEventArgs e) {
-		if(!stop)
+		if (!stop)
 			e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
 	}
 
@@ -175,15 +183,15 @@ public class Client : Form {
 	}
 
 	private bool NetHandlerConnected() {
-		if(handler != null)
-			if(handler.Connected)
+		if (netHandler != null)
+			if (netHandler.Connected)
 				return true;
 		return false;
 	}
 
 	private void Stop(object? sender, FormClosingEventArgs? e) {
 		stop=true;
-		if(sender==this) {
+		if (sender==this) {
 			logger.Log("stopping");
 			renderer.Dispose();
 			Dispose();
@@ -192,4 +200,15 @@ public class Client : Form {
 			//System.Stop();
 		}
 	}
+
+	private class Panel : System.Windows.Forms.Panel {
+		public Panel() : base() { 
+		}
+        protected override void OnPaintBackground(PaintEventArgs e) {}
+
+        protected override void OnPaint(PaintEventArgs e) {
+            //if (!stop)
+                //e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
+        }
+    }
 }

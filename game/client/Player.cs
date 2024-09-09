@@ -19,10 +19,12 @@ public class Player {
 		visible=Health!=-1;
 	}
 
+	//the constructor for invalid players
 	public Player() {
 		Pos = new(0, 0, 0);
+		//if the health of a player is -1 it is considered invalid and won't be processed
 		Health = -1;
-        PlayerUUID = 0;
+		PlayerUUID = 0;
 		visible=false;
 	}
 
