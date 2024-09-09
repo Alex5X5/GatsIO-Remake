@@ -56,11 +56,16 @@ namespace ShGame.game {
         private void StartClient(object sender, EventArgs e) {
             new Thread(
                     () => {
+					int port = -1;
+					IPAddress? address = null;
                     try{
-                        IPAddress address = IPAddress.Parse(ipTextBox.Text);
-                        int port = Convert.ToInt32(portTextBox.Text);
-                        Client.Client c = new(address, port);
-                        c.ShowDialog();
+                        address = IPAddress.Parse(ipTextBox.Text);
+						port = Convert.ToInt32(portTextBox.Text);
+						Console.WriteLine("read successfully");
+						if(port!=-1&&address!=null) {
+							Client.Client c = new(address, port);
+							c.ShowDialog();
+						}
                     } catch { 
                         Client.Client c = new(IPAddress.None,-1);
                         c.ShowDialog();

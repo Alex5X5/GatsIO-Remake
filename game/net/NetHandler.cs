@@ -31,10 +31,11 @@ public class NetHandler:Socket {
 		IP=address;
 		PORT=port;
 		logger.Log(ToString());
+		IPEndPoint point = new(IP, PORT);
 		try {
-			logger.Log("trying to connect");
+			logger.Log("trying to connect, point="+point.ToString());
 			//Connect_(address, port);
-			Connect(address, port);
+			Connect(point);
 		} catch(SocketException e) {
 			logger.Log("failed to bind (reason="+e.ToString()+")");
 		} 

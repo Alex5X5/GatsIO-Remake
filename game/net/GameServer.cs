@@ -40,9 +40,10 @@ internal class GameServer:Socket {
 			Console.WriteLine(obstacle.ToString());
 		//Console.WriteLine("[Server]:constructor");
 		IPEndPoint point = new(adress, port);
-		logger.Log(point.ToString());
+		//IPEndPoint point = new IPEndPoint(IPAddress.Parse("192.168.1.1").MapToIPv4(), 10);
+		logger.Log("binding endPoint="+point.ToString());
 		Bind(point);
-		logger.Log("a2 "+adress.ToString());
+		logger.Log("bound endPoint="+point.ToString());
 		logger.Log(Convert.ToString(IsBound));
 		new Thread(
 				start: Run
