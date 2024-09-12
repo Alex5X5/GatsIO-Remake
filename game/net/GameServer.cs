@@ -200,14 +200,12 @@ internal class GameServer:Socket {
 	}
 
 	public static IPAddress GetLocalIPv4() => 
-		Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].MapToIPv4();
+		GetLocalhost().MapToIPv4();
     public static IPAddress GetLocalIPv6() =>
-        Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].MapToIPv6();
+        GetLocalhost().MapToIPv6();
     public static IPAddress GetLocalhost(){
 		NetworkInterface ni = NetworkInterface.GetAllNetworkInterfaces()[1];
 		return ni.GetIPProperties().UnicastAddresses[^1].Address;
-		//return Dns.GetHostEntry(Dns.GetHostName()).AddressList[0];
-
 	}
 }
 

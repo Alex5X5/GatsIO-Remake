@@ -19,6 +19,10 @@
     <WarningLevel>1</WarningLevel>
     <NoWarn>1701;1702;IDE0055</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="push_sh.bat" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="libs\Simplelogging.dll" />
   </ItemGroup>
