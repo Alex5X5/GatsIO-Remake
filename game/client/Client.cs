@@ -8,7 +8,6 @@ using System.Drawing;
 using System.Net;
 
 public class Client : Form {
-
 	internal bool keyUp = false;
 	internal bool keyDown = false;
 	internal bool keyLeft = false;
@@ -18,7 +17,8 @@ public class Client : Form {
 
 	private readonly Logger logger;
 
-	private Client.Panel panel;
+	Client.Panel panel;
+	//private System.Windows.Forms.Panel panel;
 	private readonly Renderer renderer;
 	private readonly LoggingLevel mlvl = new("Client");
 	private NetHandler? netHandler;
@@ -65,15 +65,15 @@ public class Client : Form {
 		AutoScaleMode=AutoScaleMode.None;
 		ClientSize=new Size(Renderer.WIDTH, Renderer.HEIGHT);
 		Name="Client";
+		FormClosing+=Stop;
+		KeyDown+=new KeyEventHandler(KeyDown_);
+		KeyUp+=new KeyEventHandler(KeyUp_);
 		Text="Client";
-
 		panel = new() {
 			ClientSize=new Size(Renderer.WIDTH, Renderer.HEIGHT),
 			Name="Panel"
 		};
-		FormClosing+=Stop;
-		KeyDown+=new KeyEventHandler(KeyDown_);
-		KeyUp+=new KeyEventHandler(KeyUp_);
+		Controls.Add(panel);
 
 		ResumeLayout(false);
 		PerformLayout();
@@ -204,7 +204,9 @@ public class Client : Form {
 	private class Panel : System.Windows.Forms.Panel {
 		public Panel() : base() { 
 		}
-        protected override void OnPaintBackground(PaintEventArgs e) {}
+        protected override void OnPaintBackground(PaintEventArgs e) {
+			
+		}
 
         protected override void OnPaint(PaintEventArgs e) {
             //if (!stop)
