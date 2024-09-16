@@ -1,8 +1,9 @@
 ﻿namespace ShGame.game.Client;
 
 using ShGame.game.Net.protocoll;
-
 using System;
+
+#pragma warning disable CS8500 //insert spaces instead of tabs
 
 public class Obstacle {
 
@@ -96,7 +97,7 @@ public class Obstacle {
 		boundR=new LineSection3d(boundT.point2, boundB.point2);
 	}
 
-	public LineSection3d[]? GetVisibleSides(Vector3d v) {
+	public unsafe LineSection3d[]? GetVisibleSides(Vector3d* v) {
 		if(RelativeX(v)==1&&RelativeY(v)==1) {
 			return [boundL, boundT];
 		} else if(RelativeX(v)==2&&RelativeY(v)==1) {
@@ -117,70 +118,70 @@ public class Obstacle {
 		return null;
 	}
 
-	public void GetShadowPoints(ref Vector3d pos, ref Vector3d point1, ref Vector3d point2) {
+	public unsafe void GetShadowPoints(Vector3d* pos, Vector3d* point1, Vector3d* point2) {
 		if(RelativeX(pos)==1&&RelativeY(pos)==1) {
-			//return new Vector3d[] { boundR.point1, boundL.point2 };
-			point1.x=boundR.point1.x;
-			point1.y=boundR.point1.y;
-			point2.x=boundL.point2.x;
-			point2.y=boundL.point2.y;
+			//
+			point1->x=boundR.point1.x;
+			point1->y=boundR.point1.y;
+			point2->x=boundL.point2.x;
+			point2->y=boundL.point2.y;
 		} else if(RelativeX(pos)==2&&RelativeY(pos)==1) {
 			//return new Vector3d[] { boundL.point1, boundR.point1 };
-			point1.x=boundL.point1.x;
-			point1.y=boundL.point1.y;
-			point2.x=boundR.point1.x;
-			point2.y=boundR.point1.y;
+			point1->x=boundL.point1.x;
+			point1->y=boundL.point1.y;
+			point2->x=boundR.point1.x;
+			point2->y=boundR.point1.y;
 		} else if(RelativeX(pos)==3&&RelativeY(pos)==1) {
 			//return new Vector3d[] { boundL.point1, boundR.point2 };
-			point1.x=boundL.point1.x;
-			point1.y=boundL.point1.y;
-			point2.x=boundR.point2.x;
-			point2.y=boundR.point2.y;
+			point1->x=boundL.point1.x;
+			point1->y=boundL.point1.y;
+			point2->x=boundR.point2.x;
+			point2->y=boundR.point2.y;
 		} else if(RelativeX(pos)==1&&RelativeY(pos)==2) {
 			//return new Vector3d[] { boundL.point1, boundL.point2 };
-			point1.x=boundL.point1.x;
-			point1.y=boundL.point1.y;
-			point2.x=boundL.point2.x;
-			point2.y=boundL.point2.y;
+			point1->x=boundL.point1.x;
+			point1->y=boundL.point1.y;
+			point2->x=boundL.point2.x;
+			point2->y=boundL.point2.y;
 		} else if(RelativeX(pos)==3&&RelativeY(pos)==2) {
 			//return new Vector3d[] { boundR.point1, boundR.point2 };
-			point1.x=boundR.point1.x;
-			point1.y=boundR.point1.y;
-			point2.x=boundR.point2.x;
-			point2.y=boundR.point2.y;
+			point1->x=boundR.point1.x;
+			point1->y=boundR.point1.y;
+			point2->x=boundR.point2.x;
+			point2->y=boundR.point2.y;
 		} else if(RelativeX(pos)==1&&RelativeY(pos)==3) {
-			point1.x=boundL.point1.x;
-			point1.y=boundL.point1.y;
-			point2.x=boundR.point2.x;
-			point2.y=boundR.point2.y;
+			point1->x=boundL.point1.x;
+			point1->y=boundL.point1.y;
+			point2->x=boundR.point2.x;
+			point2->y=boundR.point2.y;
 		} else if(RelativeX(pos)==2&&RelativeY(pos)==3) {
-			point1.x=boundL.point2.x;
-			point1.y=boundL.point2.y;
-			point2.x=boundR.point2.x;
-			point2.y=boundR.point2.y;
+			point1->x=boundL.point2.x;
+			point1->y=boundL.point2.y;
+			point2->x=boundR.point2.x;
+			point2->y=boundR.point2.y;
 		} else if(RelativeX(pos)==3&&RelativeY(pos)==3) {
-			point1.x=boundR.point1.x;
-			point1.y=boundR.point1.y;
-			point2.x=boundL.point2.x;
-			point2.y=boundL.point2.y;
+			point1->x=boundR.point1.x;
+			point1->y=boundR.point1.y;
+			point2->x=boundL.point2.x;
+			point2->y=boundL.point2.y;
 			//return new Vector3d[] { boundR.point1, boundL.point2 };
 		}
 		//return null;
 	}
 
-	private int RelativeX(Vector3d v) {
-		if(v.x<=Pos.x)
+	private unsafe int RelativeX(Vector3d* v) {
+		if(v->x<=Pos.x)
 			return 1;
-		else if(v.x>Pos.x&&v.x<Pos.x+WIDTH)
+		else if(v->x>Pos.x&&v->x<Pos.x+WIDTH)
 			return 2;
 		else
 			return 3;
 	}
 
-	private int RelativeY(Vector3d v) {
-		if(v.y<=Pos.y)
+	private unsafe int RelativeY(Vector3d* v) {
+		if(v->y<=Pos.y)
 			return 1;
-		else if(v.y>Pos.y&&v.y<Pos.y+HEIGHT)
+		else if(v->y>Pos.y&&v->y<Pos.y+HEIGHT)
 			return 2;
 		else
 			return 3;
@@ -190,67 +191,74 @@ public class Obstacle {
 		return "game.client.graphics.Obstacle[type:" + Convert.ToString(type) + " posX:" + Convert.ToString(Pos.x) + " Convert.ToString(posY:" + Convert.ToString(Pos.y) + "]";
 	}
 
-	private static void UpdateBounds(ref Obstacle obstacle) {
-		obstacle.boundL.point1.Set(obstacle.Pos.x, obstacle.Pos.y, 0);
-		obstacle.boundL.point2.Set(obstacle.Pos.x, obstacle.Pos.y+obstacle.HEIGHT, 0);
-		obstacle.boundR.point1.Set(obstacle.Pos.x+obstacle.WIDTH, obstacle.Pos.y, 0);
-		obstacle.boundR.point2.Set(obstacle.Pos.x+obstacle.WIDTH, obstacle.Pos.y+obstacle.HEIGHT, 0);
-		obstacle.boundT.point1.Set(obstacle.boundT.point1);
-		obstacle.boundT.point2.Set(obstacle.boundR.point1);
-		obstacle.boundB.point1.Set(obstacle.boundL.point2);
-		obstacle.boundB.point2.Set(obstacle.boundR.point2);
+	private static unsafe void UpdateBounds(Obstacle* obstacle) {
+		obstacle->boundL.point1.Set(obstacle->Pos.x, obstacle->Pos.y, 0);
+		obstacle->boundL.point2.Set(obstacle->Pos.x, obstacle->Pos.y+obstacle->HEIGHT, 0);
+		obstacle->boundR.point1.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y, 0);
+		obstacle->boundR.point2.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y+obstacle->HEIGHT, 0);
+		obstacle->boundT.point1.Set(obstacle->boundT.point1);
+		obstacle->boundT.point2.Set(obstacle->boundR.point1);
+		obstacle->boundB.point1.Set(obstacle->boundL.point2);
+		obstacle->boundB.point2.Set(obstacle->boundR.point2);
 	}
 
-	public static void SerializeObstacle(ref byte[] input, ref Obstacle o, int offset) {
+	public static unsafe void SerializeObstacle(ref byte[] input, Obstacle* obstacle, int offset) {
 		int offset_ = offset;
-		SerializeObstacleCountable(ref input, ref o, ref offset_);
+		SerializeObstacleCountable(ref input, obstacle, ref offset_);
 	}
 
-	public static void SerializeObstacleCountable(ref byte[] input, ref Obstacle o, ref int offset) {
-		if(o==null) {
+	public static unsafe void SerializeObstacleCountable(ref byte[] input, Obstacle* obstacle, ref int offset) {
+		if(obstacle==null) {
 			BitConverter.GetBytes(-1).CopyTo(input, offset);
 			offset+=OBSTACLE_BYTE_LENGTH;
 		} else {
-			BitConverter.GetBytes(o.type).CopyTo(input, offset);
+			BitConverter.GetBytes(obstacle->type).CopyTo(input, offset);
 			offset+=4;
-			BitConverter.GetBytes(o.Pos==null ? 0 : o.Pos.x).CopyTo(input, offset);
+			BitConverter.GetBytes(obstacle->Pos==null ? 0 : obstacle->Pos.x).CopyTo(input, offset);
 			offset+=8;
-			BitConverter.GetBytes(o.Pos==null ? 0 : o.Pos.y).CopyTo(input, offset);
+			BitConverter.GetBytes(obstacle->Pos==null ? 0 : obstacle->Pos.y).CopyTo(input, offset);
 			offset+=8;
-			BitConverter.GetBytes(o.WIDTH==0 ? 0 : o.WIDTH).CopyTo(input, offset);
+			BitConverter.GetBytes(obstacle->WIDTH==0 ? 0 : obstacle->WIDTH).CopyTo(input, offset);
 			offset+=4;
-			BitConverter.GetBytes(o.HEIGHT==0 ? 0 : o.HEIGHT).CopyTo(input, offset);
+			BitConverter.GetBytes(obstacle->HEIGHT==0 ? 0 : obstacle->HEIGHT).CopyTo(input, offset);
 			offset+=4;
 		}
 	}
 
-	public static void DeserializeObstacle(ref byte[] input, ref Obstacle obstacle, int offset) {
+	public static unsafe void DeserializeObstacle(ref byte[] input, Obstacle* obstacle, int offset) {
 		int offset_ = offset;
-		DeserializeObstacleCountable(ref input, ref obstacle, ref offset_);
+		DeserializeObstacleCountable(ref input, obstacle, ref offset_);
 	}
 
-	public static void DeserializeObstacleCountable(ref byte[] input, ref Obstacle obstacle, ref int offset) {
-		if(input==null)
-			return;
-		int type_ = BitConverter.ToInt32(input, offset);
+	public static unsafe void DeserializeObstacleCountable(ref byte[] input, Obstacle* obstacle, ref int offset) {
+        ArgumentNullException.ThrowIfNull(input);
+        ArgumentNullException.ThrowIfNull(obstacle);
+
+        int type_ = BitConverter.ToInt32(input, offset);
 		if(type_==-1) {
 			//obstacle=null;
 			offset+=OBSTACLE_BYTE_LENGTH;
 		} else {
-			if(obstacle==null)
-				obstacle=new Obstacle(new Vector3d(0, 0, 0), type_);
+			if(*obstacle==null)
+				*obstacle=new Obstacle(new Vector3d(0, 0, 0), type_);
 			else
-				obstacle.type=type_;
+				obstacle->type=type_;
 			offset+=4;
-			obstacle.Pos.x=BitConverter.ToDouble(input, offset);
+			obstacle->Pos.x=BitConverter.ToDouble(input, offset);
 			offset+=8;
-			obstacle.Pos.y=BitConverter.ToDouble(input, offset);
+			obstacle->Pos.y=BitConverter.ToDouble(input, offset);
 			offset+=8;
-			obstacle.WIDTH=BitConverter.ToInt32(input, offset);
+			obstacle->WIDTH=BitConverter.ToInt32(input, offset);
 			offset+=4;
-			obstacle.HEIGHT=BitConverter.ToInt32(input, offset);
+			obstacle->HEIGHT=BitConverter.ToInt32(input, offset);
 			offset+=4;
-			UpdateBounds(ref obstacle);
+			UpdateBounds(obstacle);
 		}
 	}
+
+	public enum Type : byte {
+        Wide,
+        High,
+        WideHigh
+    }
 }

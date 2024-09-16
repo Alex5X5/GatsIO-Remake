@@ -1,62 +1,102 @@
-﻿using System.Linq;
-using System.Net;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Windows.Forms;
+﻿using ShGame.game.Logic.PrimitiveVector3d;
 
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 namespace ShGame.game;
 
 public static class Programm {
 
-	[STAThread]
+	//[STAThread]
 	public static void Main() {
+		unsafe {
+            ShGame.game.Logic.PrimitiveVector3d.Vector3d vector = new();
+			//Vector3d* vector2 = vector;
+			//Vector3d* vector3 = &vector;
+            vector.Set(0, 0, 0)->Add(100)->Add(new Logic.PrimitiveVector3d.Vector3d(10,10,10));
 
+            RuntimeTypeHandle th = vector.GetType().TypeHandle;
+			int size = *(*(int**)&th + 1);
+			Console.WriteLine(size);
+            Console.WriteLine(Marshal.SizeOf<ShGame.game.Logic.PrimitiveVector3d.Vector3d>());
+        }
+		Thread.Sleep(10000);
+		return;
 
-
-		//foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
-		//{
-		//	if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-		//	{
-		//		//Console.WriteLine(ni.Name);
-		//		Console.WriteLine(ni.GetIPProperties().UnicastAddresses[ni.GetIPProperties().UnicastAddresses.Count-1]);
-		//		//foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
-		//		//{
-		//		//	if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-		//		//	{
-		//		//		Console.WriteLine(ip.Address.ToString());
-		//		//	}
-		//		//}
-		//	}
-		//}
-		NetworkInterface ni = NetworkInterface.GetAllNetworkInterfaces()[1];
-		Console.WriteLine(ni.GetIPProperties().UnicastAddresses[ni.GetIPProperties().UnicastAddresses.Count-1].Address);
-
-		Console.WriteLine(Dns.GetHostEntry("srhk.srh.de").AddressList[1]);
-
-		//_=new ConsoleRedirector();
-		ConsoleRedirector.WriteLine("test");
+		Stopwatch sw = new();
+		sw.Start();
+		//Util.Imaging.CreateImage2();
+		sw.Stop();
+		Console.WriteLine(sw.ElapsedMilliseconds);
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
 		Logging.DisableColors();
 		Console.WriteLine("start");
 		Application.Run(new InitialScreen());
+		return;
+		object lock_ = new();
 
-		//unsafe
-		//{
-		//	Console.WriteLine("test");
-		//	TempData<PrimitiveVector3I> tempData;
-		//	tempData = TempStorageAllocator<PrimitiveVector3I>.Get();
-		//	tempData.data->X = 1;
-		//	Console.WriteLine(tempData);
-		//	Console.WriteLine(tempData.data->ToString());
-		//	Console.WriteLine(tempData.data->X);
-		//	//TempStorageAllocator<PrimitiveVector3I>.Recycle(ref tempData);
-		//	Console.WriteLine(tempData);
-		//	PrimitiveVector3I vec = *tempData.data;
-		//		  Console.WriteLine(tempData.data->X);
-		//	TempStorageAllocator<PrimitiveVector3I>.Recycle(ref tempData);
-		//	//return;
-		//}
-	}
+		Thread thread1;
+		Thread thread2;
+		Thread thread3;
+		Thread thread4;
+		Thread thread5;
+
+		thread1 = new Thread(
+				() => {
+					lock (lock_)
+						Monitor.Wait(lock_);
+					Console.WriteLine("1");
+				}
+		);
+		thread2 =  new Thread(
+				() => {
+					lock(lock_)
+						Monitor.Wait(lock_);
+					Console.WriteLine("2");
+				}
+		);
+		thread3 = new Thread(
+				() => {
+					lock (lock_)
+						Monitor.Wait(lock_);
+					Console.WriteLine("3");
+				}
+		);
+
+		thread4 = new Thread(
+				() => {
+					lock (lock_)
+						Monitor.Wait(lock_);
+					Console.WriteLine("4");
+				}
+		);
+		thread5 = new Thread(
+				() => {
+					lock (lock_)
+						Monitor.Wait(lock_);
+					Console.WriteLine("5");
+				}
+		);
+
+		thread1.Start();
+		thread2.Start();
+		thread3.Start();
+		thread4.Start();
+		thread5.Start();
+		Thread.Sleep(3000);
+		lock (lock_)
+			Monitor.PulseAll(lock_);
+		if(thread1.ThreadState==System.Threading.ThreadState.Stopped);
+
+        //Task task = Task.Factory.StartNew(
+        //        () => {
+        //            Console.WriteLine("");
+        //        }
+        //);
+    }
 }

@@ -70,15 +70,15 @@ internal class ServerConnection:Socket {
 			if(RecievePacket(ref buffer));
 				//depending on the packet type, send a request to the server and send back the result
 				switch(Protocoll.AnalyzePacket(buffer)) {
-					case Protocoll.PING_HEADER:
+					case ProtocollType.Ping:
 						SendPacket(gs.OnPingRequest(buffer));
 						break;
 
-					case Protocoll.PLAYER_HEADER:
+					case ProtocollType.Player:
 						SendPacket(gs.OnPlayerRequest(buffer));
 						break;
 
-					case Protocoll.MAP_HEADER:
+					case ProtocollType.Map:
 						SendPacket(gs.OnMapRequest());
 						break;
 

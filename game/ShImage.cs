@@ -3,10 +3,12 @@
 //using System.Windows.Media.Imaging;
 using System.Drawing;
 using System.Windows;
+using System.Runtime.InteropServices;
 
 namespace sh_game.game {
 	internal class ShImage {
-		//private static WriteableBitmap writeableBitmap;
+
+        //private static WriteableBitmap writeableBitmap;
 		private static Image i;
 
 		//[STAThread]
@@ -50,7 +52,7 @@ namespace sh_game.game {
 				}
 
 				// Specify the area of the bitmap that changed.
-				//writeableBitmap.AddDirtyRect(new Int32Rect(column, row, 1, 1));
+				//writeableBitmap.AddDirtyRect(new Rectangle(column, row, 1, 1));
 			} finally {
 				// Release the back buffer and make it available for display.
 				//writeableBitmap.Unlock();

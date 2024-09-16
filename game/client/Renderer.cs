@@ -3,16 +3,19 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
+#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
+
 internal class Renderer:IDisposable {
 
 	#region fields
 
 	private static readonly bool RESTRICTED_VIEW = true;
 
-	public const int WIDTH = 1000, HEIGHT = 1000;
+	public const int WIDTH = 1400, HEIGHT = 900;
 
-	private readonly Brush SHADOW_COLOR = new SolidBrush(Color.FromArgb(85,85,90));
-	private readonly Brush OBSTACLE_COLOR = new SolidBrush(Color.Gray);
+    private readonly Brush GROUND_COLOR = new SolidBrush(Color.FromArgb(85, 85, 90));
+    private readonly Brush SHADOW_COLOR = new SolidBrush(Color.FromArgb(0, 0, 0));
+    private readonly Brush OBSTACLE_COLOR = new SolidBrush(Color.Gray);
 	private readonly Brush PLAYER_RED_COLOR = new SolidBrush(Color.Red);
 
 	public static readonly Line3d BORDER_TOP = Line3d.FromPoints(new Vector3d(0,0,0),new Vector3d(WIDTH,0,0));
@@ -20,13 +23,13 @@ internal class Renderer:IDisposable {
 	public static readonly Line3d BORDER_LEFT = Line3d.FromPoints(new Vector3d(0,0,0), new Vector3d(0, HEIGHT,0));
 	public static readonly Line3d BORDER_RIGHT = Line3d.FromPoints(new Vector3d(WIDTH, 0,0), new Vector3d(WIDTH, HEIGHT,0));
 
-	private readonly Logger logger = new Logger(new LoggingLevel("Renderer"));
+	private readonly Logger logger = new(new LoggingLevel("Renderer"));
 
 	private readonly Bitmap image;
 	private readonly Graphics graphics;
 
-	private Vector3d mouseVector = new Vector3d(0, 0, 0);
-	private Vector3d logicalMouseVector = new Vector3d(0, 0, 0);
+	private Vector3d mouseVector = new(0, 0, 0);
+	private Vector3d logicalMouseVector = new(0, 0, 0);
 
     #endregion fields
 
@@ -35,29 +38,34 @@ internal class Renderer:IDisposable {
 		graphics = Graphics.FromImage(image);
 	}
 
-	public Image Render(ref Player[] players, ref Player player, ref Obstacle[] obstacles) {
+	public unsafe Image Render(ref Player[] players, ref Player player, Obstacle[]* obstacles) {
+		//create a graphics object from the main image
 		using(Graphics g = Graphics.FromImage(image)) {
 			g.SmoothingMode=SmoothingMode.AntiAlias;
-			g.FillRectangle(SHADOW_COLOR, new RectangleF(0, 0, WIDTH, HEIGHT));
-
+			//fill the whole imagge with the ground color
+			g.FillRectangle(GROUND_COLOR, new RectangleF(0, 0, WIDTH, HEIGHT));
+			//check that the player array isn't null and loop through it
 			if(players!=null)
-				foreach(Player p in players) {
+                foreach (Player p in players) {
+					//if the player isn't null draw it
 					if(p!=null)
 						DrawPlayer(p, g);
 				}
+			//checked that the main player isn't null and draw it
 			if (player != null)
 				DrawPlayer(player, g);
-
-			if(obstacles!=null)
-				RenderObstacles(obstacles, g);
-
-			if(player!=null&&obstacles!=null)
-				if(RESTRICTED_VIEW) {
-					//RenderBackHalf(c.player.Pos);
-					//RenderObstacleShadows(player.Pos, obstacles);
+			//check whether the main player and the obstackles are not null
+            if (player!=null&&obstacles!=null)
+                if (RESTRICTED_VIEW) {
+					//if the obstackles, the main player are not null and
+					//RESTRICTED_VIEW is enabled draw the obstacle shadows
+                    fixed (Vector3d* ptr = &player.Pos)
+                        RenderObstacleShadows(ptr, obstacles);
 					GetVievRestrictions();
-				}
-			g.Dispose();
+                }
+			//draw the obstacles after the shadows so all the obstacles overlay the shadows
+            if (obstacles!=null)
+				RenderObstacles(*obstacles, g);
 		}
 		return image;
 	}
@@ -111,9 +119,8 @@ internal class Renderer:IDisposable {
 	}
 
 
-    private Dir RelativeDir(Vector3d pos, Vector3d relativeTo)
-	{
-		Vector3d dir = relativeTo.Cpy().Sub(pos).Nor();
+    private unsafe Dir RelativeDir(Vector3d* pos, Vector3d relativeTo) {
+		Vector3d dir = relativeTo.Cpy().Sub(*pos).Nor();
 		if (dir.y > 1.0 / Math.Sqrt(2))
 		{
 			return Dir.B;
@@ -154,36 +161,45 @@ internal class Renderer:IDisposable {
 			//	logger.warn("unexpected direction", new MessageParameter("direction", getRoundedVievDirection().toString()));
 		}
 	}
-    private void RenderObstacleShadows(Vector3d v, Obstacle[] l) {
-		//a list of points on the screen
-		PointF[] points = new PointF[3];
-		Vector3d ShadowPoint1 = new Vector3d(0, 0, 0);
-		Vector3d ShadowPoint2 = new Vector3d(0, 0, 0);
-		Vector3d ShadowPoint3 = new Vector3d(0, 0, 0);
-		Vector3d ShadowPoint4 = new Vector3d(0, 0, 0);
+    private unsafe void RenderObstacleShadows(Vector3d* v, Obstacle[]* l) {
+        ArgumentNullException.ThrowIfNull(&v);
+        //a list of points on the screen
+        PointF[] points = new PointF[3];
+		Vector3d ShadowPoint1 = new(0, 0, 0);
+		Vector3d ShadowPoint2 = new(0, 0, 0);
+		Vector3d ShadowPoint3 = new(0, 0, 0);
+		Vector3d ShadowPoint4 = new(0, 0, 0);
 		Vector3d[] sp;
 		//return;
-		foreach (Obstacle o in l)
+		foreach (Obstacle o in *l)
 		{
-			o.GetShadowPoints(ref v, ref ShadowPoint1, ref ShadowPoint2);
+			o.GetShadowPoints(v, &ShadowPoint1, &ShadowPoint2);
 			//sp=o.GetShadowPoints(v);
-			if (!(v.x >= o.Pos.x && v.x <= o.Pos.x + o.WIDTH && v.y >= o.Pos.y && v.y <= o.Pos.y + o.HEIGHT)) {
-				switch (RelativeDir(v, o.Pos.Cpy().Add(new Vector3d(o.WIDTH / 2.0, o.HEIGHT / 2.0, 0).Nor()))) {
+			if (!(v->x >= o.Pos.x && v->x <= o.Pos.x + o.WIDTH && v->y >= o.Pos.y && v->y <= o.Pos.y + o.HEIGHT)) {
+				switch (RelativeDir(v, o.Pos.Cpy().Add(new Vector3d(o.WIDTH / 2.0, o.HEIGHT / 2.0, 0)))) {
 					case Dir.T:
-						ShadowPoint3 = ShadowHit(v, ShadowPoint1, BORDER_TOP);
-						ShadowPoint4 = ShadowHit(v, ShadowPoint2, BORDER_TOP);
+                        fixed (Line3d* line = &BORDER_TOP) {
+							ShadowPoint3 = ShadowHit(v, &ShadowPoint1, line);
+							ShadowPoint4 = ShadowHit(v, &ShadowPoint2, line);
+						}
 						break;
 					case Dir.B:
-						ShadowPoint3=ShadowHit(v, ShadowPoint1, BORDER_BOTTOM);
-						ShadowPoint4=ShadowHit(v, ShadowPoint2, BORDER_BOTTOM);
+						fixed (Line3d* line = &BORDER_BOTTOM) {
+							ShadowPoint3=ShadowHit(v, &ShadowPoint1, line);
+							ShadowPoint4=ShadowHit(v, &ShadowPoint2, line);
+						}
 						break;
 					case Dir.R:
-						ShadowPoint3=ShadowHit(v, ShadowPoint1, BORDER_RIGHT);
-						ShadowPoint4=ShadowHit(v, ShadowPoint2, BORDER_RIGHT);
+						fixed (Line3d* line = &BORDER_RIGHT) {
+							ShadowPoint3=ShadowHit(v, &ShadowPoint1, line);
+							ShadowPoint4=ShadowHit(v, &ShadowPoint2, line);
+						}
 						break;
 					case Dir.L:
-						ShadowPoint3=ShadowHit(v, ShadowPoint1, BORDER_LEFT);
-						ShadowPoint4=ShadowHit(v, ShadowPoint2, BORDER_LEFT);
+						fixed (Line3d* line = &BORDER_LEFT) {
+							ShadowPoint3=ShadowHit(v, &ShadowPoint1, line);
+							ShadowPoint4=ShadowHit(v, &ShadowPoint2, line);
+						}
 						break;
 					//default:
 					//	logger.warn("unexpected direction", new MessageParameter("direction", getRoundedVievDirection().toString()));
@@ -193,7 +209,7 @@ internal class Renderer:IDisposable {
 				//DrawShadowTriangle(ref points, ref p1.x, ref p1.y, ref p2.x, ref p2.y, ref sp[1].x, ref sp[1].y);
 				//DrawShadowTriangle(ref points, ref p1.x, ref p1.y, ref sp[0].x, ref sp[0].y, ref sp[1].x, ref sp[1].y);
 				DrawShadowTriangle(ref points, ref ShadowPoint1.x, ref ShadowPoint1.y, ref ShadowPoint2.x, ref ShadowPoint2.y, ref ShadowPoint4.x, ref ShadowPoint4.y);
-				//DrawShadowTriangle(ref points, ref ShadowPoint1.x, ref ShadowPoint1.y, ref ShadowPoint3.x, ref ShadowPoint3.y, ref ShadowPoint4.x, ref ShadowPoint4.y);
+				DrawShadowTriangle(ref points, ref ShadowPoint1.x, ref ShadowPoint1.y, ref ShadowPoint3.x, ref ShadowPoint3.y, ref ShadowPoint4.x, ref ShadowPoint4.y);
 
 
 
@@ -230,18 +246,41 @@ internal class Renderer:IDisposable {
 	//		return v.x>=0&&v.x<=UNSCALED_WIDTH&&v.y>=0&&v.y<=UNSCALED_HEIGHT;
 	//	}
 
-	private Vector3d ShadowHit(Vector3d playerPosition, Vector3d shadowPoint, Line3d border) {
-		double oth1X = border.origin.x;
-		double oth1Y = border.origin.y;
-		double oth1Z = border.origin.z;
-
-		Vector3d oth2 = border.origin.Cpy().Add(border.direction);
+	private unsafe Vector3d ShadowHit(Vector3d* playerPosition, Vector3d* shadowPoint, Line3d* border) {
+		//get the coordinates of the origin point of the border
+		double oth1X = border->origin.x;
+		double oth1Y = border->origin.y;
+		double oth1Z = border->origin.z;
+        //calculate the coordinates of a vector that starts at the origin point of the border
+		//and points towards its second definition point
+        Vector3d oth2 = border->origin.Cpy().Add(border->direction);
 		double oth2X = oth2.x;
 		double oth2Y = oth2.y;
 		double oth2Z = oth2.z;
+		//calculate a magical factor
+		double u = (
+				(oth1X - playerPosition->x) * (shadowPoint->y - playerPosition->y) -
+				(oth1Y - playerPosition->y) * (shadowPoint->x - playerPosition->x)
+			) / (
+				(oth2Y - oth1Y) * (shadowPoint->x - playerPosition->x) -
+				(oth2X - oth1X) * (shadowPoint->y - playerPosition->y)
+		);
+		//magically merge the factor with the border
+		return border->
+			origin.
+				Cpy().
+					Add(
+						oth2.
+							Sub(
+								border->origin
+							).
+								Scl(u)
+					);
 
-		double u = ((oth1X - playerPosition.x) * (shadowPoint.y - playerPosition.y) - (oth1Y - playerPosition.y) * (shadowPoint.x - playerPosition.x)) / ((oth2Y - oth1Y) * (shadowPoint.x - playerPosition.x) - (oth2X - oth1X) * (shadowPoint.y - playerPosition.y));
-		return new Vector3d(oth1X + u * (oth2X - oth1X), oth1Y + u * (oth2Y - oth1Y), oth1Z + u * (oth2Z - oth1Z));
+		return new Vector3d(
+			oth1X + u * (oth2X - oth1X),
+			oth1Y + u * (oth2Y - oth1Y),
+			oth1Z + u * (oth2Z - oth1Z));
 	}
 
 	private void DrawShadowTriangle(
@@ -283,7 +322,7 @@ internal class Renderer:IDisposable {
 		//graphics2D.drawLine(0, 0, (int)p.pos.x / gScl, (int)p.pos.y / gScl);
 		//Console.WriteLine("drawing at"+p.Pos.ToString());
 		if(p.visible)
-			g.FillEllipse(PLAYER_RED_COLOR, new Rectangle((int)p.Pos.x, (int)p.Pos.y, Player.radius*2, Player.radius*2));
+			g.FillEllipse(PLAYER_RED_COLOR, new Rectangle((int)p.Pos.x-Player.radius, (int)p.Pos.y-Player.radius, Player.radius*2, Player.radius*2));
 		//		logger.log(String.valueOf(p.pos.x/gScl)+" "+String.valueOf(p.pos.y/gScl));
 	}
 
@@ -314,9 +353,10 @@ internal class Renderer:IDisposable {
 		PLAYER_RED_COLOR.Dispose();
 		SHADOW_COLOR.Dispose();
 		OBSTACLE_COLOR.Dispose();
+		GROUND_COLOR.Dispose();
 	}
 
-	public enum Dir {
+	public enum Dir:byte {
 		T, B, L, R,
 	}
 }

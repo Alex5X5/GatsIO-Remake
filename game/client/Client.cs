@@ -1,11 +1,12 @@
 namespace ShGame.game.Client;
 
 using ShGame.game.Net;
-
 using System.Windows.Forms;
 using System.Threading;
 using System.Drawing;
 using System.Net;
+
+#pragma warning disable CS8500 //insert spaces instead of tabs
 
 public class Client : Form {
 	internal bool keyUp = false;
@@ -17,7 +18,7 @@ public class Client : Form {
 
 	private readonly Logger logger;
 
-	Client.Panel panel;
+	Client.Panel? panel;
 	//private System.Windows.Forms.Panel panel;
 	private readonly Renderer renderer;
 	private readonly LoggingLevel mlvl = new("Client");
@@ -26,8 +27,8 @@ public class Client : Form {
 	internal Player player;
 	//internal readonly SemaphoreSlim playersLock;
 
-	private Player[] players;
-	internal Obstacle[] obstacles = new Obstacle[20];
+	unsafe private Player[] players;
+	unsafe internal Obstacle[] obstacles = new Obstacle[20];
 	private Thread renderThread = new(() => { });
 	private Thread connectionThread = new(() => { });
 	private Thread playerMoveThread = new(() => { });
@@ -73,14 +74,14 @@ public class Client : Form {
 			ClientSize=new Size(Renderer.WIDTH, Renderer.HEIGHT),
 			Name="Panel"
 		};
-		Controls.Add(panel);
+		//Controls.Add(panel);
 
 		ResumeLayout(false);
 		PerformLayout();
 		logger.Log("performed layout");
 	}
 
-	private void StartThreads(IPAddress address, int port) {
+	private unsafe void StartThreads(IPAddress address, int port) {
 		connectionThread=new Thread(
 			() => {
 				netHandler = new(address, port);
@@ -132,7 +133,7 @@ public class Client : Form {
 		logger.Log("started player move thread");
 	}
 
-	private void KeyUp_(object sender, KeyEventArgs e) {
+	private void KeyUp_(object? sender, KeyEventArgs e) {
 		switch (e.KeyCode) {
 			case Keys.W:
 				keyUp=false;
@@ -151,7 +152,7 @@ public class Client : Form {
 		//logger.Log("key released", new MessageParameter("player", player.toString()));
 	}
 
-	private void KeyDown_(object sender, KeyEventArgs e) {
+	private void KeyDown_(object? sender, KeyEventArgs e) {
 		switch (e.KeyCode) {
 			case Keys.W:
 				keyUp=true;
@@ -174,8 +175,11 @@ public class Client : Form {
 	}
 
 	protected override void OnPaint(PaintEventArgs e) {
-		if (!stop)
-			e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
+		unsafe {
+			fixed (Obstacle[]* ob = &obstacles)
+				if (!stop)
+					e.Graphics.DrawImage(renderer.Render(ref players, ref player, ob), 0, 0);
+        }
 	}
 
 	protected override void OnPaintBackground(PaintEventArgs e) {
@@ -189,7 +193,7 @@ public class Client : Form {
 		return false;
 	}
 
-	private void Stop(object? sender, FormClosingEventArgs? e) {
+	private unsafe void Stop(object? sender, FormClosingEventArgs? e) {
 		stop=true;
 		if (sender==this) {
 			logger.Log("stopping");
