@@ -43,6 +43,9 @@ internal class GameServer:Socket {
 		new Thread(
 				() => console.ShowDialog()
 		).Start();
+
+		console.WriteLine("[Gameserver]:address port constructor (address="+address.ToString()+", port=+"+port+")");
+
 		logger.Log(
 			"address port constructor",
 			new MessageParameter("address",address.ToString()),

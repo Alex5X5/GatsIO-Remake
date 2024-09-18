@@ -1,11 +1,4 @@
-﻿using ShGame.game.Logic.PrimitiveVector3d;
-
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading;
 using System.Windows.Forms;
 namespace ShGame.game;
 
@@ -14,25 +7,21 @@ public static class Programm {
 	//[STAThread]
 	public static void Main() {
 		unsafe {
-            ShGame.game.Logic.PrimitiveVector3d.Vector3d vector = new();
-			//Vector3d* vector2 = vector;
-			//Vector3d* vector3 = &vector;
-            vector.Set(0, 0, 0)->Add(100)->Add(new Logic.PrimitiveVector3d.Vector3d(10,10,10));
-
-            RuntimeTypeHandle th = vector.GetType().TypeHandle;
-			int size = *(*(int**)&th + 1);
-			Console.WriteLine(size);
-            Console.WriteLine(Marshal.SizeOf<ShGame.game.Logic.PrimitiveVector3d.Vector3d>());
+			int[] key = [12311231];
+            string s = "testtesttest";
+            char[] chars = s.ToCharArray();
+            byte[] bytes = new byte[chars.Length*sizeof(char)];
+            for (int i = 0; i < chars.Length; i++) {
+				byte[] buffer = new byte[sizeof(char)]; 
+				buffer = BitConverter.GetBytes(chars[i]);
+				buffer.CopyTo(bytes, i*sizeof(char));
+            }
+			for (int i = 0; i < bytes.Length/sizeof(char); i++)
+				Console.WriteLine("byte:"+BitConverter.ToChar(bytes,i*sizeof(char)));
         }
-		Thread.Sleep(10000);
-		return;
 
-		Stopwatch sw = new();
-		sw.Start();
-		//Util.Imaging.CreateImage2();
-		sw.Stop();
-		Console.WriteLine(sw.ElapsedMilliseconds);
 		Application.EnableVisualStyles();
+		Console.WriteLine(sizeof(char));
 		Application.SetCompatibleTextRenderingDefault(false);
 		Logging.DisableColors();
 		Console.WriteLine("start");

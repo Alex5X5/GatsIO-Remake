@@ -205,6 +205,7 @@ public class Client : Form {
 		}
 	}
 
+		
 	private class Panel : System.Windows.Forms.Panel {
 		public Panel() : base() { 
 		}

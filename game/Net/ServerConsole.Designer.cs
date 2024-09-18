@@ -43,7 +43,7 @@ namespace ShGame.game
 			OutputArea.Name = "OutputArea";
 			OutputArea.Size = new System.Drawing.Size(970, 880);
 			OutputArea.TabIndex = 2;
-			OutputArea.Text = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\na";
+			OutputArea.Text = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
 			// 
 			// ServerConsole
 			// 
