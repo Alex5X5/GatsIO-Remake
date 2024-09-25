@@ -41,7 +41,7 @@ namespace ShGame.game
 			portTextBox.Name = "textBox1";
 			portTextBox.Size = new System.Drawing.Size(271, 34);
 			portTextBox.TabIndex = 0;
-			portTextBox.Text = "enter port (100 by default)";
+			portTextBox.Text = "enter port (4000 by default)";
 			portTextBox.Click+=PortField_Clicked;
 			// 
 			// textBox2
@@ -71,7 +71,6 @@ namespace ShGame.game
 			// 
 			clientButton.Font = new System.Drawing.Font("Segoe UI", 15F);
 			clientButton.Location = new System.Drawing.Point(499, 52);
-			//clientButton.Name = "button2";
 			clientButton.Size = new System.Drawing.Size(193, 43);
 			clientButton.TabIndex = 1;
 			clientButton.Text = "Client";

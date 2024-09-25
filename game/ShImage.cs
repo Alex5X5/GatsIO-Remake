@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace sh_game.game {
 	internal class ShImage {
 
-        //private static WriteableBitmap writeableBitmap;
+		//private static WriteableBitmap writeableBitmap;
 		private static Image i;
 
 		//[STAThread]

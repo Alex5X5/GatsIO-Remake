@@ -4,84 +4,100 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using System.Xml;
 
 namespace ShGame.game {
-    public unsafe partial class ServerConsole : Form {
+	public unsafe partial class ServerConsole : Form {
 
-        private readonly Label* Outputarea;
+		internal ServerConsole(GameServer gs) {
+			InitializeComponent(gs);
+			//Lines = new String[10];
+			//Console.WriteLine("text:"+OutputArea.Text);
+			StartThreads();
+		}
 
-        //private String[] Lines;
-        private bool stop = false;
+		private void Form_Load(object sender, EventArgs e) {
+		}
 
-        internal ServerConsole(GameServer gs) {
-            InitializeComponent(gs);
-            //Lines = new String[10];
-            //Console.WriteLine("text:"+OutputArea.Text);
-            StartThreads();
+		private void StartThreads() {
+			new Thread(
+					() => {
+						//File f = new("out.txt");
+						Console.SetOut(
+								new ConsoleWriter {
+									OnWrite =
+										(s) => Write(s.ToString()),
+									OnWriteLine =
+										(s) => WriteLine(s.ToString())
+								}
+						);
+						//StreamWriter writer = new StreamWriter("out.txt");
+						//Console.SetOut(writer);
+						//while(writer.)						
+						//Console.SetOut(reader);
+						//Console.Out
+					}
+			).Start();
+		}
+
+        public void Write(string s) {
+            if (InvokeRequired) {
+                Invoke(WriteLine, s);
+            } else {
+                string[] lines = OutputArea.Text.Split("\n");
+                string temp = "";
+                for (int i = 1; i<lines.Length; i++)
+                    temp+=lines[i]+"\n";
+                temp+=s;
+                OutputArea.Text=temp;
+            }
         }
 
-        private void Form_Load(object sender, EventArgs e) {
-        }
-
-        private void StartThreads() {
-            new Thread(
-                    () => {
-                        //File f = new("out.txt");
-                        Console.SetOut(new ConsoleStream(Outputarea));
-                        StreamWriter writer = new StreamWriter("out.txt");
-                        Console.SetOut(writer);
-                        //while(writer.)                        
-                        //Console.SetOut(reader);
-                        //Console.Out;
-
-                        while (!stop==!Disposing) {
-                            break;
-                        }
-                    }
-            ).Start();
-        }
 
         public void WriteLine(string s) {
-            if (IsHandleCreated)
-                Invoke(new MessageDelegate(DoSendMessage), [s]);
+			if (InvokeRequired&&!IsDisposed) {
+				//if the thread that called this method isn't the thread that created the console, make the ServerConsole call this method
+				Invoke(WriteLine, s);
+			} else {
+				string[] lines = OutputArea.Text.Split("\n");
+				string temp = "";
+				for (int i = 1; i<lines.Length; i++)
+					temp+=lines[i]+"\n";
+                temp+=s;
+				OutputArea.Text=temp;
+			}
+	   }
+
+		private delegate void MessageDelegate(string s);
+	}
+
+	public class ConsoleWriter : TextWriter {
+
+		public required Action<string> OnWriteLine;
+		public required Action<char> OnWrite;
+
+		public override Encoding Encoding => Encoding.UTF8;
+
+		public override void Write(char c) {
+			OnWrite(c);
+			using (Stream s = Console.OpenStandardOutput())
+				using(StreamWriter w = new(s)){
+					w.Write(c);
+					Console.WriteLine(c.ToString());
+				}
+			Console.SetOut(this);
+		}
+
+		public override void WriteLine(string st) {
+			OnWriteLine(st);
+            using (Stream s = Console.OpenStandardOutput())
+				using (StreamWriter w = new(s))
+					w.WriteLine(st);
+			Console.SetOut(this);
         }
 
-        private delegate void MessageDelegate(string s);
+		public override void Close() {
+			base.Close();
 
-        private void DoSendMessage(string s) {
-            string[] lines = OutputArea.Text.Split("\n");
-            string temp = "";
-            for (int i = 1; i<lines.Length; i++)
-                temp+=lines[i]+"\n";
-            temp+=s;
-            OutputArea.Text=temp;
-            //richTextBox2.Text = lines[i]+"\n"+lines[2]+"\n"+s;
-        }
-        private unsafe class ConsoleStream : TextWriter {
-
-            private Label* label;
-            public override Encoding Encoding => Encoding.UTF8;
-
-            public ConsoleStream(Label* label_) {
-                label = label_;
-            }
-
-            public override void Write(char value) {
-                if (label->InvokeRequired) {
-                    label->BeginInvoke(new Action<char>(Write), value);
-                } else {
-                    label->Text+=value;
-                }
-            }
-
-            public override void WriteLine(string? s) {
-                if (label->InvokeRequired) {
-                    label->BeginInvoke(new Action<char>(Write), s);
-                } else {
-                    label->Text+=s+Environment.NewLine;
-                }
-            }
-        }
-    }
+		}
+	}
 }

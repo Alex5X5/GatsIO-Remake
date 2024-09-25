@@ -43,8 +43,9 @@ internal class GameServer:Socket {
 		new Thread(
 				() => console.ShowDialog()
 		).Start();
+		Thread.Sleep(100);
 
-		console.WriteLine("[Gameserver]:address port constructor (address="+address.ToString()+", port=+"+port+")");
+		//console.WriteLine("[Gameserver]:address port constructor (address="+address.ToString()+", port=+"+port+")");
 
 		logger.Log(
 			"address port constructor",
@@ -54,8 +55,6 @@ internal class GameServer:Socket {
 		SpreadObstacles();
 		//fill the players with invalid players so the serializers don't face nullpointers
 		players.Initialize();
-		foreach (Obstacle obstacle in obstacles)
-			Console.WriteLine(obstacle.ToString());
 		//create an IPEndpoint with the given address and the given port and bind the server to the IPEndpoint
 		IPEndPoint point = new(address, (int)port);
 		logger.Log("binding, endPoint = "+point.ToString());
@@ -87,7 +86,7 @@ internal class GameServer:Socket {
 	internal unsafe byte[] OnMapRequest() {
 		//prepare a new Packet
 		byte[] result = [];
-        result  = Protocoll.PreparePacket(ProtocollType.Map);
+		result  = Protocoll.PreparePacket(ProtocollType.Map);
 		int counter = 0;
 		//serialize all of the obstacles into the packet
 		for(int i = 0; i<20; i++)
@@ -216,16 +215,15 @@ internal class GameServer:Socket {
 				//first add half of the distance between the rows to x
 				//then substract a random number between 0 and OBSTACLE_ROW_DISANCE to it
 				x + OBSTACLE_ROW_DISANCE / 2 - r.Next(0, OBSTACLE_ROW_DISANCE),
-                //first add half of the distance between the lines to y
+				//first add half of the distance between the lines to y
 				//then substract a random number between 0 and the full distance between the lines to it
-                y + OBSTACLE_LINE_DISTANCE /2 + r.Next(0, OBSTACLE_LINE_DISTANCE),
+				y + OBSTACLE_LINE_DISTANCE /2 + r.Next(0, OBSTACLE_LINE_DISTANCE),
 				0
 			),
 			//the upper bound of the type must be 4 becuase 3 ist the maxumum possible tytpe but the upper bound is not included
 			r.Next(1, 4)
 
 		);
-		Console.WriteLine("Pos "+obstacles[c].Pos.ToString());
 	}
 
 	public static IPAddress GetLocalIPv4() => 

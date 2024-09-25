@@ -24,8 +24,8 @@ internal class ServerConnection:Socket {
 		//ins case the buffer doesn't have the standard packet length refize
 		Array.Resize(ref buffer, Protocoll.PACKET_BYTE_LENGTH);
 		buffer.Initialize();
-        //the number of bytes recieved so far togeather
-        int recieved = 0;
+		//the number of bytes recieved so far togeather
+		int recieved = 0;
 		while (recieved < Protocoll.PACKET_BYTE_LENGTH && !stop) {
 			//the number of bytes recieved in this listening cycle
 			int bytes;
@@ -34,8 +34,8 @@ internal class ServerConnection:Socket {
 				//the offset id the difference from the recieved bytes so far and the expected amount of bytes
 				bytes = Receive(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH - recieved, SocketFlags.None);
 			} catch (Exception){
-                //if an exception occurs return that the attemt to recieve a packet was incomplete
-                return false;
+				//if an exception occurs return that the attemt to recieve a packet was incomplete
+				return false;
 			}
 			//if no additional bytes could be recieved sto the listening
 			if (bytes == 0)
@@ -44,8 +44,8 @@ internal class ServerConnection:Socket {
 			recieved += bytes;
 		}
 		if(recieved == Protocoll.PACKET_BYTE_LENGTH)
-            //if the amoutnt of recieved bytes matches the amount of expected bytes, return that the attemt to recieve a packet was successfull
-            return true;
+			//if the amoutnt of recieved bytes matches the amount of expected bytes, return that the attemt to recieve a packet was successfull
+			return true;
 		else
 			return false;
 	}

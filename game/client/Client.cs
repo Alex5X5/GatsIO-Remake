@@ -39,12 +39,12 @@ public class Client : Form {
 
 	public Client(IPAddress address, uint port) : base() {
 		logger=new Logger(mlvl);
-        logger.Log(
-            "address port constructor",
-            new MessageParameter("address", address.ToString()),
-            new MessageParameter("port", port)
-        );
-        SetVisible();
+		logger.Log(
+			"address port constructor",
+			new MessageParameter("address", address.ToString()),
+			new MessageParameter("port", port)
+		);
+		SetVisible();
 		//Thread.Sleep(500);
 		//handler=new NetHandler();
 		byte[] temp = new byte[8];
@@ -179,7 +179,7 @@ public class Client : Form {
 			fixed (Obstacle[]* ob = &obstacles)
 				if (!stop)
 					e.Graphics.DrawImage(renderer.Render(ref players, ref player, ob), 0, 0);
-        }
+		}
 	}
 
 	protected override void OnPaintBackground(PaintEventArgs e) {
@@ -209,13 +209,13 @@ public class Client : Form {
 	private class Panel : System.Windows.Forms.Panel {
 		public Panel() : base() { 
 		}
-        protected override void OnPaintBackground(PaintEventArgs e) {
+		protected override void OnPaintBackground(PaintEventArgs e) {
 			
 		}
 
-        protected override void OnPaint(PaintEventArgs e) {
-            //if (!stop)
-                //e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
-        }
-    }
+		protected override void OnPaint(PaintEventArgs e) {
+			//if (!stop)
+				//e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
+		}
+	}
 }

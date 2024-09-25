@@ -9,6 +9,7 @@ public partial class InitialScreen : Form {
 
 	private bool portInitialClick=true;
 	private bool ipInitialClick=true;
+
 	public InitialScreen() {
 		InitializeComponent();
 	}
@@ -45,10 +46,10 @@ public partial class InitialScreen : Form {
 				() => {
 					GetStartValues(out IPAddress address, out uint port);
 					Client.Client c = new(
-                       address, port
+					   address, port
 					);
-                        Console.WriteLine("Initial Screen: ip="+address+" port="+port);
-                        c.ShowDialog();
+						Console.WriteLine("Initial Screen: ip="+address+" port="+port);
+						c.ShowDialog();
 				}
 		).Start();
 	}
@@ -59,9 +60,9 @@ public partial class InitialScreen : Form {
 		try {
 			address_ = IPAddress.Parse(ipTextBox.Text);
 		} catch {}
-        try {
-            port_ = Convert.ToInt32(portTextBox.Text);
-        } catch {}
+		try {
+			port_ = Convert.ToInt32(portTextBox.Text);
+		} catch {}
 		address=address_??GameServer.GetLocalhost();
 		port=port_>=0 ? (uint)Math.Abs(port_) : 100;
 	}

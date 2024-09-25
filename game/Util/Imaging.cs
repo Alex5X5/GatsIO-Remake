@@ -10,6 +10,8 @@ namespace ShGame.game.Util;
 
 class Imaging {
 
+
+
 	public static unsafe void CreateImage(int width, int height) {
 
 		//IntPtr dataP = (IntPtr)data.Scan0();
@@ -32,56 +34,56 @@ class Imaging {
 	}
 
 	public static unsafe void CreateImage2() {
-        const int width = 1000;
-        const int height = 1000;
-        const int bytesPerPixel = 4;  // 32-bit pixel format (e.g., ARGB)
+		const int width = 1000;
+		const int height = 1000;
+		const int bytesPerPixel = 4;  // 32-bit pixel format (e.g., ARGB)
 
-        // Calculate the total memory required for the bitmap (width * height * bytes per pixel)
-        const long totalBytes = width * height * bytesPerPixel;
+		// Calculate the total memory required for the bitmap (width * height * bytes per pixel)
+		const long totalBytes = width * height * bytesPerPixel;
 
 		// Allocate unmanaged memory using NativeMemory.Alloc
 		IntPtr unmanagedMemory = (IntPtr)NativeMemory.Alloc((nuint)totalBytes);
 
-        try {
+		try {
 			// Initialize the memory with some pixel data if needed (this part is optional)
 			Random random = new();
 			unsafe {
-                byte* ptr = (byte*)unmanagedMemory.ToPointer();
-                for (int i = 0; i < totalBytes; i++) {
+				byte* ptr = (byte*)unmanagedMemory.ToPointer();
+				for (int i = 0; i < totalBytes; i++) {
 					//ptr[i] = (byte)ToArgb(255,255,100,0);
-                    ptr[i] = (byte)random.Next(255); // Example: Fill all bytes with 255 (white pixels)
-                }
-            }
+					ptr[i] = (byte)random.Next(255); // Example: Fill all bytes with 255 (white pixels)
+				}
+			}
 
-            // Create a Bitmap object from the unmanaged memory
-            Bitmap bitmap = new(
-                width,
-                height,
-                width * bytesPerPixel, // Stride (bytes per row)
-                PixelFormat.Format32bppArgb, // 32-bit pixel format (ARGB)
-                unmanagedMemory // Pointer to the unmanaged memory
-            );
+			// Create a Bitmap object from the unmanaged memory
+			Bitmap bitmap = new(
+				width,
+				height,
+				width * bytesPerPixel, // Stride (bytes per row)
+				PixelFormat.Format32bppArgb, // 32-bit pixel format (ARGB)
+				unmanagedMemory // Pointer to the unmanaged memory
+			);
 
 			// Save or display the bitmap
 			bitmap.Save("output.png");
 
-            // Dispose of the bitmap when done
-            bitmap.Dispose();
-        } finally {
-            // Free unmanaged memory when done
-            NativeMemory.Free((void*)unmanagedMemory);
-        }
-    }
+			// Dispose of the bitmap when done
+			bitmap.Dispose();
+		} finally {
+			// Free unmanaged memory when done
+			NativeMemory.Free((void*)unmanagedMemory);
+		}
+	}
 
-    private static uint ToArgb(byte alpha, byte red, byte green, byte blue) {
-        //Alpha(255 or 0xFF): Shifted 24 bits to the left → 0xFF000000
-        //Red(255 or 0xFF): Shifted 16 bits to the left → 0x00FF0000
-        //Green(0 or 0x00): Shifted 8 bits to the left → 0x00000000
-        //Blue(0 or 0x00): Stays in place → 0x00000000
-        return (uint)((alpha << 24) | (red << 16) | (green << 8) | blue);
-    }
+	private static uint ToArgb(byte alpha, byte red, byte green, byte blue) {
+		//Alpha(255 or 0xFF): Shifted 24 bits to the left → 0xFF000000
+		//Red(255 or 0xFF): Shifted 16 bits to the left → 0x00FF0000
+		//Green(0 or 0x00): Shifted 8 bits to the left → 0x00000000
+		//Blue(0 or 0x00): Stays in place → 0x00000000
+		return (uint)((alpha << 24) | (red << 16) | (green << 8) | blue);
+	}
 
-    public static unsafe void Iterate() {
+	public static unsafe void Iterate() {
 	}
 
 	public static unsafe void Iterate2() {

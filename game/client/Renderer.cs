@@ -13,9 +13,9 @@ internal class Renderer:IDisposable {
 
 	public const int WIDTH = 1400, HEIGHT = 900;
 
-    private readonly Brush GROUND_COLOR = new SolidBrush(Color.FromArgb(85, 85, 90));
-    private readonly Brush SHADOW_COLOR = new SolidBrush(Color.FromArgb(0, 0, 0));
-    private readonly Brush OBSTACLE_COLOR = new SolidBrush(Color.Gray);
+	private readonly Brush GROUND_COLOR = new SolidBrush(Color.FromArgb(85, 85, 90));
+	private readonly Brush SHADOW_COLOR = new SolidBrush(Color.FromArgb(0, 0, 0));
+	private readonly Brush OBSTACLE_COLOR = new SolidBrush(Color.Gray);
 	private readonly Brush PLAYER_RED_COLOR = new SolidBrush(Color.Red);
 
 	public static readonly Line3d BORDER_TOP = Line3d.FromPoints(new Vector3d(0,0,0),new Vector3d(WIDTH,0,0));
@@ -31,9 +31,9 @@ internal class Renderer:IDisposable {
 	private Vector3d mouseVector = new(0, 0, 0);
 	private Vector3d logicalMouseVector = new(0, 0, 0);
 
-    #endregion fields
+	#endregion fields
 
-    public Renderer() {
+	public Renderer() {
 		image = new Bitmap(WIDTH, HEIGHT);
 		graphics = Graphics.FromImage(image);
 	}
@@ -46,7 +46,7 @@ internal class Renderer:IDisposable {
 			g.FillRectangle(GROUND_COLOR, new RectangleF(0, 0, WIDTH, HEIGHT));
 			//check that the player array isn't null and loop through it
 			if(players!=null)
-                foreach (Player p in players) {
+				foreach (Player p in players) {
 					//if the player isn't null draw it
 					if(p!=null)
 						DrawPlayer(p, g);
@@ -55,42 +55,42 @@ internal class Renderer:IDisposable {
 			if (player != null)
 				DrawPlayer(player, g);
 			//check whether the main player and the obstackles are not null
-            if (player!=null&&obstacles!=null)
-                if (RESTRICTED_VIEW) {
+			if (player!=null&&obstacles!=null)
+				if (RESTRICTED_VIEW) {
 					//if the obstackles, the main player are not null and
 					//RESTRICTED_VIEW is enabled draw the obstacle shadows
-                    fixed (Vector3d* ptr = &player.Pos)
-                        RenderObstacleShadows(ptr, obstacles);
+					fixed (Vector3d* ptr = &player.Pos)
+						RenderObstacleShadows(ptr, obstacles);
 					GetVievRestrictions();
-                }
+				}
 			//draw the obstacles after the shadows so all the obstacles overlay the shadows
-            if (obstacles!=null)
+			if (obstacles!=null)
 				RenderObstacles(*obstacles, g);
 		}
 		return image;
 	}
 
-    private void RenderObstacles(Obstacle[] l, Graphics g) {
-        foreach (Obstacle o in l) {
-            switch (o?.type) {
-                case 1:
-                    DrawObstacle1(o.Pos, g: g);
-                    break;
-                case 2:
-                    DrawObstacle2(o.Pos, g: g);
-                    break;
-                case 3:
-                    DrawObstacle3(o.Pos, g: g);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+	private void RenderObstacles(Obstacle[] l, Graphics g) {
+		foreach (Obstacle o in l) {
+			switch (o?.type) {
+				case 1:
+					DrawObstacle1(o.Pos, g: g);
+					break;
+				case 2:
+					DrawObstacle2(o.Pos, g: g);
+					break;
+				case 3:
+					DrawObstacle3(o.Pos, g: g);
+					break;
+				default:
+					break;
+			}
+		}
+	}
 
-    #region direction calculations
+	#region direction calculations
 
-    private Vector3d[] GetVievRestrictions() {
+	private Vector3d[] GetVievRestrictions() {
 		Vector3d r = logicalMouseVector.Cpy();
 		//		logger.log("",new MessageParameter("r",r.toString()));
 		double angle = Math.Tan(r.y / r.x);
@@ -119,7 +119,7 @@ internal class Renderer:IDisposable {
 	}
 
 
-    private unsafe Dir RelativeDir(Vector3d* pos, Vector3d relativeTo) {
+	private unsafe Dir RelativeDir(Vector3d* pos, Vector3d relativeTo) {
 		Vector3d dir = relativeTo.Cpy().Sub(*pos).Nor();
 		if (dir.y > 1.0 / Math.Sqrt(2))
 		{
@@ -137,13 +137,13 @@ internal class Renderer:IDisposable {
 		{
 			return Dir.L;
 		}
-    }
+	}
 
-    #endregion direction calculations
+	#endregion direction calculations
 
-    #region shadow rendering
+	#region shadow rendering
 
-    private void RenderBackHalf(Vector3d pos) {
+	private void RenderBackHalf(Vector3d pos) {
 		switch (GetRoundedVievDirection()) {
 			case Dir.T:
 				graphics.FillRectangle(SHADOW_COLOR, new Rectangle(-1, -1, WIDTH + 2, (int)(pos.y + 1)));
@@ -161,24 +161,25 @@ internal class Renderer:IDisposable {
 			//	logger.warn("unexpected direction", new MessageParameter("direction", getRoundedVievDirection().toString()));
 		}
 	}
-    private unsafe void RenderObstacleShadows(Vector3d* v, Obstacle[]* l) {
-        ArgumentNullException.ThrowIfNull(&v);
-        //a list of points on the screen
-        PointF[] points = new PointF[3];
+	private unsafe void RenderObstacleShadows(Vector3d* v, Obstacle[]* l) {
+		ArgumentNullException.ThrowIfNull(&v);
+		//a list of points on the screen
+		PointF[] points = new PointF[3];
 		Vector3d ShadowPoint1 = new(0, 0, 0);
 		Vector3d ShadowPoint2 = new(0, 0, 0);
 		Vector3d ShadowPoint3 = new(0, 0, 0);
 		Vector3d ShadowPoint4 = new(0, 0, 0);
 		Vector3d[] sp;
 		//return;
-		foreach (Obstacle o in *l)
-		{
+		foreach (Obstacle o in *l) {
+			if(o==null)
+				continue;
 			o.GetShadowPoints(v, &ShadowPoint1, &ShadowPoint2);
 			//sp=o.GetShadowPoints(v);
 			if (!(v->x >= o.Pos.x && v->x <= o.Pos.x + o.WIDTH && v->y >= o.Pos.y && v->y <= o.Pos.y + o.HEIGHT)) {
 				switch (RelativeDir(v, o.Pos.Cpy().Add(new Vector3d(o.WIDTH / 2.0, o.HEIGHT / 2.0, 0)))) {
 					case Dir.T:
-                        fixed (Line3d* line = &BORDER_TOP) {
+						fixed (Line3d* line = &BORDER_TOP) {
 							ShadowPoint3 = ShadowHit(v, &ShadowPoint1, line);
 							ShadowPoint4 = ShadowHit(v, &ShadowPoint2, line);
 						}
@@ -251,9 +252,9 @@ internal class Renderer:IDisposable {
 		double oth1X = border->origin.x;
 		double oth1Y = border->origin.y;
 		double oth1Z = border->origin.z;
-        //calculate the coordinates of a vector that starts at the origin point of the border
+		//calculate the coordinates of a vector that starts at the origin point of the border
 		//and points towards its second definition point
-        Vector3d oth2 = border->origin.Cpy().Add(border->direction);
+		Vector3d oth2 = border->origin.Cpy().Add(border->direction);
 		double oth2X = oth2.x;
 		double oth2Y = oth2.y;
 		double oth2Z = oth2.z;
@@ -313,11 +314,11 @@ internal class Renderer:IDisposable {
 		);
 	}
 
-    #endregion shadow rendering
+	#endregion shadow rendering
 
-    #region draw methods
+	#region draw methods
 
-    private void DrawPlayer(Player p, Graphics g) {
+	private void DrawPlayer(Player p, Graphics g) {
 		//graphics2D.SetStroke(new BasicStroke(1 / gScl));
 		//graphics2D.drawLine(0, 0, (int)p.pos.x / gScl, (int)p.pos.y / gScl);
 		//Console.WriteLine("drawing at"+p.Pos.ToString());
@@ -343,9 +344,9 @@ internal class Renderer:IDisposable {
 		logicalMouseVector = mouseVector.Cpy().Sub(pos).Nor();
 	}
 
-    #endregion draw methods
+	#endregion draw methods
 
-    public void Dispose() {
+	public void Dispose() {
 		logger.Log("stoppping");
 		//renderLock.Dispose();
 		image.Dispose();

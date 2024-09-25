@@ -231,10 +231,10 @@ public class Obstacle {
 	}
 
 	public static unsafe void DeserializeObstacleCountable(ref byte[] input, Obstacle* obstacle, ref int offset) {
-        ArgumentNullException.ThrowIfNull(input);
-        ArgumentNullException.ThrowIfNull(obstacle);
+		ArgumentNullException.ThrowIfNull(input);
+		ArgumentNullException.ThrowIfNull(obstacle);
 
-        int type_ = BitConverter.ToInt32(input, offset);
+		int type_ = BitConverter.ToInt32(input, offset);
 		if(type_==-1) {
 			//obstacle=null;
 			offset+=OBSTACLE_BYTE_LENGTH;
@@ -257,8 +257,8 @@ public class Obstacle {
 	}
 
 	public enum Type : byte {
-        Wide,
-        High,
-        WideHigh
-    }
+		Wide,
+		High,
+		WideHigh
+	}
 }

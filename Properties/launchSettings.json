@@ -1,10 +1,10 @@
 {
   "profiles": {
-    "ShGame": {
-      "commandName": "Project",
-      "nativeDebugging": true,
-      "jsWebView2Debugging": false,
-      "sqlDebugging": false
-    }
+	"ShGame": {
+	  "commandName": "Project",
+	  "nativeDebugging": true,
+	  "jsWebView2Debugging": false,
+	  "sqlDebugging": false
+	}
   }
 }

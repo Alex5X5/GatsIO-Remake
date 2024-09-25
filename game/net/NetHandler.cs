@@ -75,18 +75,18 @@ public class NetHandler:Socket {
 			throw new ConnectException("not connected");
 		byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
 		int recieved = 0;
-        while (recieved < Protocoll.PACKET_BYTE_LENGTH && !stop) {
-            int bytes;
-            try {
-                bytes = Receive(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH - recieved, SocketFlags.None);
-            } catch (Exception) {
-                break;
-            }
-            if (bytes == 0)
-                break;
-            recieved += bytes;
-        }
-        return buffer;
+		while (recieved < Protocoll.PACKET_BYTE_LENGTH && !stop) {
+			int bytes;
+			try {
+				bytes = Receive(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH - recieved, SocketFlags.None);
+			} catch (Exception) {
+				break;
+			}
+			if (bytes == 0)
+				break;
+			recieved += bytes;
+		}
+		return buffer;
 	}
 
 	private void SendPacket(byte[] send) {
@@ -129,14 +129,14 @@ public class NetHandler:Socket {
 		}
 	}
 
-    internal void Stop() {
-        logger.Log("stopping");
-        stop=true;
-        Close();
-        Dispose();
-    }
+	internal void Stop() {
+		logger.Log("stopping");
+		stop=true;
+		Close();
+		Dispose();
+	}
 
-    public override string ToString() {
+	public override string ToString() {
 		return "sh_game.game.net.NetHandler:[ip="+IP.ToString()+", port="+Convert.ToString(PORT)+"]";
 	}
 }
