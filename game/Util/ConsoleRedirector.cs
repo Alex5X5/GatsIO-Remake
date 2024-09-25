@@ -21,7 +21,7 @@ namespace ShGame.game.Util
 			
 		}
 
-		public StreamWriter SW { get; set; }
+		public StreamWriter? SW { get; set; }
 
 		public ConsoleRedirector() {
 			EnsureLogDirectoryExists();
@@ -43,13 +43,13 @@ namespace ShGame.game.Util
 		public static void WriteLine(string str)
 		{
 			Console.WriteLine(str);
-			OutputSingleton.SW.WriteLine(str);
+			OutputSingleton.SW?.WriteLine(str);
 		}
 
 		public static void Write(string str)
 		{
 			Console.Write(str);
-			OutputSingleton.SW.Write(str);
+			OutputSingleton.SW?.Write(str);
 		}
 
 		private void InstantiateStreamWriter()

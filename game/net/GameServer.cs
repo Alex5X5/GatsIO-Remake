@@ -190,9 +190,9 @@ internal class GameServer:Socket {
 		logger.Log("generating Obstacles");
 		int c = 0;
 		//spreading obstacles over OBSTACKLE_ROWS rows
-		for (int x = 0; x<OBSTACKLE_ROWS; x++)
+		for (int x = 0; x<OBSTACKLE_LINES; x++)
 			//spreading obstacles over OBSTACKLE_LINES lines so there are OBSTACKLE_ROWS*OBSTACKLE_LINES obstacles all together
-			for (int y = 0; y<OBSTACKLE_LINES; y++) {
+			for (int y = 0; y<OBSTACKLE_ROWS; y++) {
 				PlaceObstacles(1 + x, 1 + y, c);
 				//c is the position of the obstacle in the arary
 				c++;
@@ -233,7 +233,7 @@ internal class GameServer:Socket {
 	public static IPAddress GetLocalhost(){
 		NetworkInterface ni = 
 			NetworkInterface.GetAllNetworkInterfaces()[1];
-		return ni.GetIPProperties().UnicastAddresses[^2].Address;
+		return ni.GetIPProperties().UnicastAddresses[^1].Address;
 	}
 }
 

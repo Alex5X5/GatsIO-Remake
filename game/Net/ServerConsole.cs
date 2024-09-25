@@ -87,8 +87,8 @@ namespace ShGame.game {
 			Console.SetOut(this);
 		}
 
-		public override void WriteLine(string st) {
-			OnWriteLine(st);
+		public override void WriteLine(string? st) {
+			OnWriteLine(st??"");
             using (Stream s = Console.OpenStandardOutput())
 				using (StreamWriter w = new(s))
 					w.WriteLine(st);
