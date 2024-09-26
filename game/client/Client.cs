@@ -186,7 +186,7 @@ public class Client : Form {
 		//Don't allow the background to paint
 	}
 
-	private bool NetHandlerConnected() {
+private bool NetHandlerConnected() {
 		if (netHandler != null)
 			if (netHandler.Connected)
 				return true;
