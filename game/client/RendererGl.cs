@@ -356,24 +356,12 @@ internal class RendererGl : IDisposable {
 			0,0,0
 		];
 
-		private static unsafe void UpdateRect(float* x1, float* y1, float* x2, float* y2, float* x3, float* y3, float* x4, float* y4, int pos) {
-			Console.WriteLine("update Shadow: x1:"+*x1+" y1:"+*y1+" x2:"+*x2+" y2:"+*y2+" x3:"+*x3+" y3:"+*y3);
-			new float[] {
-            //X    Y      Z
-			*x1, *y1, 0.0f,
-			*x2, *y2, 0.0f,
-			*x3, *y3, 0.0f,
-			*x4, *y4, 0.0f,
-			}.CopyTo(Vertecies, FLOATS_PER_RECT*2*pos);
-		}
-
 		private uint vao;
 		private uint vbo;
 
 		public RenderableRect() {
 			vao = Gl.GenVertexArray();
 			BindVAO();
-
 			vbo = Gl.GenBuffer();
 			Gl.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
 		}
