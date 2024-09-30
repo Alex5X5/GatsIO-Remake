@@ -1,9 +1,8 @@
 ﻿using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
-using System;
 
-class DrawableTriangle {
-	public float[] Vertices { get; }
+public struct DrawableTriangle {
+	public float[] Vertices { get; set; }
 
 	public DrawableTriangle(float[] vertices) {
 		if (vertices.Length != 9) {
@@ -13,7 +12,7 @@ class DrawableTriangle {
 	}
 }
 
-class Program3 {
+class Programm3 {
 	private static IWindow _window;
 	private static GL _gl;
 	private static uint _vertexArray;
@@ -23,21 +22,23 @@ class Program3 {
 	// Array of DrawableTriangle objects
 	private static DrawableTriangle[] dTriangles = new DrawableTriangle[]
 	{
-		new DrawableTriangle(new float[]
-		{
-			0.0f, 0.5f, 0.0f,   // Top vertex of triangle 1
-            -0.5f, -0.5f, 0.0f, // Bottom-left vertex of triangle 1
-            0.5f, -0.5f, 0.0f   // Bottom-right vertex of triangle 1
-        }),
-		new DrawableTriangle(new float[]
-		{
-			-0.8f, 0.0f, 0.0f,  // Top vertex of triangle 2
-            -0.9f, -0.8f, 0.0f, // Bottom-left vertex of triangle 2
-            -0.6f, -0.8f, 0.0f  // Bottom-right vertex of triangle 2
-        })
+		new DrawableTriangle(
+			[
+				0.0f, 0.5f, 0.0f,   // Top vertex of triangle 1
+				-0.5f, -0.5f, 0.0f, // Bottom-left vertex of triangle 1
+				0.5f, -0.5f, 0.0f   // Bottom-right vertex of triangle 1
+			]
+		),
+		new DrawableTriangle(
+			[
+				-0.8f, 0.0f, 0.0f,  // Top vertex of triangle 2
+				-0.9f, -0.8f, 0.0f, // Bottom-left vertex of triangle 2
+				-0.6f, -0.8f, 0.0f  // Bottom-right vertex of triangle 2
+			]
+		)
 	};
 
-	static void Main(string[] args) {
+	public static void Main_() {
 		var options = WindowOptions.Default;
 		options.Size = new Silk.NET.Maths.Vector2D<int>(800, 600);
 		options.Title = "OpenGL Drawable Triangles";
@@ -73,7 +74,7 @@ class Program3 {
 		_gl.BindVertexArray(0);
 	}
 
-	private static void OnRender(double deltaTime) {
+	private static unsafe void OnRender(double deltaTime) {
 		// Clear the screen with black
 		_gl.Clear((uint)ClearBufferMask.ColorBufferBit);
 
@@ -87,7 +88,8 @@ class Program3 {
 		foreach (var triangle in dTriangles) {
 			// Upload the vertices from the current DrawableTriangle to the buffer
 			_gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vertexBuffer);
-//			_gl.BufferSubData(BufferTargetARB.ArrayBuffer, 0, triangle.Vertices);
+			fixed(void* ptr = triangle.Vertices)
+				_gl.BufferSubData((Silk.NET.OpenGL.GLEnum)BufferTargetARB.ArrayBuffer, 0, 9*sizeof(float), ptr);
 
 			// Draw the triangle
 			_gl.DrawArrays(PrimitiveType.Triangles, 0, 3);

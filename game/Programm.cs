@@ -7,8 +7,7 @@ public static class Programm {
 
 	//[STAThread]
 	public static void Main() {
-		//BareboneTriangle.Main_();
-		_=new RendererGl();
+		Programm3.Main_();
 		return;
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
