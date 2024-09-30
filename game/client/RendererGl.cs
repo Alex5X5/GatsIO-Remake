@@ -1,15 +1,11 @@
 ﻿namespace ShGame.game.Client;
 
 using ShGame.game.Net;
-using Silk.NET.GLFW;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System.Drawing;
-using System.Reflection;
-using System.Security.Policy;
-using Monitor = Silk.NET.Windowing.Monitor;
 
 //#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
 
@@ -83,7 +79,15 @@ internal class RendererGl : IDisposable {
 
 	//the default vertecies for debugging.
 	private static readonly float[] Vertecies_ = [
-		//X    Y      Z
+	  //X    Y      Z
+		0f, 1f, 0.0f,
+		0f, 0f, 0.0f,
+		2f, 0f, 0.0f,
+		1f, 1f, 0.0f
+	];
+
+	private static readonly float[] Vertecies2 = [
+	  //X    Y      Z
 		0f, 1f, 0.0f,
 		0f, 0f, 0.0f,
 		1f, 0f, 0.0f,
@@ -105,13 +109,14 @@ internal class RendererGl : IDisposable {
 		}
 		for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
 			Vertecies_.CopyTo(Vertecies, i*FLOATS_PER_RECT);
-		float x = 0.5f;
-		float y = 0.2f;
-		float z = -0.6f;
-		UpdateShadow(&x, &z, &y, &x, &x, &z, &y, &x, 2);
+		//float x = 0.5f;
+		//float y = 0.2f;
+		//float z = -0.6f;
+		//UpdateShadow(&x, &z, &y, &x, &x, &z, &y, &x, 2);
 		SetupWindow();
-
-
+		//RenderableRect rect = new();
+		//rect.BufferData();
+		//rect.BindAndDraw();
 	}
 
 	private static void SetupWindow() {
@@ -348,27 +353,36 @@ internal class RendererGl : IDisposable {
 	}
 
 	private class RenderableRect {
-		private float[] vertecies = [
-//			x,y,z
-			0,0,0,
-			0,0,0,
-			0,0,0,
-			0,0,0
+		private static float[] vertecies = [
+		//  X  Y  Z
+			0f,1f,0.0f,
+			0f,0f,0.0f,
+			2f,0f,0.0f,
+			1f,1f,0.0f
 		];
 
-		private uint vao;
-		private uint vbo;
+		private uint vao; //a pointer to the vertecies
+		private uint vbo; //a pointer to the indices
 
 		public RenderableRect() {
 			vao = Gl.GenVertexArray();
 			BindVAO();
 			vbo = Gl.GenBuffer();
 			Gl.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
+			UnbindVAO();
+			UnbindVBO();
+		}
+
+		public unsafe void BufferData() {
+			BindVBO();
+			fixed (void* i = &vertecies[0])
+				Gl.BufferData(BufferTargetARB.ArrayBuffer, (uint)(vertecies.Length * sizeof(float)), i, BufferUsageARB.StaticDraw);
+			UnbindVBO();
 		}
 
 		public unsafe void BindAndDraw() {
-			Gl.BindVertexArray(vao);
-			Gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
+			BindVAO();
+			Gl.DrawArrays(PrimitiveType.Triangles, 0, 6);
 			UnbindVAO();
 		}
 
