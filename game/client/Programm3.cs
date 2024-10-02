@@ -20,8 +20,7 @@ class Programm3 {
 	private static uint _shaderProgram;
 
 	// Array of DrawableTriangle objects
-	private static DrawableTriangle[] dTriangles = new DrawableTriangle[]
-	{
+	private static DrawableTriangle[] dTriangles = new DrawableTriangle[] {
 		new DrawableTriangle(
 			[
 				0.0f, 0.5f, 0.0f,   // Top vertex of triangle 1
