@@ -25,6 +25,10 @@
   <ItemGroup>
 	<None Remove="push_sh.bat" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Silk.NET" Version="2.21.0" />
+  </ItemGroup>
   <ItemGroup>
 	<Reference Include="libs\Simplelogging.dll" />
   </ItemGroup>

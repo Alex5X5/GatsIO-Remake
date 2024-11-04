@@ -83,7 +83,7 @@ public class Line3d {
 	}
 
 	public static Line3d FromDirection(Vector3d origin, Vector3d direction) {
-		Line3d l = new Line3d {
+		Line3d l = new() {
 			origin=origin,
 			direction=direction
 		};
@@ -91,7 +91,7 @@ public class Line3d {
 	}
 
 	public static Line3d FromPoints(Vector3d point1, Vector3d point2) {
-		Line3d l = new Line3d {
+		Line3d l = new() {
 			origin=point1.Cpy(),
 			direction=point2.Cpy().Sub(point1).Nor()
 		};

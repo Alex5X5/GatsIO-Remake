@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
+#pragma warning disable IDE0130 // Der Namespace entspricht stimmt nicht der Ordnerstruktur.
 namespace ShGame.game.Logic.PrimitiveVector3i {
 
 	[StructLayout(LayoutKind.Sequential, Pack = 1)] // Ensures no extra padding is added
@@ -120,8 +121,8 @@ namespace ShGame.game.Logic.PrimitiveVector3i {
 	}
 }
 
-
 namespace ShGame.game.Logic.PrimitiveVector3d {
+#pragma warning restore IDE0130 // Der Namespace entspricht stimmt nicht der Ordnerstruktur.
 
 	[StructLayout(LayoutKind.Sequential, Pack = 1)] [Serializable]// Ensures no extra padding is added
 	public struct Vector3d(double x, double y, double z) {
@@ -282,7 +283,7 @@ namespace ShGame.game.Logic.PrimitiveVector3d {
 		}
 		public static unsafe Vector3d* SetLength2(this Vector3d vector, double len2) {
 			double oldLen2 = Len2(vector);
-			double scl = (double)Math.Sqrt(len2/oldLen2);
+			//double scl = (double)Math.Sqrt(len2/oldLen2);
 			return oldLen2==0||oldLen2==len2 ? &vector : Scl(vector, Math.Sqrt(len2/oldLen2));
 		}
 
