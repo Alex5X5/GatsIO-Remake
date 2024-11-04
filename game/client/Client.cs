@@ -35,7 +35,7 @@ public class Client : Form {
 
 	public Client() : this(100) { }
 
-	public Client(uint port) : this(GameServer.GetLocalhost(), port) { }
+	public Client(uint port) : this(GameServer.GetLocalIP(), port) { }
 
 	public Client(IPAddress address, uint port) : base() {
 		logger=new Logger(mlvl);

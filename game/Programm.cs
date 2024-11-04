@@ -5,7 +5,7 @@ namespace ShGame.game;
 
 public static class Programm {
 
-	//[STAThread]
+	[STAThread]
 	public static void Main() {
 		Programm3.Main_();
 		return;

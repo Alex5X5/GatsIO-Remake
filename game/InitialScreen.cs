@@ -1,10 +1,14 @@
 ﻿using ShGame.game.Net;
+using System.Net;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace ShGame.game; 
 public partial class InitialScreen : Form {
 
-	private bool portInitialClick=true;
-	private bool ipInitialClick=true;
+	private bool portInitialClick = true;
+	private bool ipInitialClick = true;
+	private IpVersion ipVersion = IpVersion.DeviceDefault;
 
 	public InitialScreen() {
 		InitializeComponent();
@@ -27,6 +31,18 @@ public partial class InitialScreen : Form {
 		}
 	}
 
+	private void UseIpV4(object sender, EventArgs e) {
+		ipV6Button.Checked = false;
+        ipV4Button.Checked = !ipV4Button.Checked;
+		ipVersion = ipV4Button.Checked ? IpVersion.V4 : IpVersion.DeviceDefault;
+    }
+
+	private void UseIpV6(object sender, EventArgs e) {
+		ipV4Button.Checked = false;
+		ipV6Button.Checked = !ipV6Button.Checked;
+        ipVersion = ipV6Button.Checked ? IpVersion.V6 : IpVersion.DeviceDefault;
+    }
+
 	private void StartServer(object sender, EventArgs e) {
 		new Thread(
 				() => {
@@ -42,10 +58,10 @@ public partial class InitialScreen : Form {
 				() => {
 					GetStartValues(out IPAddress address, out uint port);
 					Client.Client c = new(
-					   address, port
+						address, port
 					);
-						Console.WriteLine("Initial Screen: ip="+address+" port="+port);
-						c.ShowDialog();
+					Console.WriteLine("Initial Screen: ip="+address+" port="+port);
+					c.ShowDialog();
 				}
 		).Start();
 	}
@@ -59,7 +75,15 @@ public partial class InitialScreen : Form {
 		try {
 			port_ = Convert.ToInt32(portTextBox.Text);
 		} catch {}
-		address=address_??GameServer.GetLocalhost();
-		port=port_>=0 ? (uint)Math.Abs(port_) : 100;
-	}
+        address = ipVersion switch {
+            IpVersion.V4 => address_!=null ? address_.MapToIPv4() : GameServer.GetLocalIP().MapToIPv4(),
+            IpVersion.V6 => address_!=null ? address_.MapToIPv6() : GameServer.GetLocalIP().MapToIPv6(),
+            _ => GameServer.GetLocalIP().MapToIPv4()
+        };
+        port=port_>=0 ? (uint)Math.Abs(port_) : 4000;
+    }
+
+    public enum IpVersion {
+        V4, V6, DeviceDefault
+    }
 }

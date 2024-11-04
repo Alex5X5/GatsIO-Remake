@@ -25,7 +25,7 @@ public class NetHandler:Socket {
 		logger.Log("enpty constructor");
 	}
 
-	internal NetHandler(int port) : this(GameServer.GetLocalhost(), port) {
+	internal NetHandler(int port) : this(GameServer.GetLocalIP(), port) {
 		logger.Log("port constructor");
 	}
 
