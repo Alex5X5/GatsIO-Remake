@@ -4,7 +4,7 @@ namespace ShGame.game;
 
 public static class Programm {
 
-	//[STAThread]
+	[STAThread]
 	public static void Main() {
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);

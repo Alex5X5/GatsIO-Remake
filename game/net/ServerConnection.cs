@@ -7,6 +7,7 @@ internal class ServerConnection:Socket {
 
 	private bool stop = false;
 	private readonly Logger logger;
+	internal int disposalCooldown = 100;
 
 	internal ServerConnection(SocketInformation info, GameServer gs) : base(info) {
 		logger=new Logger(new LoggingLevel("ServerConnection"));
@@ -70,7 +71,7 @@ internal class ServerConnection:Socket {
 			if(RecievePacket(ref buffer));
 				//depending on the packet type, send a request to the server and send back the result
 				switch(Protocoll.AnalyzePacket(buffer)) {
-					case ProtocollType.Ping:
+					case ProtocollType.Communication:
 						SendPacket(gs.OnPingRequest(buffer));
 						break;
 

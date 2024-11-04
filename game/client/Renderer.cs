@@ -3,7 +3,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
+#pragma warning disable CS8500 //a pointer is created to a variable of a managed type
 
 internal class Renderer:IDisposable {
 
@@ -157,8 +157,6 @@ internal class Renderer:IDisposable {
 			case Dir.L:
 				graphics.FillRectangle(SHADOW_COLOR, new Rectangle((int)pos.x, -1, (int)(WIDTH-pos.x)+1, HEIGHT+2));
 				break;
-			//default:
-			//	logger.warn("unexpected direction", new MessageParameter("direction", getRoundedVievDirection().toString()));
 		}
 	}
 	private unsafe void RenderObstacleShadows(Vector3d* v, Obstacle[]* l) {
@@ -292,7 +290,6 @@ internal class Renderer:IDisposable {
 		ref double v4,
 		ref double v5,
 		ref double v6
-		//ref int v7, ref int v8, ref int v9, ref int v10, ref int v11, ref int v12
 	) {
 		points[0].X=(float)v1;
 		points[0].Y=(float)v2;
@@ -300,16 +297,9 @@ internal class Renderer:IDisposable {
 		points[1].Y=(float)v4;
 		points[2].X=(float)v5;
 		points[2].Y=(float)v6;
-		//points[0].X = v1; points[1].X = v2; points[2].X = v3; points[3].X = v4; points[4].X = v5; points[5].X = v6;
-		//points[6].X = v7; points[7].X = v8; points[8].X = v9; points[9].X = v10; points[10].X = v11; points[11].X = v12;
-		
+
 		graphics.FillPolygon(
 			SHADOW_COLOR,
-			//new PointF[] {
-			//	new PointF((int)p1.x, (int)p1.y),
-			//	new PointF((int)p2.x, (int)p2.y),
-			//	new PointF((int)sp[1].x, (int)sp[1].y)
-			//}
 			points
 		);
 	}
