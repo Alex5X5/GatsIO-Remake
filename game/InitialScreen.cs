@@ -1,8 +1,4 @@
 ﻿using ShGame.game.Net;
-using System.Linq.Expressions;
-using System.Net;
-using System.Threading;
-using System.Windows.Forms;
 
 namespace ShGame.game; 
 public partial class InitialScreen : Form {

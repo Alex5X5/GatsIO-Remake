@@ -55,10 +55,16 @@
 	</EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+	<None Update="hc_black.json">
+	  <Generator>ThemeConverter</Generator>
+	</None>
 	<None Update="Properties\Settings.settings">
 	  <Generator>SettingsSingleFileGenerator</Generator>
 	  <LastGenOutput>Settings.Designer.cs</LastGenOutput>
 	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Update="Untitled-1.jsonc">
+	  <Generator>ThemeConverter</Generator>
 	</None>
   </ItemGroup>
   
