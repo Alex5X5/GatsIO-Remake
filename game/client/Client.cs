@@ -19,13 +19,11 @@ public class Client : Form {
 	private readonly Logger logger;
 
 	Client.Panel? panel;
-	//private System.Windows.Forms.Panel panel;
 	private readonly Renderer renderer;
 	private readonly LoggingLevel mlvl = new("Client");
 	private NetHandler? netHandler;
 
 	internal Player player;
-	//internal readonly SemaphoreSlim playersLock;
 
 	unsafe private Player[] players;
 	unsafe internal Obstacle[] obstacles = new Obstacle[20];
@@ -33,7 +31,7 @@ public class Client : Form {
 	private Thread connectionThread = new(() => { });
 	private Thread playerMoveThread = new(() => { });
 
-	public Client() : this(100) { }
+	public Client() : this(5000) { }
 
 	public Client(uint port) : this(GameServer.GetLocalIP(), port) { }
 
@@ -55,7 +53,7 @@ public class Client : Form {
 			players[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
 		obstacles.Initialize();
 		renderer=new Renderer();
-		StartThreads(address, (int)port);
+		StartThreads(address, port);
 	}
 
 	private void SetVisible() {
@@ -80,7 +78,7 @@ public class Client : Form {
 		logger.Log("performed layout");
 	}
 
-	private unsafe void StartThreads(IPAddress address, int port) {
+	private unsafe void StartThreads(IPAddress address, uint port) {
 		connectionThread=new Thread(
 			() => {
 				netHandler = new(address, port);

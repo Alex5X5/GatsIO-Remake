@@ -35,7 +35,7 @@ internal class GameServer:Socket {
 
     public GameServer(int port) : this(GetLocalIP(), (uint)Math.Abs(port)) { }
 
-    public GameServer(IPAddress address, uint port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp){
+    public GameServer(IPAddress address, uint port) : base(address.AddressFamily == AddressFamily.InterNetwork ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp){
 		logger = new Logger(new LoggingLevel("GameServer"));
 		//create a new console that shows the messages of the server
 		console = new(this);
@@ -46,16 +46,17 @@ internal class GameServer:Socket {
 
 		logger.Log(
 			"address port constructor",
-			new MessageParameter("address",address.ToString()),
-            new MessageParameter("addressFamily", address.AddressFamily.ToString()),
+			new MessageParameter("address",address),
+            new MessageParameter("addressFamily", base.AddressFamily.ToString()),
             new MessageParameter("port",port)
 		);
 		SpreadObstacles();
 		//fill the players with invalid players so the serializers don't face nullpointers
 		players.Initialize();
-		//create an IPEndpoint with the given address and the given port and bind the server to the IPEndpoint
-		IPEndPoint point = new( address, (int)port);
-		logger.Log("binding, endPoint = "+point.ToString());
+        //create an IPEndpoint with the given address and the given port and bind the server to the IPEndpoint
+        IPEndPoint point = new(address.AddressFamily == AddressFamily.InterNetworkV6 ? GetLocalIPv6() : GetLocalIPv4(), (int)port);
+        //IPEndPoint point = new(IPAddress.Parse("fe80::d860:be77:221:1144"), (int)port);
+        logger.Log("binding, endPoint = "+point.ToString()+" endpint address = " + point.AddressFamily.ToString());
 		Bind(point);
 		logger.Log("bound endPoint="+point.ToString());
 		logger.Log(Convert.ToString(IsBound));
@@ -242,12 +243,16 @@ internal class GameServer:Socket {
         }
     }
 
-    public static IPAddress GetLocalIPv4() => 
-		GetLocalIP().MapToIPv4();
-	public static IPAddress GetLocalIPv6() =>
-		GetLocalIP().MapToIPv6();
+    public static IPAddress GetLocalIPv4() =>
+        NetworkInterface.GetAllNetworkInterfaces()[2].
+            GetIPProperties().UnicastAddresses[^1].
+                Address;
+    public static IPAddress GetLocalIPv6() =>
+        NetworkInterface.GetAllNetworkInterfaces()[2].
+            GetIPProperties().UnicastAddresses[^2].
+                Address;
 
-	public static IPAddress GetLocalIP()=>
+    public static IPAddress GetLocalIP()=>
 		NetworkInterface.GetAllNetworkInterfaces()[2].
 			GetIPProperties().UnicastAddresses[^1].
 				Address;

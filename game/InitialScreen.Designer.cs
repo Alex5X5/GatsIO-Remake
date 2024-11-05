@@ -33,31 +33,32 @@ namespace ShGame.game
             startLabel = new System.Windows.Forms.Label();
             ipV4Button = new System.Windows.Forms.RadioButton();
             ipV6Button = new System.Windows.Forms.RadioButton();
-            // 
-            // ipTextBox
-            // 
-            ipTextBox.Font = new System.Drawing.Font("Segoe UI", 15F);
-            ipTextBox.Location = new System.Drawing.Point(30, 15);
-            ipTextBox.Size = new System.Drawing.Size(480, 50);
-            ipTextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            ipTextBox.Name = "ipTextBox";
-            ipTextBox.ShortcutsEnabled = false;
-            ipTextBox.TabIndex = 0;
-            ipTextBox.TabStop = false;
-            ipTextBox.Text = "enter IP (lovcalhost is "+GameServer.GetLocalIP()+")";
-            ipTextBox.Click += IpField_Clicked;
             SuspendLayout();
             // 
             // portTextBox
             // 
             portTextBox.Font = new System.Drawing.Font("Segoe UI", 15F);
             portTextBox.Location = new System.Drawing.Point(30, 80);
-            portTextBox.Size = new System.Drawing.Size(380, 50);
             portTextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             portTextBox.Name = "portTextBox";
+            portTextBox.Size = new System.Drawing.Size(380, 47);
             portTextBox.TabIndex = 0;
-            portTextBox.Text = "enter port (4000 by default)";
+            portTextBox.Text = "enter port (5000 by default)";
             portTextBox.Click += PortField_Clicked;
+            // 
+            // ipTextBox
+            // 
+            ipTextBox.AcceptsTab = true;
+            ipTextBox.AllowDrop = true;
+            ipTextBox.Font = new System.Drawing.Font("Segoe UI", 15F);
+            ipTextBox.Location = new System.Drawing.Point(30, 15);
+            ipTextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            ipTextBox.Name = "ipTextBox";
+            ipTextBox.Size = new System.Drawing.Size(540, 47);
+            ipTextBox.TabIndex = 0;
+            ipTextBox.TabStop = false;
+            ipTextBox.Text = "enter IP (localhost is "+GameServer.GetLocalIP().ToString()+")";
+            ipTextBox.Click += IpField_Clicked;
             // 
             // serverButton
             // 
@@ -94,28 +95,28 @@ namespace ShGame.game
             startLabel.TabIndex = 2;
             startLabel.Text = "what to start";
             // 
-            // radioButton1
+            // ipV4Button
             // 
-            ipV4Button.Name = "ipV4Button";
-            ipV4Button.TabStop = true;
-            ipV4Button.TabIndex = 3;
             ipV4Button.AutoSize = true;
-            ipV4Button.UseVisualStyleBackColor = true;
-            ipV4Button.Location = new System.Drawing.Point(30, 140);
-            ipV4Button.Size = new System.Drawing.Size(140, 30);
             ipV4Button.Font = new System.Drawing.Font("Segoe UI", 12F);
+            ipV4Button.Location = new System.Drawing.Point(30, 140);
+            ipV4Button.Name = "ipV4Button";
+            ipV4Button.Size = new System.Drawing.Size(188, 36);
+            ipV4Button.TabIndex = 3;
+            ipV4Button.TabStop = true;
             ipV4Button.Text = "use strict IPV4";
+            ipV4Button.UseVisualStyleBackColor = true;
             ipV4Button.Click += UseIpV4;
             // 
-            // radioButton2
-            //
+            // ipV6Button
+            // 
+            ipV6Button.AutoSize = true;
+            ipV6Button.Font = new System.Drawing.Font("Segoe UI", 12F);
+            ipV6Button.Location = new System.Drawing.Point(220, 140);
             ipV6Button.Name = "ipV6Button";
+            ipV6Button.Size = new System.Drawing.Size(188, 36);
             ipV6Button.TabIndex = 3;
             ipV6Button.TabStop = true;
-            ipV6Button.AutoSize = true;
-            ipV6Button.Location = new System.Drawing.Point(220, 140);
-            ipV6Button.Size = new System.Drawing.Size(140, 30);
-            ipV6Button.Font = new System.Drawing.Font("Segoe UI", 12F);
             ipV6Button.Text = "use strict IPV6";
             ipV6Button.UseVisualStyleBackColor = true;
             ipV6Button.Click += UseIpV6;

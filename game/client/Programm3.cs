@@ -1,17 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
-public struct DrawableTriangle {
-	public float[] Vertices { get; set; }
-
-	public DrawableTriangle(float[] vertices) {
-		if (vertices.Length != 9) {
-			throw new ArgumentException("A triangle must have exactly 9 vertex values.");
-		}
-		Vertices = vertices;
-	}
-}
-
 class Programm3 {
 	private static IWindow _window;
 	private static GL _gl;
@@ -36,6 +25,8 @@ class Programm3 {
 			]
 		)
 	};
+
+
 
 	public static void Main_() {
 		var options = WindowOptions.Default;
@@ -63,7 +54,7 @@ class Programm3 {
 		_gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vertexBuffer);
 
 		// Allocate buffer for the largest possible triangle (9 floats per triangle)
-		_gl.BufferData(BufferTargetARB.ArrayBuffer, 9 * sizeof(float), IntPtr.Zero, BufferUsageARB.DynamicDraw);
+		_gl.BufferData(BufferTargetARB.ArrayBuffer, 9 * sizeof(float), in IntPtr.Zero, BufferUsageARB.DynamicDraw);
 
 		// Specify the layout of the vertex data
 		_gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
@@ -148,4 +139,24 @@ class Programm3 {
 
 		return shader;
 	}
+    public struct DrawableTriangle {
+        public float[] Vertices { get; set; }
+
+        public DrawableTriangle(float[] vertices) {
+            if (vertices.Length != 9) {
+                throw new ArgumentException("A triangle must have exactly 9 vertex values.");
+            }
+            Vertices = vertices;
+        }
+    }
+    public struct DrawableCircle {
+        public float[] Vertices { get; set; }
+
+        public DrawableCircle(float[] vertices) {
+            if (vertices.Length != 9) {
+                throw new ArgumentException("A triangle must have exactly 9 vertex values.");
+            }
+            Vertices = vertices;
+        }
+    }
 }

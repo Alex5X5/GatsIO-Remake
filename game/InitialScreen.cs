@@ -8,7 +8,8 @@ public partial class InitialScreen : Form {
 
 	private bool portInitialClick = true;
 	private bool ipInitialClick = true;
-	private bool ipV4ButtonPressed = false;
+	private bool ipV4ButtonPressed_ = false;
+    private bool ipV6ButtonPressed_ = false;
     private IpVersion ipVersion = IpVersion.DeviceDefault;
 
 	public InitialScreen() {
@@ -33,15 +34,47 @@ public partial class InitialScreen : Form {
 	}
 
 	private void UseIpV4(object sender, EventArgs e) {
-		ipV6Button.Checked = false;
-        //ipV4Button.Checked = !ipV4Button.Checked;
-		ipVersion = ipV4Button.Checked ? IpVersion.V4 : IpVersion.DeviceDefault;
+		//make sure that only inV4Button was clicked
+		if (sender!=ipV4Button)
+            return;
+        //uncheck the other button 
+        ipV6Button.Checked = false;
+		//if the button was clicked before, uncheck it
+		if (ipV4ButtonPressed_) {
+			ipVersion = IpVersion.DeviceDefault;
+            ipTextBox.Text = "enter IP (localhost is "+GameServer.GetLocalIP()+")";
+            //reset the button
+            ipV4Button.Checked = false;
+			ipV4ButtonPressed_ = false;
+			ipV6ButtonPressed_ = false;
+		} else {
+			//set the ip protocoll version to be used to ip v4
+			ipTextBox.Text = "enter IP (localhost is "+GameServer.GetLocalIPv4()+")";
+            ipVersion = IpVersion.V4;
+			ipV4ButtonPressed_ = true;
+		}
     }
 
 	private void UseIpV6(object sender, EventArgs e) {
-		ipV4Button.Checked = false;
-		//ipV6Button.Checked = !ipV6Button.Checked;
-        ipVersion = ipV6Button.Checked ? IpVersion.V6 : IpVersion.DeviceDefault;
+        //make sure that only inV6Button was clicked
+        if (sender!=ipV6Button)
+			return;
+		//uncheck the other button
+        ipV4Button.Checked = false;
+        //if the button was clicked before, uncheck it
+        if (ipV6ButtonPressed_) {
+            ipVersion = IpVersion.DeviceDefault;
+            ipTextBox.Text = "enter IP (localhost is "+GameServer.GetLocalIP()+")";
+            //reset the button
+            ipV6Button.Checked = false;
+            ipV6ButtonPressed_ = false;
+			ipV4ButtonPressed_ = false;
+        } else {
+            //set the ip protocoll version to be used to ip v6
+            ipTextBox.Text = "enter IP (localhost is "+GameServer.GetLocalIPv6()+")";
+            ipVersion = IpVersion.V6;
+            ipV6ButtonPressed_ = true;
+        }
     }
 
 	private void StartServer(object sender, EventArgs e) {
@@ -81,7 +114,7 @@ public partial class InitialScreen : Form {
             IpVersion.V6 => address_!=null ? address_.MapToIPv6() : GameServer.GetLocalIP().MapToIPv6(),
             _ => GameServer.GetLocalIP()
         };
-        port=port_>=0 ? (uint)Math.Abs(port_) : 4000;
+        port=port_>=0 ? (uint)Math.Abs(port_) : 5000;
     }
 
     public enum IpVersion {

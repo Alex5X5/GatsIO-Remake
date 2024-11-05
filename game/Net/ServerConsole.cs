@@ -10,8 +10,6 @@ namespace ShGame.game {
 
 		internal ServerConsole(GameServer gs) {
 			InitializeComponent(gs);
-			//Lines = new String[10];
-			//Console.WriteLine("text:"+OutputArea.Text);
 			StartThreads();
 		}
 
@@ -30,11 +28,6 @@ namespace ShGame.game {
 										(s) => WriteLine(s.ToString())
 								}
 						);
-						//StreamWriter writer = new StreamWriter("out.txt");
-						//Console.SetOut(writer);
-						//while(writer.)						
-						//Console.SetOut(reader);
-						//Console.Out
 					}
 			).Start();
 		}
@@ -52,19 +45,19 @@ namespace ShGame.game {
             }
         }
 
-
         public void WriteLine(string s) {
-			if (InvokeRequired&&!IsDisposed) {
-				//if the thread that called this method isn't the thread that created the console, make the ServerConsole call this method
-				Invoke(WriteLine, s);
-			} else {
-				string[] lines = OutputArea.Text.Split("\n");
-				string temp = "";
-				for (int i = 1; i<lines.Length; i++)
-					temp+=lines[i]+"\n";
-                temp+=s;
-				OutputArea.Text=temp;
-			}
+			if(Disposing&&!IsDisposed)
+				if (InvokeRequired) {
+					//if the thread that called this method isn't the thread that created the console, make the ServerConsole call this method
+					Invoke(WriteLine, s);
+				} else {
+					string[] lines = OutputArea.Text.Split("\n");
+					string temp = "";
+					for (int i = 1; i<lines.Length; i++)
+						temp+=lines[i]+"\n";
+					temp+=s;
+					OutputArea.Text=temp;
+				}
 	   }
 
 		private delegate void MessageDelegate(string s);
@@ -97,7 +90,6 @@ namespace ShGame.game {
 
 		public override void Close() {
 			base.Close();
-
 		}
 	}
 }
