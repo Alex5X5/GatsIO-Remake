@@ -8,7 +8,8 @@ public partial class InitialScreen : Form {
 
 	private bool portInitialClick = true;
 	private bool ipInitialClick = true;
-	private IpVersion ipVersion = IpVersion.DeviceDefault;
+	private bool ipV4ButtonPressed = false;
+    private IpVersion ipVersion = IpVersion.DeviceDefault;
 
 	public InitialScreen() {
 		InitializeComponent();
@@ -33,13 +34,13 @@ public partial class InitialScreen : Form {
 
 	private void UseIpV4(object sender, EventArgs e) {
 		ipV6Button.Checked = false;
-        ipV4Button.Checked = !ipV4Button.Checked;
+        //ipV4Button.Checked = !ipV4Button.Checked;
 		ipVersion = ipV4Button.Checked ? IpVersion.V4 : IpVersion.DeviceDefault;
     }
 
 	private void UseIpV6(object sender, EventArgs e) {
 		ipV4Button.Checked = false;
-		ipV6Button.Checked = !ipV6Button.Checked;
+		//ipV6Button.Checked = !ipV6Button.Checked;
         ipVersion = ipV6Button.Checked ? IpVersion.V6 : IpVersion.DeviceDefault;
     }
 
@@ -78,7 +79,7 @@ public partial class InitialScreen : Form {
         address = ipVersion switch {
             IpVersion.V4 => address_!=null ? address_.MapToIPv4() : GameServer.GetLocalIP().MapToIPv4(),
             IpVersion.V6 => address_!=null ? address_.MapToIPv6() : GameServer.GetLocalIP().MapToIPv6(),
-            _ => GameServer.GetLocalIP().MapToIPv4()
+            _ => GameServer.GetLocalIP()
         };
         port=port_>=0 ? (uint)Math.Abs(port_) : 4000;
     }

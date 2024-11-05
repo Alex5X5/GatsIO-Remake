@@ -44,7 +44,7 @@ namespace ShGame.game
             ipTextBox.ShortcutsEnabled = false;
             ipTextBox.TabIndex = 0;
             ipTextBox.TabStop = false;
-            ipTextBox.Text = "enter IP (192.168.100.100 by default)";
+            ipTextBox.Text = "enter IP (lovcalhost is "+GameServer.GetLocalIP()+")";
             ipTextBox.Click += IpField_Clicked;
             SuspendLayout();
             // 

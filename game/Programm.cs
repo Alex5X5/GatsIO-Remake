@@ -7,8 +7,8 @@ public static class Programm {
 
 	[STAThread]
 	public static void Main() {
-		Programm3.Main_();
-		return;
+		//Programm3.Main_();
+		//return;
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
 		Logging.DisableColors();

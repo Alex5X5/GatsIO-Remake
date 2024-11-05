@@ -74,7 +74,6 @@ public class Client : Form {
 			ClientSize=new Size(Renderer.WIDTH, Renderer.HEIGHT),
 			Name="Panel"
 		};
-		//Controls.Add(panel);
 
 		ResumeLayout(false);
 		PerformLayout();
@@ -149,7 +148,6 @@ public class Client : Form {
 				break;
 		}
 		player.OnKeyEvent(c: this);
-		//logger.Log("key released", new MessageParameter("player", player.toString()));
 	}
 
 	private void KeyDown_(object? sender, KeyEventArgs e) {
@@ -171,7 +169,6 @@ public class Client : Form {
 				break;
 		}
 		player.OnKeyEvent(c: this);
-		//logger.Log("key released", new MessageParameter("player", player.toString()));
 	}
 
 	protected override void OnPaint(PaintEventArgs e) {
@@ -200,8 +197,6 @@ private bool NetHandlerConnected() {
 			renderer.Dispose();
 			Dispose();
 			Thread.Sleep(500);
-			//Environment.Exit(1);
-			//System.Stop();
 		}
 	}
 

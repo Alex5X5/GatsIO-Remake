@@ -35,7 +35,7 @@ internal class GameServer:Socket {
 
     public GameServer(int port) : this(GetLocalIP(), (uint)Math.Abs(port)) { }
 
-    public GameServer(IPAddress address, uint port) : base(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp){
+    public GameServer(IPAddress address, uint port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp){
 		logger = new Logger(new LoggingLevel("GameServer"));
 		//create a new console that shows the messages of the server
 		console = new(this);
@@ -49,13 +49,14 @@ internal class GameServer:Socket {
 		logger.Log(
 			"address port constructor",
 			new MessageParameter("address",address.ToString()),
-			new MessageParameter("port",port)
+            new MessageParameter("addressFamily", address.AddressFamily.ToString()),
+            new MessageParameter("port",port)
 		);
 		SpreadObstacles();
 		//fill the players with invalid players so the serializers don't face nullpointers
 		players.Initialize();
 		//create an IPEndpoint with the given address and the given port and bind the server to the IPEndpoint
-		IPEndPoint point = new(IPAddress.Parse("192.168.178.30"), (int)port);
+		IPEndPoint point = new( address, (int)port);
 		logger.Log("binding, endPoint = "+point.ToString());
 		Bind(point);
 		logger.Log("bound endPoint="+point.ToString());
