@@ -48,8 +48,10 @@ internal class Renderer:IDisposable {
 			if(players!=null)
 				foreach (Player p in players) {
 					//if the player isn't null draw it
-					if(p!=null)
-						DrawPlayer(p, g);
+					if (p!=null) {
+						logger.Log("drawing player ",new MessageParameter("player",p.ToString()));
+                        DrawPlayer(p, g);
+                    }
 				}
 			//checked that the main player isn't null and draw it
 			if (player != null)
@@ -312,7 +314,7 @@ internal class Renderer:IDisposable {
 		//graphics2D.SetStroke(new BasicStroke(1 / gScl));
 		//graphics2D.drawLine(0, 0, (int)p.pos.x / gScl, (int)p.pos.y / gScl);
 		//Console.WriteLine("drawing at"+p.Pos.ToString());
-		if(p.Visible)
+		if (p.Visible) ;
 			g.FillEllipse(PLAYER_RED_COLOR, new Rectangle((int)p.Pos.x-Player.Radius, (int)p.Pos.y-Player.Radius, Player.Radius*2, Player.Radius*2));
 		//		logger.log(String.valueOf(p.pos.x/gScl)+" "+String.valueOf(p.pos.y/gScl));
 	}

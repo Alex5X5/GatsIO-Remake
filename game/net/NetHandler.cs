@@ -120,7 +120,7 @@ public class NetHandler:Socket {
 		Send(send);
 		byte[] temp = RecievePacket();
 		int counter = 0;
-		for(int i = 1; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
+		for(int i = 0; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
 			logger.Log("deserializing player",new MessageParameter("player",players[i].ToString()));
             if (temp != null)
                 fixed (Player* ptr = &players[i])

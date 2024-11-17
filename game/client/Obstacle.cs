@@ -223,13 +223,13 @@ public class Obstacle {
 			return;
         } else {
             offset_ += 4;
-            obstacle->Pos.x=BitConverter.ToInt32(*input, offset);
+            obstacle->Pos.x=BitConverter.ToInt32(*input, offset_);
             offset_ += 4;
-            obstacle->Pos.y=BitConverter.ToInt32(*input, offset);
+            obstacle->Pos.y=BitConverter.ToInt32(*input, offset_);
             offset_ += 4;
-            obstacle->WIDTH=BitConverter.ToInt32(*input, offset);
+            obstacle->WIDTH=BitConverter.ToInt32(*input, offset_);
             offset_+=4;
-            obstacle->HEIGHT=BitConverter.ToInt32(*input, offset);
+            obstacle->HEIGHT=BitConverter.ToInt32(*input, offset_);
 			UpdateBounds(obstacle);
         }
 	}

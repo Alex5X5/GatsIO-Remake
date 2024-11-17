@@ -129,6 +129,7 @@ internal class GameServer:Socket {
 					continue;
 				if(players[i].PlayerUUID == temp.PlayerUUID) {
 					//if the player was found in the stored players, set its direction to the direction of the recieved player
+					players[i].Pos = temp.Pos;
 					players[i].Dir = temp.Dir.Nor();
 					playerFound=true;
 					break;
