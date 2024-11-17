@@ -37,7 +37,6 @@ internal class RendererGl : IDisposable {
 	private static IWindow window;
 	private static GL Gl;
 
-
 	private static uint vertexBuffer;
 	private static uint indexBuffer;
 	private static uint VertexArray;
@@ -45,13 +44,12 @@ internal class RendererGl : IDisposable {
 
 	//Vertex shaders are run on each vertex.
 	private static readonly string VertexShaderSource = @"
-        #version 330 core //Using version GLSL version 3.3
+        #version 330 core
         layout (location = 0) in vec4 vPos;
-        
+
         void main() {
             gl_Position = vec4(vPos.x-1, -vPos.y+1, vPos.z, 1.0);
-        }
-        ";
+        }";
 
 	//Fragment shaders are run on each fragment/pixel of the geometry.
 	private static readonly string FragmentShaderSource = @"
@@ -60,8 +58,7 @@ internal class RendererGl : IDisposable {
 
         void main() {
             FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-        }
-        ";
+        }";
 
 	//a rectangle is defined by four points which have three coordinates each.
 	private const int FLOATS_PER_RECT = 12;
@@ -391,5 +388,43 @@ internal class RendererGl : IDisposable {
 
 		public static void UnbindVAO() => Gl.BindVertexArray(0);
 		public static void UnbindVBO() => Gl.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
+	}
+
+	public struct Triangle {
+        private const string VertexShaderSource = @"
+        #version 330 core
+        layout (location = 0) in vec4 vPos;
+
+        void main() {
+            gl_Position = vec4(vPos.x, -vPos.y, vPos.z, 1.0);
+        }";
+
+        public const int VERTECIES_LENGHT = 9 * sizeof(float);
+		public const int INDICES_LENGTH = 6 * sizeof(int);
+
+		private readonly int[] indices = [1, 2, 3, 1, 4, 3];
+		private float[] vertecies = new float[9];
+
+        public Triangle() {
+			vertecies.Initialize();
+		}
+
+		public unsafe void Update(float* x1, float* y1, float* x2, float* y2, float* x3, float* y3) {
+			vertecies[0] = *x1;
+			vertecies[1] = *y1;
+			vertecies[2] = *x2;
+			vertecies[2] = *y2;
+			vertecies[4] = *x3;
+			vertecies[5] = *y3;
+		}
+
+		public void OverrideArary(ref float[] array, int offset) {
+			array[offset] = vertecies[0];
+			array[offset + 1] = vertecies[1];
+			array[offset + 2] = vertecies[2];
+			array[offset + 3] = vertecies[3];
+			array[offset + 4] = vertecies[4];
+			array[offset + 5] = vertecies[5];
+		}
 	}
 }

@@ -20,7 +20,7 @@ internal class ServerConnection:Socket {
 
 	private bool RecievePacket(ref byte[] buffer) {
 		if (!Connected)
-			//if the socket isn't connected, return that the attemt to recieve a packet was incomplete
+			//if the socket isn't connected, return that the atempt to recieve a packet was unsuccessfull
 			return false;
 		//ins case the buffer doesn't have the standard packet length refize
 		Array.Resize(ref buffer, Protocoll.PACKET_BYTE_LENGTH);
@@ -43,50 +43,48 @@ internal class ServerConnection:Socket {
 				break;
 			//add the amount of recieved bytes in this cycle to all the recieved bytes so far
 			recieved += bytes;
-		}
-		if(recieved == Protocoll.PACKET_BYTE_LENGTH)
-			//if the amoutnt of recieved bytes matches the amount of expected bytes, return that the attemt to recieve a packet was successfull
-			return true;
-		else
-			return false;
+        }
+        //if the amount of recieved bytes matches the amount of expected bytes, return that the attemt to recieve a packet was successfull
+        return recieved >= Protocoll.PACKET_BYTE_LENGTH;
 	}
 
 	private void SendPacket(byte[]? send) {
 		if(send==null)
 			return;
-		try {
-			_=Send(send);
-		} catch (SocketException e) {
-			logger.Error(e.ToString());
-		} catch (ObjectDisposedException) {
-			
-		}
+		_=Send(send);
 	}
 
 	private void Run(GameServer gs) {
 		logger.Log("run");
 		byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
 		while(!stop) {
-			//recieve a packet from the client
-			if(RecievePacket(ref buffer));
+			try {
+				//recieve a packet from the client
+				if (!RecievePacket(ref buffer))
+					continue;
 				//depending on the packet type, send a request to the server and send back the result
-				switch(Protocoll.AnalyzePacket(buffer)) {
-					case ProtocollType.Communication:
+				switch (Protocoll.AnalyzePacket(buffer)) {
+					case Headers.PING:
 						SendPacket(gs.OnPingRequest(buffer));
 						break;
 
-					case ProtocollType.Player:
+					case Headers.PLAYER:
 						SendPacket(gs.OnPlayerRequest(buffer));
 						break;
 
-					case ProtocollType.Map:
+					case Headers.MAP:
 						SendPacket(gs.OnMapRequest());
 						break;
 
 					default:
 						Console.WriteLine("[ServerConnection]:type of recieved Protocoll is unknown (protocoll.type="+Protocoll.AnalyzePacket(buffer)+")");
 						break;
-				} 
+				}
+			} catch(SocketException e) {
+				logger.Error(e.Message);
+				disposalCooldown--;
+				break;
+			}
 		}
 	}
 

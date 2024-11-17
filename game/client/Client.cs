@@ -26,7 +26,7 @@ public class Client : Form {
 	internal Player player;
 
 	unsafe private Player[] players;
-	unsafe internal Obstacle[] obstacles = new Obstacle[20];
+	unsafe internal Obstacle[] obstacles = new Obstacle[GameServer.OBSTACLE_COUNT];
 	private Thread renderThread = new(() => { });
 	private Thread connectionThread = new(() => { });
 	private Thread playerMoveThread = new(() => { });
@@ -79,14 +79,15 @@ public class Client : Form {
 	}
 
 	private unsafe void StartThreads(IPAddress address, uint port) {
-		connectionThread=new Thread(
+        logger.Log("start threads!");
+        connectionThread=new Thread(
 			() => {
 				netHandler = new(address, port);
-
 				if (NetHandlerConnected())
 					netHandler.GetMap(ref obstacles);
 				Console.WriteLine(player);
 				while (!stop && NetHandlerConnected()) {
+					logger.Log("asking for players");
 					netHandler.ExchangePlayers(player, ref players);
 					Thread.Sleep(500);
 				}
@@ -94,8 +95,6 @@ public class Client : Form {
 			}
 		);
 		connectionThread.Start();
-
-		logger.Log("start threads!");
 		renderThread=new Thread(
 				() => {
 					while (!CanRaiseEvents&&!stop)

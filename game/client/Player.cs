@@ -1,4 +1,6 @@
-﻿namespace ShGame.game.Client;
+﻿using System.Xml.Linq;
+
+namespace ShGame.game.Client;
 
 public class Player {
 
@@ -7,16 +9,24 @@ public class Player {
 	public Vector3d Pos;
 	public Vector3d Dir = new(0, 0, 0);
 	public int Speed = 1;
-	public int Health { set; get; } = 100;
-	public const int radius = 10;
-	public Int64 PlayerUUID;
-	public bool visible;
 
-	public Player(Vector3d? pos, int health, Int64 UUID) {
-		Pos=pos??new Vector3d(0, 0, 0);
-		Health=health;
-		PlayerUUID=UUID!=0 ? UUID : new Random().Next();
-		visible=Health!=-1;
+	//private int Health_ = 0;// property
+
+	private int Health_;
+    public int Health {
+        get => Health_;
+        set => Health_ = value>100 ? 100 : value<-1 ? -1 : value;
+    }
+
+    public const int Radius = 10;
+	public Int64 PlayerUUID;
+	public bool Visible;
+
+	public Player(Vector3d? newPos, int newHealth, Int64 UUID) {
+		Pos = newPos??new Vector3d(0, 0, 0);
+		Health=newHealth;
+		PlayerUUID = UUID!=0 ? UUID : new Random().Next();
+		Visible=Health!=-1;
 	}
 
 	//the constructor for invalid players
@@ -25,7 +35,7 @@ public class Player {
 		//if the health of a player is -1 it is considered invalid and won't be processed
 		Health = -1;
 		PlayerUUID = 0;
-		visible=false;
+		Visible = false;
 	}
 
 	public override string ToString() => $"game.graphics.client.player[health:{Health}, speed:{Speed}, pos:{Pos} dir:{Dir} UUID:{PlayerUUID}]";
@@ -40,14 +50,14 @@ public class Player {
 	}
 
 	public void Deactivate() {
-		visible = false;
-		Pos.x=0;
-		Pos.y=0;
-		Pos.z=0;
-		Dir.x=0;
-		Dir.y=0;
-		Dir.z=0;
-		Health=0;
+		Visible = false;
+		Pos.x = 0;
+		Pos.y = 0;
+		Pos.z = 0;
+		Dir.x = 0;
+		Dir.y = 0;
+		Dir.z = 0;
+		Health = 0;
 	}
 
 	//	public bool checkEdges() {
@@ -70,7 +80,6 @@ public class Player {
 						Dir.x=0; //wasd
 						Dir.y=0;
 					} else {
-						//logger.log("was");
 						Dir.x=-1; //was
 						Dir.y=0;
 					}
@@ -81,7 +90,6 @@ public class Player {
 					} else {
 						Dir.x=(-1)/Math.Sqrt(2); //wa
 						Dir.y=(-1)/Math.Sqrt(2);
-						//Console.WriteLine(Dir.ToString());
 					}
 				}
 			} else {
@@ -90,7 +98,6 @@ public class Player {
 						Dir.x=1; //wsd
 						Dir.y=0;
 					} else {
-						//logger.log("ws");
 						Dir.x=0; //ws
 						Dir.y=0;
 					}
@@ -145,60 +152,53 @@ public class Player {
 		}
 	}
 
-	public static void SerializePlayer(ref byte[] input, ref Player p, int offset) {
+	public static unsafe void SerializePlayer(byte[]* input, Player* player, int offset) {
 		int offset_ = offset;
-		SerializePlayerCountable(ref input, ref p, ref offset_);
-	}
-
-	public static void SerializePlayerCountable(ref byte[] input, ref Player p, ref int offset) {
-		if(p==null) {
-			BitConverter.GetBytes(-1).CopyTo(input, offset);
-			offset+=PLAYER_BYTE_LENGTH;
+		if(player==null) {
+			BitConverter.GetBytes(-1).CopyTo(*input, offset_);
 			return;
 		}
-		BitConverter.GetBytes(p.Health).CopyTo(input, offset);
-		offset+=4;
-		BitConverter.GetBytes(p.Pos==null ? 0 : p.Pos.x).CopyTo(input, offset);
-		offset+=8;
-		BitConverter.GetBytes(p.Pos==null ? 0 : p.Pos.y).CopyTo(input, offset);
-		offset+=8;
-		BitConverter.GetBytes(p.Dir==null ? 0 : p.Dir.x).CopyTo(input, offset);
-		offset+=8;
-		BitConverter.GetBytes(p.Dir==null ? 0 : p.Dir.y).CopyTo(input, offset);
-		offset+=8;
-		BitConverter.GetBytes(p.Speed).CopyTo(input, offset);
-		offset+=4;
-		BitConverter.GetBytes(p.PlayerUUID).CopyTo(input, offset);
-		offset+=8;
+		BitConverter.GetBytes(player->Health).CopyTo(*input, offset_);
+		offset_+=4;
+		BitConverter.GetBytes(player->Pos==null ? 0 : player->Pos.x).CopyTo(*input, offset_);
+		offset_+=8;
+		BitConverter.GetBytes(player->Pos==null ? 0 : player->Pos.y).CopyTo(*input, offset_);
+		offset_+=8;
+		BitConverter.GetBytes(player->Dir==null ? 0 : player->Dir.x).CopyTo(*input, offset_);
+		offset_+=8;
+		BitConverter.GetBytes(player->Dir==null ? 0 : player->Dir.y).CopyTo(*input, offset_);
+		offset_+=8;
+		BitConverter.GetBytes(player->Speed).CopyTo(*input, offset_);
+		offset_+=4;
+		BitConverter.GetBytes(player->PlayerUUID).CopyTo(*input, offset_);
 	}
 
-	public static void DeserializePlayer(ref byte[] input, ref Player player, int offset) {
+	public static unsafe void DeserializePlayer(byte[]* input, Player* player, int offset) {
 		int offset_ = offset;
-		DeserializePlayerCountable(ref input, ref player, ref offset_);
-	}
+		if (input==null)
+            return;
+        *player ??= new Player(null, 0, 0);
+        player->Health = BitConverter.ToInt32(*input, offset_);
+        if (player->Health==-1) {
+            player->Deactivate();
+            //offset_+=PLAYER_BYTE_LENGTH;
+        } else {
+            offset_+=4;
+            player->Pos.x=BitConverter.ToDouble(*input, offset_);
+            offset_+=8;
+            player->Pos.y=BitConverter.ToDouble(*input, offset_);
+            offset_+=8;
+            player->Dir.x=BitConverter.ToDouble(*input, offset_);
+            offset_+=8;
+            player->Dir.y=BitConverter.ToDouble(*input, offset_);
+            offset_+=8;
+            player->Speed=BitConverter.ToInt32(*input, offset_);
+            offset_+=4;
+            player->PlayerUUID = BitConverter.ToInt64(*input, offset_);
+        }
+    }
 	
-	public static void DeserializePlayerCountable(ref byte[] input, ref Player player, ref int offset) {
-		if(input==null)
-			return;
-		player ??= new Player(null, 0, 0);
-		player.Health = BitConverter.ToInt32(input, offset);
-		if(player.Health==-1) {
-			player.Deactivate();
-			offset+=PLAYER_BYTE_LENGTH;
-		} else {
-			offset+=4;
-			player.Pos.x=BitConverter.ToDouble(input, offset);
-			offset+=8;
-			player.Pos.y=BitConverter.ToDouble(input, offset);
-			offset+=8;
-			player.Dir.x=BitConverter.ToDouble(input, offset);
-			offset+=8;
-			player.Dir.y=BitConverter.ToDouble(input, offset);
-			offset+=8;
-			player.Speed=BitConverter.ToInt32(input, offset);
-			offset+=4;
-			player.PlayerUUID = BitConverter.ToInt64(input, offset);
-			offset+=8;
-		}
+	public static unsafe void DeserializePlayerArray(byte[]* input, Player* player, int offset) {
+		
 	}
 }

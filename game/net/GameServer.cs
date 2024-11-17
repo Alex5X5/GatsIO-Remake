@@ -1,5 +1,6 @@
 ﻿namespace ShGame.game.Net;
 
+using System.Diagnostics.Eventing.Reader;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -25,17 +26,17 @@ internal class GameServer:Socket {
 	public const int MAX_PLAYER_COUNT = 10, OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES;
 
 	internal readonly ServerConnection?[] clients = new ServerConnection[MAX_PLAYER_COUNT];
-	internal Player?[] players = new Player[MAX_PLAYER_COUNT];
+	internal Player[] players = new Player[MAX_PLAYER_COUNT];
 	private unsafe readonly Obstacle[] obstacles = new Obstacle[OBSTACLE_COUNT];
 
-    #endregion fields
+	#endregion fields
 
-    #region constructors
-    public GameServer() : this(5000) { }
+	#region constructors
+	public GameServer() : this(5000) { }
 
-    public GameServer(int port) : this(GetLocalIP(), (uint)Math.Abs(port)) { }
+	public GameServer(int port) : this(GetLocalIP(), (uint)Math.Abs(port)) { }
 
-    public GameServer(IPAddress address, uint port) : base(address.AddressFamily == AddressFamily.InterNetwork ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp){
+	public GameServer(IPAddress address, uint port) : base(address.AddressFamily == AddressFamily.InterNetwork ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp){
 		logger = new Logger(new LoggingLevel("GameServer"));
 		//create a new console that shows the messages of the server
 		console = new(this);
@@ -47,16 +48,16 @@ internal class GameServer:Socket {
 		logger.Log(
 			"address port constructor",
 			new MessageParameter("address",address),
-            new MessageParameter("addressFamily", base.AddressFamily.ToString()),
-            new MessageParameter("port",port)
+			new MessageParameter("addressFamily", base.AddressFamily.ToString()),
+			new MessageParameter("port",port)
 		);
 		SpreadObstacles();
 		//fill the players with invalid players so the serializers don't face nullpointers
-		players.Initialize();
-        //create an IPEndpoint with the given address and the given port and bind the server to the IPEndpoint
-        IPEndPoint point = new(address.AddressFamily == AddressFamily.InterNetworkV6 ? GetLocalIPv6() : GetLocalIPv4(), (int)port);
-        //IPEndPoint point = new(IPAddress.Parse("fe80::d860:be77:221:1144"), (int)port);
-        logger.Log("binding, endPoint = "+point.ToString()+" endpint address = " + point.AddressFamily.ToString());
+		for (int i = 0; i < MAX_PLAYER_COUNT; i++)
+			players[i] = new Player();
+		//create an IPEndpoint with the given address and the given port and bind the server to the IPEndpoint
+		IPEndPoint point = new(address.AddressFamily == AddressFamily.InterNetworkV6 ? GetLocalIPv6() : GetLocalIPv4(), (int)port);
+		logger.Log("binding, endPoint = "+point.ToString()+" endpint address = " + point.AddressFamily.ToString());
 		Bind(point);
 		logger.Log("bound endPoint="+point.ToString());
 		logger.Log(Convert.ToString(IsBound));
@@ -69,12 +70,20 @@ internal class GameServer:Socket {
 	private void OnAccept(Socket s) {
 		Console.WriteLine("[Server]:OnAccept("+s.ToString()+")");
 		//search for a slot for the new connection
+		bool found = false;
 		for(int i = 0; i<clients.Length; i++) {
 			if(clients[i]==null) {
 				//close the newly created socket an create a ServerConnection from the socket's information so the ServerConnection is bound to the incoming connection
 				clients[i]=new ServerConnection(s.DuplicateAndClose(Environment.ProcessId), this);
+				found = true;
 				break;
 			}
+		}
+		if (!found) {
+			byte[] buffer = Protocoll.PreparePacket(Headers.PAYER_LIMIT);
+			s.Send(buffer);
+			s.Close();
+			s.Dispose();
 		}
 	}
 
@@ -84,13 +93,15 @@ internal class GameServer:Socket {
 
 	internal unsafe byte[] OnMapRequest() {
 		//prepare a new Packet
-		byte[] result = [];
-		result  = Protocoll.PreparePacket(ProtocollType.Map);
+		byte[] result = Protocoll.PreparePacket(Headers.MAP);
 		int counter = 0;
 		//serialize all of the obstacles into the packet
-		for(int i = 0; i<20; i++)
-			fixed(Obstacle* ptr = &obstacles[i])
-				Obstacle.SerializeObstacleCountable(ref result, ptr, ref counter);
+		for (int i = 0; i<OBSTACLE_COUNT; i++) {
+            fixed (Obstacle* ptr = &obstacles[i]) {
+				logger.Log("serializing requested obstacle",new MessageParameter(" packet offset", (Protocoll.PAYLOAD_OFFSET+i*Obstacle.OBSTACLE_BYTE_LENGTH)),new MessageParameter(" Obstacle"+ptr->ToString()));
+				Obstacle.SerializeObstacle(&result, ptr, Protocoll.PAYLOAD_OFFSET+i*Obstacle.OBSTACLE_BYTE_LENGTH);
+			}
+		}
 		return result;
 	}
 
@@ -103,43 +114,56 @@ internal class GameServer:Socket {
 		return null;
 	}
 
-	internal byte[]? OnPlayerRequest(byte[] packet) {
+	internal unsafe byte[]? OnPlayerRequest(byte[] packet) {
 		//check if the packet actually is a player request
-		if(Protocoll.AnalyzePacket(packet)==ProtocollType.Player) {
+		if (Protocoll.AnalyzePacket(packet)==Headers.PLAYER) {
 			//create a temporary player and read it's properties from the packet
 			Player temp = new(null, 0, 0);
-			Player.DeserializePlayer(ref packet, ref temp, Protocoll.PAYLOAD_OFFSET);
+			Player.DeserializePlayer(&packet, &temp, Protocoll.PAYLOAD_OFFSET);
+			logger.Log("processing player request",new MessageParameter("player",temp));
 			bool playerFound=false;
+			bool registeredPlayer = false;
 			//loop through the current players and check whether the recieved player's and the stored player's UUID match
-			for(int i = 0; i<MAX_PLAYER_COUNT; i++) {
+			for (int i = 0; i<MAX_PLAYER_COUNT; i++) {
+				if (players[i]==null)
+					continue;
 				if(players[i].PlayerUUID == temp.PlayerUUID) {
 					//if the player was found in the stored players, set its direction to the direction of the recieved player
 					players[i].Dir = temp.Dir.Nor();
 					playerFound=true;
 					break;
 				}
-			}
-			//since the player isn't known, loop through the players array serarch for an empty slot for the new player
-			if (!playerFound) {
-				bool registeredPlayer = false;
+			} if (!playerFound) {
+				//since the player isn't known, try to register it
 				logger.Log("registering new player",new MessageParameter("UUID",temp.PlayerUUID));
+				//loop through the player array and search for an unused player
 				for (int i = 0; i<MAX_PLAYER_COUNT; i++) {
 					//the slot is considered empty if the players health is -1
 					if (players[i].Health==-1) {
 						players[i].Health=100;
+						players[i].PlayerUUID = temp.PlayerUUID;
 						players[i].Dir=temp.Dir.Nor();
 						registeredPlayer = true;
+						logger.Log("sucessfully registred new player", new MessageParameter("UUID", temp.PlayerUUID));
 						break;
 					}
 				}
 
 			}
 			//prepare a new packet
-			byte[] result = Protocoll.PreparePacket(ProtocollType.Player);
-			int count = Protocoll.PAYLOAD_OFFSET;
-			//add all of the players to the packet
-			for(int i = 0; i<MAX_PLAYER_COUNT-1; i++) {
-				Player.SerializePlayerCountable(ref result, ref players[i], ref count);
+			byte[] result = Protocoll.PreparePacket(Headers.PLAYER);
+			if (playerFound|registeredPlayer) {
+				//add all of the players to the packet
+				for (int i = 0; i<MAX_PLAYER_COUNT-1; i++) {
+					if (players[i]==null)
+						continue;
+					logger.Log("serializing player",new MessageParameter("player", players[i].ToString()));
+					//create a pointer to a player in the array of the players
+					fixed (Player* ptr = &players[i])
+						Player.SerializePlayer(&result, ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+				}
+			} else {
+				result = Protocoll.PreparePacket(Headers.PAYER_LIMIT);
 			}
 			return result;
 		} else
@@ -155,12 +179,10 @@ internal class GameServer:Socket {
 			if (clients[i]!=null) {
 				if (clients[i].disposalCooldown<1000)
 					clients[i].disposalCooldown--;
-				if (clients[i].disposalCooldown==500) {
+				if (clients[i].disposalCooldown==800)
 					clients[i].Stop();
-				}
-				if (clients[i]?.disposalCooldown<=0) {
+				if (clients[i]?.disposalCooldown<=0)
 					clients[i] = null;
-				}
 			}
 		}
 	}
@@ -192,10 +214,10 @@ internal class GameServer:Socket {
 			new Vector3d(
 				//the obstacles may also be offset by half the distance to the next row/line
 				//first add half of the distance between the rows to x
-				//then substract a random number between 0 and OBSTACLE_ROW_DISANCE to it
+				//then substract a random number between 0 and OBSTACLE_ROW_DISANCE from it
 				row + OBSTACLE_ROW_DISANCE / 2 - r.Next(0, OBSTACLE_ROW_DISANCE),
 				//first add half of the distance between the lines to y
-				//then substract a random number between 0 and the full distance between the lines to it
+				//then substract a random number between 0 and OBSTACLE_LINE_DISTANCE from it
 				line + OBSTACLE_LINE_DISTANCE /2 + r.Next(0, OBSTACLE_LINE_DISTANCE),
 				0
 			),
@@ -204,55 +226,56 @@ internal class GameServer:Socket {
 
 		);
 	}
-    public void Stop() {
-        logger.Log("stopping");
-        //the Run Thread only stops if stop is set to true
-        stop = true;
-        //stopp all connections
-        foreach (ServerConnection? c in clients)
-            c?.Stop();
-        Thread.Sleep(1000);
-        //the socket must be closed and disposed or the garbage collector won't free the memory
-        Close();
-        Dispose();
-    }
+	public void Stop() {
+		logger.Log("stopping");
+		//the Run Thread only stops if stop is set to true
+		stop = true;
+		//stopp all connections
+		foreach (ServerConnection? c in clients)
+			c?.Stop();
+		Thread.Sleep(1000);
+		//the socket must be closed and disposed or the garbage collector won't free the memory
+		Close();
+		Dispose();
+	}
 
-    private async void Run() {
-        logger.Log("run");
-        //loop until the server is about to stop
-        while (!stop) {
-            Listen(1);
-            while (!stop) {
-                try {
-                    //create a Task that starts to try to accept a socket and in case of success stops to listen
-                    // the result of the listening is a  socket that is connected to a client
-                    Socket clientConnection =
-                        await Task.Factory.FromAsync(BeginAccept, EndAccept, null);
-                    _=Task.Run(() => OnAccept(clientConnection));
-                } catch (Exception e) {
-                    if (!stop) {
-                        //if the Exception wasn't caught because the server is stopping and it's socket is closing,
-                        //a different error must have happened so print it's message
-                        Console.WriteLine(e.ToString());
-                    } else {
-                        //since the server is stopping, ignore the error and break the main loop
-                        break;
-                    }
-                }
-            }
-        }
-    }
+	private async void Run() {
+		logger.Log("run");
+		//loop until the server is about to stop
+		while (!stop) {
+			Listen(1);
+			while (!stop) {
+				try {
+					//create a Task that starts to try to accept a socket and in case of success stops to listen
+					//the result of the listening is a  socket that is connected to a client
+					Socket clientConnection =
+						await Task.Factory.FromAsync(BeginAccept, EndAccept, null);
+					_=Task.Run(()=>OnAccept(clientConnection));
+				} catch (Exception e) {
+					if (!stop) {
+						//if the Exception wasn't caught because the server is stopping and it's socket is therefore closing,
+						//a different error must have happened so print it's message
+						Console.WriteLine(e.ToString());
+					} else {
+						//since the server is stopping, ignore the error and break the main loop
+						break;
+					}
+				}
+			}
+		}
+	}
 
-    public static IPAddress GetLocalIPv4() =>
-        NetworkInterface.GetAllNetworkInterfaces()[2].
-            GetIPProperties().UnicastAddresses[^1].
-                Address;
-    public static IPAddress GetLocalIPv6() =>
-        NetworkInterface.GetAllNetworkInterfaces()[2].
-            GetIPProperties().UnicastAddresses[^2].
-                Address;
+	public static IPAddress GetLocalIPv4() =>
+		NetworkInterface.GetAllNetworkInterfaces()[2].
+			GetIPProperties().UnicastAddresses[^1].
+				Address;
 
-    public static IPAddress GetLocalIP()=>
+	public static IPAddress GetLocalIPv6() =>
+		NetworkInterface.GetAllNetworkInterfaces()[2].
+			GetIPProperties().UnicastAddresses[^2].
+				Address;
+
+	public static IPAddress GetLocalIP()=>
 		NetworkInterface.GetAllNetworkInterfaces()[2].
 			GetIPProperties().UnicastAddresses[^1].
 				Address;

@@ -312,8 +312,8 @@ internal class Renderer:IDisposable {
 		//graphics2D.SetStroke(new BasicStroke(1 / gScl));
 		//graphics2D.drawLine(0, 0, (int)p.pos.x / gScl, (int)p.pos.y / gScl);
 		//Console.WriteLine("drawing at"+p.Pos.ToString());
-		if(p.visible)
-			g.FillEllipse(PLAYER_RED_COLOR, new Rectangle((int)p.Pos.x-Player.radius, (int)p.Pos.y-Player.radius, Player.radius*2, Player.radius*2));
+		if(p.Visible)
+			g.FillEllipse(PLAYER_RED_COLOR, new Rectangle((int)p.Pos.x-Player.Radius, (int)p.Pos.y-Player.Radius, Player.Radius*2, Player.Radius*2));
 		//		logger.log(String.valueOf(p.pos.x/gScl)+" "+String.valueOf(p.pos.y/gScl));
 	}
 

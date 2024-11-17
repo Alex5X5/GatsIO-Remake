@@ -148,15 +148,29 @@ class Programm3 {
             }
             Vertices = vertices;
         }
+
+        public unsafe void Draw(float*[] updatedVertecies) {
+			if (updatedVertecies!=null) {
+				
+			} else {
+
+			}
+        }
+
+
     }
     public struct DrawableCircle {
-        public float[] Vertices { get; set; }
+        public float[] vertices { get; set; }
 
-        public DrawableCircle(float[] vertices) {
-            if (vertices.Length != 9) {
+        public DrawableCircle(float[] _vertices) {
+            if (_vertices.Length != 9) {
                 throw new ArgumentException("A triangle must have exactly 9 vertex values.");
             }
-            Vertices = vertices;
+            vertices = _vertices;
         }
+
+		public unsafe void Draw(float*[] unpdatedVertecies) {
+			
+		}
     }
 }

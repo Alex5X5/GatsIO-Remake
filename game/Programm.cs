@@ -9,6 +9,7 @@ public static class Programm {
 	public static void Main() {
 		//Programm3.Main_();
 		//return;
+		//RendererGl rd = new();
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
 		Logging.DisableColors();

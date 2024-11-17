@@ -29,19 +29,20 @@ public class NetHandler:Socket {
 		logger.Log("port constructor");
 	}
 
-    public NetHandler(IPAddress address, uint port) : base(address.AddressFamily == AddressFamily.InterNetwork ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp) {
-        logger.Log("port addresss constructor");
-		IP=address;
-		PORT=port;
+    public NetHandler(IPAddress address, uint port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
+		logger.Log("port addresss constructor");
+		logger.Log(address.AddressFamily.ToString());
+		IP = address;
+		PORT = port;
 		//logger.Log(ToString());
-		IPEndPoint point = new(address.AddressFamily == AddressFamily.InterNetworkV6 ? GameServer.GetLocalIPv6() : GameServer.GetLocalIPv4(), (int)port);
+		IPEndPoint point = new(address, (int)port);
 		logger.Log(point.ToString());
 		try {
-			logger.Log("trying to connect, point="+point.ToString());
+			logger.Log("trying to connect, point="+point.ToString()+", family="+point.Address.AddressFamily);
 			//Connect_(address, port);
 			Connect(point);
 		} catch(SocketException e) {
-			logger.Warn("failed to bind (reason="+e.ToString()+")");
+			logger.Warn("failed to connect (reason="+e.ToString()+")");
 		} 
 		if(Connected)
 			logger.Log("connected!");
@@ -56,11 +57,11 @@ public class NetHandler:Socket {
 		IPEndPoint point = new(address, port);
 		logger.Log("connecting "+point);
 		IAsyncResult result = BeginConnect(point, null, null);
-		bool success = result.AsyncWaitHandle.WaitOne(5000, true);
+		bool success = result.AsyncWaitHandle.WaitOne(10000, true);
 		while (!success)
 			Thread.Sleep(100);
 		logger.Log(Convert.ToString(Connected));
-		if (Connected) {
+		if (!Connected) {
 			EndConnect(result);
 			return success;
 		} else {
@@ -70,7 +71,7 @@ public class NetHandler:Socket {
 		return success;
 	}
 
-	private byte[] RecievePacket() {
+	private byte[] RecievePacket(){
 		if(!Connected)
 			throw new ConnectException("not connected");
 		byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
@@ -101,37 +102,37 @@ public class NetHandler:Socket {
 
 	public unsafe void GetMap(ref Obstacle[] obstacles) {
 		logger.Log("getting map");
-		SendPacket(Protocoll.PreparePacket(ProtocollType.Map));
-		byte[] temp = RecievePacket();
+		SendPacket(Protocoll.PreparePacket(Headers.MAP));
+		byte[] packet = RecievePacket();
 		int counter = 0;
-		for(int i = 0; i<20; i++) {
-			if(temp!=null)
-				fixed(Obstacle* ptr = &obstacles[i])
-					Obstacle.DeserializeObstacleCountable(ref temp, ptr, ref counter);
-		}
+        if (packet!=null)
+            for (int j = 0; j<GameServer.OBSTACLE_COUNT; j++)
+				fixed (Obstacle* ptr = &obstacles[j])
+					Obstacle.DeserializeObstacle(&packet, ptr, j*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
 		foreach(Obstacle obstacle in obstacles)
-			if(obstacle!=null)
-				Console.WriteLine(obstacle.ToString());
+			Console.WriteLine(obstacle.ToString());
 	}
 
-	public void ExchangePlayers(Player p, ref Player[] players) {
+	public unsafe void ExchangePlayers(Player p, ref Player[] players) {
 		logger.Log("exchanging players", [new MessageParameter("player",p.ToString())]);
-		byte[] send = Protocoll.PreparePacket(ProtocollType.Player);
-		Player.SerializePlayer(ref send, ref p, Protocoll.PAYLOAD_OFFSET);
-		//Console.WriteLine("NetHandler:"+p);
+		byte[] send = Protocoll.PreparePacket(Headers.PLAYER);
+		Player.SerializePlayer(&send, &p, Protocoll.PAYLOAD_OFFSET);
+		Send(send);
 		byte[] temp = RecievePacket();
 		int counter = 0;
-		for(int i = 0; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
-			Console.WriteLine("NetHandler:"+players[i]);
-			if (temp != null)
-				Player.DeserializePlayerCountable(ref temp, ref players[i], ref counter);
-			Console.WriteLine("NetHandler:"+players[i]);
-		}
+		for(int i = 1; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
+			logger.Log("deserializing player",new MessageParameter("player",players[i].ToString()));
+            if (temp != null)
+                fixed (Player* ptr = &players[i])
+					Player.DeserializePlayer(&temp, ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+			counter+=Player.PLAYER_BYTE_LENGTH;
+            logger.Log("deserialized player", new MessageParameter("player", players[i].ToString()));
+        }
 	}
 
 	internal void Stop() {
 		logger.Log("stopping");
-		stop=true;
+		stop = true;
 		Close();
 		Dispose();
 	}
