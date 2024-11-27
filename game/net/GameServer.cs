@@ -223,7 +223,7 @@ internal class GameServer:Socket {
 				0
 			),
 			//the upper bound of the type must be 4 becuase 3 ist the maxumum possible tytpe but the upper bound is not included
-			r.Next(1, 4)
+			(byte)r.Next(1, 4)
 
 		);
 	}

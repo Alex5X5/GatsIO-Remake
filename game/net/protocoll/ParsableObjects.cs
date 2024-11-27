@@ -41,7 +41,7 @@ public class Serializer {
 		offset+=8;
 		BitConverter.GetBytes(o.Pos.y).CopyTo(buffer, offset);
 		offset+=8;
-		BitConverter.GetBytes(o.type).CopyTo(buffer, offset);
-		offset+=4;
+		//BitConverter.GetBytes(o.type).CopyTo(buffer, offset);
+		//offset+=4;
 	}
 }

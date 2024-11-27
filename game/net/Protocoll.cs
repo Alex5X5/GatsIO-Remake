@@ -2,8 +2,9 @@
 
 public static class Protocoll {
 
-	public const int PING_HEADER = 1, PLAYER_HEADER = 11, MAP_HEADER = 3;
-	public const int PACKET_BYTE_LENGTH = 1000, PAYLOAD_OFFSET = 1;
+	public const byte PING_HEADER = 1, PLAYER_HEADER = 11, MAP_HEADER = 3;
+	public const short PACKET_BYTE_LENGTH = 1000, PAYLOAD_OFFSET = 1;
+	
 
 	public static byte AnalyzePacket(byte[] packet) {
 		return packet[0];

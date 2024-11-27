@@ -13,6 +13,7 @@ public static class Programm {
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
 		Logging.DisableColors();
+		//Logging.DisableLog();
 		Console.WriteLine("start");
 		Application.Run(new InitialScreen());
 	}

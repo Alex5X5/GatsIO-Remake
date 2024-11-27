@@ -106,9 +106,9 @@ public class NetHandler:Socket {
 		byte[] packet = RecievePacket();
 		int counter = 0;
         if (packet!=null)
-            for (int j = 0; j<GameServer.OBSTACLE_COUNT; j++)
-				fixed (Obstacle* ptr = &obstacles[j])
-					Obstacle.DeserializeObstacle(&packet, ptr, j*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+            for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
+				fixed (Obstacle* ptr = &obstacles[i])
+					Obstacle.DeserializeObstacle(&packet, ptr, i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
 		foreach(Obstacle obstacle in obstacles)
 			Console.WriteLine(obstacle.ToString());
 	}
@@ -118,16 +118,16 @@ public class NetHandler:Socket {
 		byte[] send = Protocoll.PreparePacket(Headers.PLAYER);
 		Player.SerializePlayer(&send, &p, Protocoll.PAYLOAD_OFFSET);
 		Send(send);
-		byte[] temp = RecievePacket();
-		int counter = 0;
-		for(int i = 0; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
-			logger.Log("deserializing player",new MessageParameter("player",players[i].ToString()));
-            if (temp != null)
-                fixed (Player* ptr = &players[i])
-					Player.DeserializePlayer(&temp, ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
-			counter+=Player.PLAYER_BYTE_LENGTH;
-            logger.Log("deserialized player", new MessageParameter("player", players[i].ToString()));
-        }
+		byte[] packet = RecievePacket();
+        if (packet != null)
+            for (int i = 0; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
+				logger.Log("deserializing player",new MessageParameter("player",players[i].ToString()));
+				Player temp = new();
+				Player.DeserializePlayer(&packet, &temp, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+				if (temp != null && temp.PlayerUUID != p.PlayerUUID)
+					players[i] = temp;
+				logger.Log("deserialized player", new MessageParameter("player", players[i].ToString()));
+			}
 	}
 
 	internal void Stop() {

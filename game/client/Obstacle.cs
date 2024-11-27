@@ -15,8 +15,9 @@ public class Obstacle {
 
     public const int OBSTACLE_BYTE_LENGTH = 20;
 
-	public int WIDTH, HEIGHT;
-	public int type;
+	public ushort WIDTH, HEIGHT;
+	
+	public byte type;
 
 	public Obstacle() {
 		Pos = new(0, 0, 0);
@@ -28,7 +29,7 @@ public class Obstacle {
 		boundR = new LineSection3d(boundT.point2, boundB.point2);
 	}
 
-	public Obstacle(Vector3d? pos_, int type_) {
+	public Obstacle(Vector3d? pos_, byte type_) {
 		Pos = pos_??new Vector3d(0, 0, 0);
 		type = type_;
 		switch(type) {
@@ -61,7 +62,7 @@ public class Obstacle {
 
 	public Obstacle(ParsableObstacle obstacle) {
 		Pos = obstacle.POS;
-		type = obstacle.TYPE;
+		type = (byte)obstacle.TYPE;
 
 		switch(type) {
 			case 1:
@@ -120,25 +121,21 @@ public class Obstacle {
 			point2->x=boundL.point2.x;
 			point2->y=boundL.point2.y;
 		} else if(RelativeX(pos)==2&&RelativeY(pos)==1) {
-			//return new Vector3d[] { boundL.point1, boundR.point1 };
 			point1->x=boundL.point1.x;
 			point1->y=boundL.point1.y;
 			point2->x=boundR.point1.x;
 			point2->y=boundR.point1.y;
 		} else if(RelativeX(pos)==3&&RelativeY(pos)==1) {
-			//return new Vector3d[] { boundL.point1, boundR.point2 };
 			point1->x=boundL.point1.x;
 			point1->y=boundL.point1.y;
 			point2->x=boundR.point2.x;
 			point2->y=boundR.point2.y;
 		} else if(RelativeX(pos)==1&&RelativeY(pos)==2) {
-			//return new Vector3d[] { boundL.point1, boundL.point2 };
 			point1->x=boundL.point1.x;
 			point1->y=boundL.point1.y;
 			point2->x=boundL.point2.x;
 			point2->y=boundL.point2.y;
 		} else if(RelativeX(pos)==3&&RelativeY(pos)==2) {
-			//return new Vector3d[] { boundR.point1, boundR.point2 };
 			point1->x=boundR.point1.x;
 			point1->y=boundR.point1.y;
 			point2->x=boundR.point2.x;
@@ -158,9 +155,7 @@ public class Obstacle {
 			point1->y=boundR.point1.y;
 			point2->x=boundL.point2.x;
 			point2->y=boundL.point2.y;
-			//return new Vector3d[] { boundR.point1, boundL.point2 };
 		}
-		//return null;
 	}
 
 	private unsafe int RelativeX(Vector3d* v) {
@@ -201,7 +196,8 @@ public class Obstacle {
 		if (obstacle==null) {
 			BitConverter.GetBytes(-1).CopyTo(*input, offset_);
 		} else {
-            BitConverter.GetBytes(obstacle->type).CopyTo(*input, offset_);
+            fixed (byte* ptr = *input)
+                obstacle->type=*ptr;
             offset_ += 4;
 			Console.WriteLine("[Obstacle]:x="+(int)(obstacle->Pos==null ? 0 : obstacle->Pos.x));
             BitConverter.GetBytes((int)(obstacle->Pos==null ? 0 : obstacle->Pos.x)).CopyTo(*input, offset_);
@@ -218,7 +214,9 @@ public class Obstacle {
         ArgumentNullException.ThrowIfNull(*input);
         int offset_ = offset;
 		*obstacle ??= new Obstacle(null, 0);
-        obstacle->type = BitConverter.ToInt32(*input, offset_);
+		fixed (byte *ptr = *input) {
+			obstacle->type=*ptr;
+		}
         if (obstacle->type==-1) {
 			return;
         } else {
@@ -227,16 +225,10 @@ public class Obstacle {
             offset_ += 4;
             obstacle->Pos.y=BitConverter.ToInt32(*input, offset_);
             offset_ += 4;
-            obstacle->WIDTH=BitConverter.ToInt32(*input, offset_);
+            obstacle->WIDTH=(ushort)BitConverter.ToInt16(*input, offset_);
             offset_+=4;
-            obstacle->HEIGHT=BitConverter.ToInt32(*input, offset_);
+            obstacle->HEIGHT=(ushort)BitConverter.ToInt32(*input, offset_);
 			UpdateBounds(obstacle);
         }
-	}
-
-	public enum Type : byte {
-		Wide,
-		High,
-		WideHigh
 	}
 }

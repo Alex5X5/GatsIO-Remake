@@ -19,7 +19,7 @@ public class Player {
     }
 
     public const int Radius = 10;
-	public Int64 PlayerUUID;
+	public Int64 PlayerUUID = 0;
 	public bool Visible;
 
 	public Player(Vector3d? newPos, int newHealth, Int64 UUID) {
