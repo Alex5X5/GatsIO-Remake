@@ -15,9 +15,8 @@ public class Obstacle {
 
     public const int OBSTACLE_BYTE_LENGTH = 20;
 
-	public ushort WIDTH, HEIGHT;
-	
-	public byte type;
+	public int WIDTH, HEIGHT;
+	public int type;
 
 	public Obstacle() {
 		Pos = new(0, 0, 0);
@@ -29,7 +28,7 @@ public class Obstacle {
 		boundR = new LineSection3d(boundT.point2, boundB.point2);
 	}
 
-	public Obstacle(Vector3d? pos_, byte type_) {
+	public Obstacle(Vector3d? pos_, int type_) {
 		Pos = pos_??new Vector3d(0, 0, 0);
 		type = type_;
 		switch(type) {
@@ -62,7 +61,7 @@ public class Obstacle {
 
 	public Obstacle(ParsableObstacle obstacle) {
 		Pos = obstacle.POS;
-		type = (byte)obstacle.TYPE;
+		type = obstacle.TYPE;
 
 		switch(type) {
 			case 1:
@@ -181,7 +180,19 @@ public class Obstacle {
 	}
 
 	private static unsafe void UpdateBounds(Obstacle* obstacle) {
-		obstacle->boundL.point1.Set(obstacle->Pos.x, obstacle->Pos.y, 0);
+        obstacle->WIDTH = obstacle->type switch {
+            1 => 35,
+            2 => 70,
+            3 => 70,
+            _ => 0,
+        };
+		obstacle->HEIGHT = obstacle->type switch {
+            1 => 70,
+            2 => 35,
+            3 => 70,
+            _ => 0,
+        };
+        obstacle->boundL.point1.Set(obstacle->Pos.x, obstacle->Pos.y, 0);
 		obstacle->boundL.point2.Set(obstacle->Pos.x, obstacle->Pos.y+obstacle->HEIGHT, 0);
 		obstacle->boundR.point1.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y, 0);
 		obstacle->boundR.point2.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y+obstacle->HEIGHT, 0);
@@ -196,10 +207,8 @@ public class Obstacle {
 		if (obstacle==null) {
 			BitConverter.GetBytes(-1).CopyTo(*input, offset_);
 		} else {
-            fixed (byte* ptr = *input)
-                obstacle->type=*ptr;
+            BitConverter.GetBytes(obstacle->type).CopyTo(*input, offset_);
             offset_ += 4;
-			Console.WriteLine("[Obstacle]:x="+(int)(obstacle->Pos==null ? 0 : obstacle->Pos.x));
             BitConverter.GetBytes((int)(obstacle->Pos==null ? 0 : obstacle->Pos.x)).CopyTo(*input, offset_);
             offset_ += 4;
             BitConverter.GetBytes((int)(obstacle->Pos==null ? 0 : obstacle->Pos.y)).CopyTo(*input, offset_);
@@ -214,9 +223,7 @@ public class Obstacle {
         ArgumentNullException.ThrowIfNull(*input);
         int offset_ = offset;
 		*obstacle ??= new Obstacle(null, 0);
-		fixed (byte *ptr = *input) {
-			obstacle->type=*ptr;
-		}
+        obstacle->type = BitConverter.ToInt32(*input, offset_);
         if (obstacle->type==-1) {
 			return;
         } else {
@@ -225,10 +232,16 @@ public class Obstacle {
             offset_ += 4;
             obstacle->Pos.y=BitConverter.ToInt32(*input, offset_);
             offset_ += 4;
-            obstacle->WIDTH=(ushort)BitConverter.ToInt16(*input, offset_);
+            obstacle->WIDTH=BitConverter.ToInt32(*input, offset_);
             offset_+=4;
-            obstacle->HEIGHT=(ushort)BitConverter.ToInt32(*input, offset_);
+            obstacle->HEIGHT=BitConverter.ToInt32(*input, offset_);
 			UpdateBounds(obstacle);
         }
+	}
+
+	public enum Type : byte {
+		Wide,
+		High,
+		WideHigh
 	}
 }
