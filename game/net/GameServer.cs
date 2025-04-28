@@ -253,8 +253,8 @@ internal class GameServer:Socket {
 			Listen(1);
 			while (!stop) {
 				try {
-					//create a Task that starts to try to accept a socket and in case of success stops to listen
-					//the result of the listening is a  socket that is connected to a client
+					//create a Task that starts to try to accept a connection request and in case of success stops to listen
+					//the result of the listening is a socket that is connected to a client
 					Socket clientConnection =
 						await Task.Factory.FromAsync(BeginAccept, EndAccept, null);
 					_=Task.Run(()=>OnAccept(clientConnection));
