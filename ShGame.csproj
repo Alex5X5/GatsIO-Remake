@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
@@ -27,13 +28,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Silk.NET" Version="2.21.0" />
+    <PackageReference Include="Silk.NET" Version="2.22.0" />
+    <PackageReference Include="Silk.NET.GLFW" Version="2.22.0" />
+    <PackageReference Include="Silk.NET.Input.Extensions" Version="2.22.0" />
+    <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.22.0" />
   </ItemGroup>
   <ItemGroup>
 	<Reference Include="libs\Simplelogging.dll" />
   </ItemGroup>
   <ItemGroup>
-	<Compile Update="game\Client\Renderer.cs">
+	<Compile Update="game\Client\Rendering\Renderer.cs">
 	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</Compile>
 	<Compile Update="game\Net\ServerConsole.cs">
@@ -64,9 +68,6 @@
 	  <Generator>SettingsSingleFileGenerator</Generator>
 	  <LastGenOutput>Settings.Designer.cs</LastGenOutput>
 	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	</None>
-	<None Update="Untitled-1.jsonc">
-	  <Generator>ThemeConverter</Generator>
 	</None>
   </ItemGroup>
   

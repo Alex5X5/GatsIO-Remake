@@ -1,18 +1,30 @@
-﻿namespace ShGame.game.Logic;
+﻿using System.Runtime.InteropServices;
 
-[Serializable]
-public class Vector3d {
+namespace ShGame.game.Logic;
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)][Serializable]// Ensures no extra padding is added
+public unsafe struct Vector3d {
 
 	public double x;
 	public double y;
 	public double z;
 
+	public const int Size = 12;
+
 	public static readonly Vector3d X = new(1, 0, 0);
 	public static readonly Vector3d Y = new(0, 1, 0);
 	public static readonly Vector3d Z = new(0, 0, 1);
-	public static readonly Vector3d Zero = new(0, 0, 0);
+    public static readonly Vector3d Zero = new(0, 0, 0);
 
-	public Vector3d() {
+    public static implicit operator Vector3f(Vector3d? v) => 
+		new(
+			(float)Math.Floor(v!=null ? v.Value.x:0),
+			(float)Math.Floor(v!=null ? v.Value.y:0),
+			(float)Math.Floor(v!=null ? v.Value.z:0)
+		);
+
+
+    public Vector3d():this(0,0,0) {
 	}
 
 	public Vector3d(double x, double y, double z) {
@@ -27,10 +39,11 @@ public class Vector3d {
 		Set(values[0], values[1], values[2]);
 	}
 
-	public Vector3d Set(double x, double y, double z) {
-		this.x=x;
-		this.y=y;
-		this.z=z;
+	public unsafe Vector3d Set(double x_, double y_, double z_) {
+		this.x=x_;
+		this.y=y_;
+		this.z=z_;
+		fixed (double* ptr = &this.x)
 		return this;
 	}
 
@@ -96,7 +109,7 @@ public class Vector3d {
 		return Math.Sqrt(x*x+y*y+z*z);
 	}
 
-	public double Len() {
+	public readonly double Len() {
 		return Math.Sqrt(x*x+y*y+z*z);
 	}
 
@@ -104,11 +117,11 @@ public class Vector3d {
 		return x*x+y*y+z*z;
 	}
 
-	public double Len2() {
+	public readonly double Len2() {
 		return x*x+y*y+z*z;
 	}
 
-	public bool Idt(Vector3d vector) {
+	public readonly bool Idt(Vector3d vector) {
 		return x==vector.x&&y==vector.y&&z==vector.z;
 	}
 
@@ -119,14 +132,14 @@ public class Vector3d {
 		return (double)Math.Sqrt(a*a+b*b+c*c);
 	}
 
-	public double Dst(Vector3d vector) {
+	public readonly double Dst(Vector3d vector) {
 		double a = vector.x-x;
 		double b = vector.y-y;
 		double c = vector.z-z;
 		return (double)Math.Sqrt(a*a+b*b+c*c);
 	}
 
-	public double Dst(double x, double y, double z) {
+	public readonly double Dst(double x, double y, double z) {
 		double a = x-this.x;
 		double b = y-this.y;
 		double c = z-this.z;
@@ -140,14 +153,14 @@ public class Vector3d {
 		return a*a+b*b+c*c;
 	}
 
-	public double Dst2(Vector3d point) {
+	public readonly double Dst2(Vector3d point) {
 		double a = point.x-x;
 		double b = point.y-y;
 		double c = point.z-z;
 		return a*a+b*b+c*c;
 	}
 
-	public double Dst2(double x, double y, double z) {
+	public readonly double Dst2(double x, double y, double z) {
 		double a = x-this.x;
 		double b = y-this.y;
 		double c = z-this.z;
@@ -165,11 +178,11 @@ public class Vector3d {
 		return x1*x2+y1*y2+z1*z2;
 	}
 
-	public double Dot(Vector3d vector) {
+	public readonly double Dot(Vector3d vector) {
 		return x*vector.x+y*vector.y+z*vector.z;
 	}
 
-	public double Dot(double x, double y, double z) {
+	public readonly double Dot(double x, double y, double z) {
 		return this.x*x+this.y*y+this.z*z;
 	}
 

@@ -1,24 +1,23 @@
 ﻿namespace ShGame.game.Client;
 
-using ShGame.game.Net;
 using ShGame.game.Net.protocoll;
 using System;
-
-using static ShGame.game.Client.Obstacle;
-
-#pragma warning disable CS8500 //insert spaces instead of tabs
+using System.Diagnostics;
 
 public class Obstacle {
 
 	public Vector3d Pos;
-    public readonly LineSection3d boundL, boundT, boundR, boundB;
+	public readonly LineSection3d boundL, boundT, boundR, boundB;
 
-    public const int OBSTACLE_BYTE_LENGTH = 20;
+	public const int OBSTACLE_BYTE_LENGTH = 20;
+
+	private readonly Vector3d[,] triangles;
+	private const int FLOAT_LENGHT = 24;
 
 	public int WIDTH, HEIGHT;
-	public int type;
+	public byte type;
 
-	public Obstacle() {
+	public Obstacle():this(null, 3) {
 		Pos = new(0, 0, 0);
 		WIDTH = 0;
 		HEIGHT = 0;
@@ -28,7 +27,7 @@ public class Obstacle {
 		boundR = new LineSection3d(boundT.point2, boundB.point2);
 	}
 
-	public Obstacle(Vector3d? pos_, int type_) {
+	public Obstacle(Vector3d? pos_, byte type_) {
 		Pos = pos_??new Vector3d(0, 0, 0);
 		type = type_;
 		switch(type) {
@@ -57,11 +56,15 @@ public class Obstacle {
 		boundT = new LineSection3d(Pos, Pos.Cpy().Add(WIDTH, 0, 0));
 		boundB = new LineSection3d(boundL.point2, boundL.point2.Cpy().Add(WIDTH, 0, 0));
 		boundR = new LineSection3d(boundT.point2, boundB.point2);
+		triangles = new Vector3d[,] {
+			{Pos, Pos.Cpy().Add(0, HEIGHT, 0),Pos.Cpy().Add(WIDTH, 0, 0)},
+            {Pos.Cpy().Add(0, HEIGHT, 0),Pos.Cpy().Add(WIDTH, HEIGHT, 0), Pos.Cpy().Add(WIDTH, 0, 0)}
+        };
 	}
 
 	public Obstacle(ParsableObstacle obstacle) {
 		Pos = obstacle.POS;
-		type = obstacle.TYPE;
+		type = (byte)obstacle.TYPE;
 
 		switch(type) {
 			case 1:
@@ -114,7 +117,6 @@ public class Obstacle {
 
 	public unsafe void GetShadowPoints(Vector3d* pos, Vector3d* point1, Vector3d* point2) {
 		if(RelativeX(pos)==1&&RelativeY(pos)==1) {
-			//
 			point1->x=boundR.point1.x;
 			point1->y=boundR.point1.y;
 			point2->x=boundL.point2.x;
@@ -180,19 +182,19 @@ public class Obstacle {
 	}
 
 	private static unsafe void UpdateBounds(Obstacle* obstacle) {
-        obstacle->WIDTH = obstacle->type switch {
-            1 => 35,
-            2 => 70,
-            3 => 70,
-            _ => 0,
-        };
+		obstacle->WIDTH = obstacle->type switch {
+			1 => 35,
+			2 => 70,
+			3 => 70,
+			_ => 0,
+		};
 		obstacle->HEIGHT = obstacle->type switch {
-            1 => 70,
-            2 => 35,
-            3 => 70,
-            _ => 0,
-        };
-        obstacle->boundL.point1.Set(obstacle->Pos.x, obstacle->Pos.y, 0);
+			1 => 70,
+			2 => 35,
+			3 => 70,
+			_ => 0,
+		};
+		obstacle->boundL.point1.Set(obstacle->Pos.x, obstacle->Pos.y, 0);
 		obstacle->boundL.point2.Set(obstacle->Pos.x, obstacle->Pos.y+obstacle->HEIGHT, 0);
 		obstacle->boundR.point1.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y, 0);
 		obstacle->boundR.point2.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y+obstacle->HEIGHT, 0);
@@ -204,44 +206,40 @@ public class Obstacle {
 
 	public static unsafe void SerializeObstacle(byte[]* input, Obstacle* obstacle, int offset) {
 		int offset_ = offset;
-		if (obstacle==null) {
-			BitConverter.GetBytes(-1).CopyTo(*input, offset_);
-		} else {
-            BitConverter.GetBytes(obstacle->type).CopyTo(*input, offset_);
-            offset_ += 4;
-            BitConverter.GetBytes((int)(obstacle->Pos==null ? 0 : obstacle->Pos.x)).CopyTo(*input, offset_);
-            offset_ += 4;
-            BitConverter.GetBytes((int)(obstacle->Pos==null ? 0 : obstacle->Pos.y)).CopyTo(*input, offset_);
-            offset_ += 4;
-            BitConverter.GetBytes(obstacle->WIDTH).CopyTo(*input, offset_);
-            offset_ += 4;
-            BitConverter.GetBytes(obstacle->HEIGHT).CopyTo(*input, offset_);
-        }
+		fixed (byte* ptr = *input)
+			if (obstacle==null) {
+				*(ptr+offset_) = 0;
+			} else {
+				*(ptr+offset_) = obstacle->type;
+				offset_ += 4;
+				BitConverter.GetBytes((int)obstacle->Pos.x).CopyTo(*input, offset_);
+				offset_ += 4;
+				BitConverter.GetBytes((int)obstacle->Pos.y).CopyTo(*input, offset_);
+				offset_ += 4;
+				BitConverter.GetBytes(obstacle->WIDTH).CopyTo(*input, offset_);
+				offset_ += 4;
+				BitConverter.GetBytes(obstacle->HEIGHT).CopyTo(*input, offset_);
+			}
 	}
 
-    public static unsafe void DeserializeObstacle(byte[]* input, Obstacle* obstacle, int offset) {
-        ArgumentNullException.ThrowIfNull(*input);
-        int offset_ = offset;
+	public static unsafe void DeserializeObstacle(byte[]* input, Obstacle* obstacle, int offset) {
+		ArgumentNullException.ThrowIfNull(*input);
+		int offset_ = offset;
 		*obstacle ??= new Obstacle(null, 0);
-        obstacle->type = BitConverter.ToInt32(*input, offset_);
-        if (obstacle->type==-1) {
+		fixed (byte* ptr = *input)
+			obstacle->type = *(ptr+offset_);
+		if (obstacle->type==0) {
 			return;
-        } else {
-            offset_ += 4;
-            obstacle->Pos.x=BitConverter.ToInt32(*input, offset_);
-            offset_ += 4;
-            obstacle->Pos.y=BitConverter.ToInt32(*input, offset_);
-            offset_ += 4;
-            obstacle->WIDTH=BitConverter.ToInt32(*input, offset_);
-            offset_+=4;
-            obstacle->HEIGHT=BitConverter.ToInt32(*input, offset_);
+		} else {
+			offset_ += 4;
+			obstacle->Pos.x=BitConverter.ToInt32(*input, offset_);
+			offset_ += 4;
+			obstacle->Pos.y=BitConverter.ToInt32(*input, offset_);
+			offset_ += 4;
+			obstacle->WIDTH=BitConverter.ToInt32(*input, offset_);
+			offset_+=4;
+			obstacle->HEIGHT=BitConverter.ToInt32(*input, offset_);
 			UpdateBounds(obstacle);
-        }
-	}
-
-	public enum Type : byte {
-		Wide,
-		High,
-		WideHigh
+		}
 	}
 }

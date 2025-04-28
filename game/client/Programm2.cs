@@ -65,7 +65,7 @@ class Program2 {
 		_gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vertexBuffer);
 
 		// Allocate buffer for the largest possible triangle (9 floats per triangle)
-		_gl.BufferData(BufferTargetARB.ArrayBuffer, 9 * sizeof(float), IntPtr.Zero, BufferUsageARB.DynamicDraw);
+		_gl.BufferData(BufferTargetARB.ArrayBuffer, 9 * sizeof(float), in IntPtr.Zero, BufferUsageARB.DynamicDraw);
 
 		// Specify the layout of the vertex data
 		_gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);

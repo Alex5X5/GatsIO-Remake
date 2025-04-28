@@ -5,10 +5,14 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Drawing;
 using System.Net;
+using ShGame.game.Client.Rendering;
+using Silk.NET.Windowing;
+using Silk.NET.OpenGL;
 
 #pragma warning disable CS8500 //insert spaces instead of tabs
 
 public class Client : Form {
+
 	internal bool keyUp = false;
 	internal bool keyDown = false;
 	internal bool keyLeft = false;
@@ -42,8 +46,9 @@ public class Client : Form {
 			new MessageParameter("address", address.ToString()),
 			new MessageParameter("port", port)
 		);
-		SetVisible();
-		//Thread.Sleep(500);
+
+        SetVisible();
+		Thread.Sleep(500);
 		//handler=new NetHandler();
 		byte[] temp = new byte[8];
 		new Random().NextBytes(temp);
@@ -89,12 +94,13 @@ public class Client : Form {
 				while (!stop && NetHandlerConnected()) {
 					logger.Log("asking for players");
 					netHandler.ExchangePlayers(player, ref players);
-					Thread.Sleep(500);
+					Thread.Sleep(100);
 				}
 				netHandler?.Dispose();
 			}
 		);
 		connectionThread.Start();
+
 		renderThread=new Thread(
 				() => {
 					while (!CanRaiseEvents&&!stop)
@@ -145,7 +151,8 @@ public class Client : Form {
 				break;
 		}
 		player.OnKeyEvent(c: this);
-	}
+		Console.WriteLine("key up, p:"+player.ToString());
+    }
 
 	private void KeyDown_(object? sender, KeyEventArgs e) {
 		switch (e.KeyCode) {
@@ -166,6 +173,7 @@ public class Client : Form {
 				break;
 		}
 		player.OnKeyEvent(c: this);
+		Console.WriteLine("key up, p:"+player.ToString());
 	}
 
 	protected override void OnPaint(PaintEventArgs e) {

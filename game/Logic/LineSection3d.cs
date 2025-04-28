@@ -9,22 +9,22 @@ public class LineSection3d {
 	public Vector3d point2;
 	//	public double length;
 
-	public LineSection3d(Line3d l, double ln) {
-		this.point1=l.origin.Cpy();
-		this.point2=point1.Cpy().Add(l.direction.Cpy().Scl(ln));
+
+	public unsafe LineSection3d(Line3d l, double ln) {
+		point1 = l.origin.Cpy();
+		point2 = point1.Cpy().Add(l.direction.Cpy().Scl(ln));
 	}
 
-	public double GetLength() {
+   public unsafe LineSection3d(Vector3d p1, Vector3d p2) {
+		point1 = p1.Cpy();
+		point2 = p2.Cpy();
+	}
+
+	public unsafe double GetLength() {
 		return point1.Dst(point2);
 	}
 
-	public LineSection3d(Vector3d p1, Vector3d p2) {
-		//		System.out.println("[LineSection3d]: (constructor): p1="+p1.ToString()+" p2="+p2.ToString());
-		this.point1=p1.Cpy();
-		this.point2=p2.Cpy();
-	}
-
-	public double Dst(Vector3d point) {
+	public unsafe double Dst(Vector3d point) {
 		return point.Cpy().Sub(this.point1).Crs(point2.Cpy().Sub(point1)).Len()/point2.Cpy().Sub(point1).Len();
 	}
 
@@ -35,10 +35,12 @@ public class LineSection3d {
 	}
 
 	private bool Contains1(Vector3d p) {
-		return (point1.Dst(p)<=GetLength()&&point2.Dst(p)<=GetLength());
+		unsafe {
+			return (point1.Dst(p)<=GetLength()&&point2.Dst(p)<=GetLength());
+		}
 	}
 
-	public Vector3d Intercept(Line3d l2) {
+	public Vector3d? Intercept(Line3d l2) {
 		Line3d l = Line3d.FromPoints(point1, point2);
 		Vector3d v = l.Intercept(ref l2);
 		//		System.out.println("[LineSection3d]: (getting Intercept): this:"+v+" result:"+Contains(v));
@@ -48,7 +50,7 @@ public class LineSection3d {
 		//		else return null;
 	}
 
-	public Vector3d Intercept(LineSection3d l2) {
+	public Vector3d? Intercept(LineSection3d l2) {
 		Line3d l = Line3d.FromPoints(point1, point2);
 		Vector3d v = l.Intercept(ref l);
 		//		System.out.println("[LineSection3d]: (getting Intercept): this:"+v+" result:"+Contains(v));

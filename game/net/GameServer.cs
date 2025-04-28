@@ -1,6 +1,6 @@
 ﻿namespace ShGame.game.Net;
 
-using System.Diagnostics.Eventing.Reader;
+using ShGame.game.Client.Rendering;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -23,7 +23,7 @@ internal class GameServer:Socket {
 	public const int OBSTACKLE_ROWS = 5, OBSTACKLE_LINES = 8;
 	public const int OBSTACLE_ROW_DISANCE = MAP_WIDTH / OBSTACKLE_ROWS;
 	public const int OBSTACLE_LINE_DISTANCE = MAP_HEIGHT / OBSTACKLE_LINES;
-	public const int MAX_PLAYER_COUNT = 10, OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES;
+	public const int MAX_PLAYER_COUNT = 20, OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES;
 
 	internal readonly ServerConnection?[] clients = new ServerConnection[MAX_PLAYER_COUNT];
 	internal Player[] players = new Player[MAX_PLAYER_COUNT];
@@ -48,15 +48,16 @@ internal class GameServer:Socket {
 		logger.Log(
 			"address port constructor",
 			new MessageParameter("address",address),
-			new MessageParameter("addressFamily", base.AddressFamily.ToString()),
+			new MessageParameter("addressFamily", AddressFamily.ToString()),
 			new MessageParameter("port",port)
 		);
 		SpreadObstacles();
 		//fill the players with invalid players so the serializers don't face nullpointers
 		for (int i = 0; i < MAX_PLAYER_COUNT; i++)
 			players[i] = new Player();
+		logger.Log(players.ToString());
 		//create an IPEndpoint with the given address and the given port and bind the server to the IPEndpoint
-		IPEndPoint point = new(address.AddressFamily == AddressFamily.InterNetworkV6 ? GetLocalIPv6() : GetLocalIPv4(), (int)port);
+		IPEndPoint point = new(address, (int)port);
 		logger.Log("binding, endPoint = "+point.ToString()+" endpint address = " + point.AddressFamily.ToString());
 		Bind(point);
 		logger.Log("bound endPoint="+point.ToString());
@@ -74,7 +75,7 @@ internal class GameServer:Socket {
 		for(int i = 0; i<clients.Length; i++) {
 			if(clients[i]==null) {
 				//close the newly created socket an create a ServerConnection from the socket's information so the ServerConnection is bound to the incoming connection
-				clients[i]=new ServerConnection(s.DuplicateAndClose(Environment.ProcessId), this);
+				clients[i]=new ServerConnection(s.DuplicateAndClose(Environment.ProcessId), this, i);
 				found = true;
 				break;
 			}
@@ -121,68 +122,73 @@ internal class GameServer:Socket {
 			Player temp = new(null, 0, 0);
 			Player.DeserializePlayer(&packet, &temp, Protocoll.PAYLOAD_OFFSET);
 			logger.Log("processing player request",new MessageParameter("player",temp));
-			bool playerFound=false;
-			bool registeredPlayer = false;
-			//loop through the current players and check whether the recieved player's and the stored player's UUID match
-			for (int i = 0; i<MAX_PLAYER_COUNT; i++) {
-				if (players[i]==null)
-					continue;
-				if(players[i].PlayerUUID == temp.PlayerUUID) {
-					//if the player was found in the stored players, set its direction to the direction of the recieved player
-					players[i].Pos = temp.Pos;
-					players[i].Dir = temp.Dir.Nor();
-					playerFound=true;
-					break;
-				}
-			} if (!playerFound) {
-				//since the player isn't known, try to register it
-				logger.Log("registering new player",new MessageParameter("UUID",temp.PlayerUUID));
-				//loop through the player array and search for an unused player
-				for (int i = 0; i<MAX_PLAYER_COUNT; i++) {
-					//the slot is considered empty if the players health is -1
-					if (players[i].Health==-1) {
-						players[i].Health=100;
-						players[i].PlayerUUID = temp.PlayerUUID;
-						players[i].Dir=temp.Dir.Nor();
-						registeredPlayer = true;
-						logger.Log("sucessfully registred new player", new MessageParameter("UUID", temp.PlayerUUID));
-						break;
-					}
-				}
-
+			if (!IsPlayerRegistered(temp)) {
+				RegisterNewPlayer(temp);
 			}
 			//prepare a new packet
 			byte[] result = Protocoll.PreparePacket(Headers.PLAYER);
-			if (playerFound|registeredPlayer) {
-				//add all of the players to the packet
-				for (int i = 0; i<MAX_PLAYER_COUNT-1; i++) {
-					if (players[i]==null)
-						continue;
-					logger.Log("serializing player",new MessageParameter("player", players[i].ToString()));
-					//create a pointer to a player in the array of the players
-					fixed (Player* ptr = &players[i])
-						Player.SerializePlayer(&result, ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+
+			//add all of the players to the packet
+			for (int i = 0; i<MAX_PLAYER_COUNT-1; i++) {
+				if (players[i]==null)
+					continue;
+				if (players[i].PlayerUUID == temp.PlayerUUID) {
+					players[i].Pos = temp.Pos;
+					players[i].Dir = temp.Dir;
 				}
-			} else {
-				result = Protocoll.PreparePacket(Headers.PAYER_LIMIT);
+				logger.Log("serializing player",new MessageParameter("player", players[i].ToString()));
+				//create a pointer to a player in the array of the players
+				fixed (Player* ptr = &players[i])
+					Player.SerializePlayer(&result, ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
 			}
 			return result;
-		} else
-			logger.Log("wrong request");
+		} else {
+            logger.Log("wrong request");
+        }
 		return null;
 	}
 
 	#endregion request events
 
+	private bool IsPlayerRegistered(Player player) {
+		bool found = false;
+		for (int i = 0; i<MAX_PLAYER_COUNT-1; i++) {
+			if (players[i]==null)
+				continue;
+			if (players[i].PlayerUUID == player.PlayerUUID) {
+				found = true;
+				break;
+			}
+		}
+        return found;
+	}
+    private bool RegisterNewPlayer(Player player) {
+        //since the player isn't known, try to register it
+        logger.Log("registering new player", new MessageParameter("UUID", player.PlayerUUID));
+        //loop through the player array and search for an unused player
+        for (int i = 0; i<MAX_PLAYER_COUNT; i++) {
+            //the slot is considered empty if the player's health is -1
+            if (players[i].Health==-1) {
+                players[i].Health=100;
+                players[i].PlayerUUID = player.PlayerUUID;
+				unsafe {
+					players[i].Dir=player.Dir.Nor();
+				}
+                logger.Log("sucessfully registred new player", new MessageParameter("UUID", player.PlayerUUID));
+                return true;
+            }
+        }
+		return false;
+    }
 
-	private void DisposeObjects() {
+    private void DisposeObjects() {
 		for (int i = 0; i<MAX_PLAYER_COUNT; i++) {
 			if (clients[i]!=null) {
 				if (clients[i].disposalCooldown<1000)
 					clients[i].disposalCooldown--;
 				if (clients[i].disposalCooldown==800)
 					clients[i].Stop();
-				if (clients[i]?.disposalCooldown<=0)
+				if (clients[i].disposalCooldown<=0)
 					clients[i] = null;
 			}
 		}
@@ -267,17 +273,17 @@ internal class GameServer:Socket {
 	}
 
 	public static IPAddress GetLocalIPv4() =>
-		NetworkInterface.GetAllNetworkInterfaces()[2].
+		NetworkInterface.GetAllNetworkInterfaces()[0].
 			GetIPProperties().UnicastAddresses[^1].
 				Address;
 
 	public static IPAddress GetLocalIPv6() =>
-		NetworkInterface.GetAllNetworkInterfaces()[2].
+		NetworkInterface.GetAllNetworkInterfaces()[0].
 			GetIPProperties().UnicastAddresses[^2].
 				Address;
 
 	public static IPAddress GetLocalIP()=>
-		NetworkInterface.GetAllNetworkInterfaces()[2].
+		NetworkInterface.GetAllNetworkInterfaces()[0].
 			GetIPProperties().UnicastAddresses[^1].
 				Address;
 }

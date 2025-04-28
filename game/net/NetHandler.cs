@@ -14,11 +14,6 @@ public class NetHandler:Socket {
 
 	private bool stop = false;
 
-	//private readonly NetworkStream input;
-	//private readonly NetworkStream output;
-
-	//private readonly BinaryFormatter formatter = new BinaryFormatter();
-
 	private readonly Logger logger = new(new LoggingLevel("NetHandler"));
 
 	internal NetHandler() : this(5000) {
@@ -117,17 +112,21 @@ public class NetHandler:Socket {
 		logger.Log("exchanging players", [new MessageParameter("player",p.ToString())]);
 		byte[] send = Protocoll.PreparePacket(Headers.PLAYER);
 		Player.SerializePlayer(&send, &p, Protocoll.PAYLOAD_OFFSET);
-		Send(send);
-		byte[] packet = RecievePacket();
-        if (packet != null)
-            for (int i = 0; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
-				logger.Log("deserializing player",new MessageParameter("player",players[i].ToString()));
-				Player temp = new();
-				Player.DeserializePlayer(&packet, &temp, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
-				if (temp != null && temp.PlayerUUID != p.PlayerUUID)
-					players[i] = temp;
-				logger.Log("deserialized player", new MessageParameter("player", players[i].ToString()));
-			}
+		try {
+			Send(send);
+			byte[] packet = RecievePacket();
+			if (packet != null)
+				for (int i = 0; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
+					logger.Log("deserializing player", new MessageParameter("player", players[i].ToString()));
+					Player temp = new();
+					Player.DeserializePlayer(&packet, &temp, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+					if (temp != null && temp.PlayerUUID != p.PlayerUUID)
+						players[i] = temp;
+					logger.Log("deserialized player", new MessageParameter("player", players[i].ToString()));
+				}
+		} catch (Exception e) {
+			logger.Log(e.ToString());
+		}
 	}
 
 	internal void Stop() {

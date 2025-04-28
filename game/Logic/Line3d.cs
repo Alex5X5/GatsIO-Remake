@@ -14,7 +14,7 @@ public class Line3d {
 		//		else System.out.println("vectors cannot be the same");
 	//}
 
-	public double Dist(Vector3d point) {
+	public unsafe double Dist(Vector3d point) {
 		return point.Sub(origin).Crs(direction).Len()/direction.Len();
 	}
 
@@ -45,7 +45,7 @@ public class Line3d {
 	//		return interception;
 	//	}
 
-	public Vector3d Intercept(ref Line3d other) {
+	public unsafe Vector3d Intercept(ref Line3d other) {
 		//double th1X = origin.x;
 		//double th1Y = origin.y;
 
@@ -90,7 +90,7 @@ public class Line3d {
 		return l;
 	}
 
-	public static Line3d FromPoints(Vector3d point1, Vector3d point2) {
+	public static unsafe Line3d FromPoints(Vector3d point1, Vector3d point2) {
 		Line3d l = new() {
 			origin=point1.Cpy(),
 			direction=point2.Cpy().Sub(point1).Nor()

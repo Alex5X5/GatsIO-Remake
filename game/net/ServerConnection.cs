@@ -8,11 +8,12 @@ internal class ServerConnection:Socket {
 	private bool stop = false;
 	private readonly Logger logger;
 	internal int disposalCooldown = 100;
+	internal readonly int id;
 
-	internal ServerConnection(SocketInformation info, GameServer gs) : base(info) {
-		logger=new Logger(new LoggingLevel("ServerConnection"));
+	internal ServerConnection(SocketInformation info, GameServer gs, int id_) : base(info) {
+		logger = new Logger(new LoggingLevel("ServerConnection"));
 		logger.Log("Constructor");
-
+		id = id_;
 		new Thread(
 				() => Run(gs)
 		).Start();
@@ -22,23 +23,23 @@ internal class ServerConnection:Socket {
 		if (!Connected)
 			//if the socket isn't connected, return that the atempt to recieve a packet was unsuccessfull
 			return false;
-		//ins case the buffer doesn't have the standard packet length refize
+		//ins case the buffer doesn't have the standard packet length resize it
 		Array.Resize(ref buffer, Protocoll.PACKET_BYTE_LENGTH);
 		buffer.Initialize();
-		//the number of bytes recieved so far togeather
+		//the number of bytes recieved so far together
 		int recieved = 0;
 		while (recieved < Protocoll.PACKET_BYTE_LENGTH && !stop) {
-			//the number of bytes recieved in this listening cycle
+			//the number of bytes recieved during this listening cycle
 			int bytes;
 			try {
 				//recive bytes from the socket and write them to the buffer
-				//the offset id the difference from the recieved bytes so far and the expected amount of bytes
+				//the offset is the difference from the recieved bytes so far and the expected amount of bytes
 				bytes = Receive(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH - recieved, SocketFlags.None);
 			} catch (Exception){
 				//if an exception occurs return that the attemt to recieve a packet was incomplete
 				return false;
 			}
-			//if no additional bytes could be recieved sto the listening
+			//if no additional bytes could be recieved stop the listening
 			if (bytes == 0)
 				break;
 			//add the amount of recieved bytes in this cycle to all the recieved bytes so far
