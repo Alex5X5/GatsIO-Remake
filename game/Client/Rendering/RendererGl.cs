@@ -1,5 +1,6 @@
 ﻿namespace ShGame.game.Client.Rendering;
 
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
@@ -16,7 +17,7 @@ class RendererGl {
 
     private static readonly Drawable[] dTriangles = [
 		//new([0,0,0,10,0,0,0,10,0])
-		new()
+		//#new()
 	];
 
 	public RendererGl() {
@@ -36,6 +37,17 @@ class RendererGl {
 
         // Create the shader program
         _shaderProgram = CreateShaderProgram();
+
+        int screenWidthLocation = gl.GetUniformLocation(_shaderProgram, "u_WindowWidth");
+        int screenHeightLocation = gl.GetUniformLocation(_shaderProgram, "u_WindowHeight");
+
+        window.FramebufferResize += (Vector2D<int> size) => {
+            gl.Viewport(0, 0, (uint)size.X, (uint)size.Y);
+            // Also update uniforms for width and height if you're using them
+            gl.Uniform1(screenWidthLocation, (float)size.X);
+            gl.Uniform1(screenWidthLocation, (float)size.Y);
+        };
+
 
         foreach (Drawable drawable in dTriangles) {
             drawable.Setup(gl);
@@ -89,7 +101,12 @@ class RendererGl {
 			uniform float u_WindowHeight;
 			void main()
 			{
-				gl_Position = vec4(aPos.x / u_WindowWidth -1 , aPos.y / u_WindowHeight -1, aPos.z, 1.0);
+				vec2 ndc = vec2(
+					aPos.x / (u_WindowWidth  / 4.0) - 1.0,
+					aPos.y / (u_WindowHeight / 4.0) - 1.0
+				);
+				gl_Position = vec4(ndc, aPos.z, 1.0);
+
 			}
 		";
 		

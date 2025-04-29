@@ -12,13 +12,12 @@ public static class Programm {
 
 	[STAThread]
     public static void Main(string[] args) {
+        Logging.DisableColors();
         //Programm3.Main_();
         //return;
-        //Logging.DisableColors();
         //RendererGl rd = new();
         //Client2 c = new();
         //return;
-        Logging.DisableLog();
 
         System.Collections.Generic.List<string> args_ = args.ToList<string>();
         bool noGui = args_.Contains("-nogui");
@@ -73,7 +72,6 @@ public static class Programm {
                 }
             ).Start();
             return;
-
         }
 
         Application.EnableVisualStyles();

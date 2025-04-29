@@ -1,16 +1,17 @@
-﻿//using Silk.NET.OpenGL//namespace ShGame.game.Client.Rendering;
+﻿namespace ShGame.game.Client.Rendering;
+//using Silk.NET.OpenGL
 using Silk.NET.OpenGL;
 
 using System.Runtime.InteropServices;
 
-internal class Drawable {
+public abstract class Drawable {
 
 	uint vaoHandle = 0;
 	uint vboHandle = 0;
 
 	private readonly uint FLOAT_COUNT = 6;
 
-	//public float[] Vertices { get; }
+	public required float[] vertices;
 
 	private Vector3d p1 = new(30,1000,0);
 	private Vector3d p2 = new(500,0,0);
@@ -21,17 +22,16 @@ internal class Drawable {
 	private static readonly Logger logger = new(new LoggingLevel("Drawable"));
 
 
-	public Drawable(GL gl, float[] vertices) : this() {
+	public Drawable(float[] vertices_) : this() {
 		Console.WriteLine("[Drawable]:gl constructor");
-		Setup(gl);
+		vertices = vertices_;
 	}
 
 	public Drawable() {
-		//Vertices = vertices;
 		Console.WriteLine("[Drawable]:vertices constructor");
 	}
 
-	public unsafe void Setup(GL gl) {
+	public unsafe virtual void Setup(GL gl) {
 		Console.WriteLine("[Drawable]:setup");
 		vaoHandle = gl.GenVertexArray();
 		BindVAO(gl);
@@ -47,7 +47,6 @@ internal class Drawable {
         UnbindVBO(gl);
 		UnbindVAO(gl);
 	}
-
 
 	public unsafe void Update(GL gl) {
 		logger.Log("updating");
@@ -96,9 +95,26 @@ internal class Drawable {
         logger.Log("finished Draw");
     }
 
+	public static unsafe void BufferTriangles(float* triangles, int count, GL gl) {
+		float* buffer = (float*)NativeMemory.Alloc((nuint)count*sizeof(float));
+		for(int i=0; i<count; i++) {
+            *buffer=*triangles;
+            buffer++;
+			triangles++;
+            *buffer=*triangles;
+            buffer++;
+			triangles++;
+            *buffer = 0;
+			triangles++;
+            buffer++;
+        }
+        gl.BufferSubData(GLEnum.ArrayBuffer, 0, 36, buffer);
+		NativeMemory.Free(buffer);
+    }
+
     public void BindVBO(GL gl) => gl.BindBuffer(BufferTargetARB.ArrayBuffer, vboHandle);
-	public void UnbindVBO(GL gl) => gl.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
+	public static void UnbindVBO(GL gl) => gl.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
 
 	public void BindVAO(GL gl) => gl.BindVertexArray(vaoHandle);
-	public void UnbindVAO(GL gl) => gl.BindVertexArray(0);
+	public static void UnbindVAO(GL gl) => gl.BindVertexArray(0);
 }
