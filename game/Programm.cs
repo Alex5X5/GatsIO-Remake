@@ -18,15 +18,17 @@ public static class Programm {
         //RendererGl rd = new();
         //Client2 c = new();
         //return;
+        Logging.DisableLog();
 
         System.Collections.Generic.List<string> args_ = args.ToList<string>();
         bool noGui = args_.Contains("-nogui");
+
         if (args_.Contains("--server")) {
             new Thread(
                 () => {
                     //Console.WriteLine("Initial Screen: ip="+address+" port="+port);
                     IPAddress? address = null;
-                    int port = 0;
+                    int port = 1;
                     try {
                         address = IPAddress.Parse(args_.Contains("-ip") ? args_[args_.IndexOf("-ip")+1] : "");
                     } catch {
@@ -37,16 +39,46 @@ public static class Programm {
                     } catch {
                         port = 5000;
                     }
+                    
                     _ = new Net.GameServer(address, (uint)port);
 
                 }
             ).Start();
+            return;
+        }
+
+        if (args_.Contains("--client")) {
+            new Thread(
+                () => {
+                    //Console.WriteLine("Initial Screen: ip="+address+" port="+port);
+                    IPAddress? address = null;
+                    int port = 1;
+                    try {
+                        address = IPAddress.Parse(args_.Contains("-ip") ? args_[args_.IndexOf("-ip")+1] : "");
+                    } catch {
+                        address = GameServer.GetLocalIP().MapToIPv4();
+                    }
+                    try {
+                        port = args_.Contains("-port") ? Convert.ToInt32(args_[args_.IndexOf("-port")+1]) : 5000;
+                    } catch {
+                        port = 5000;
+                    }
+
+                    Client.Client c = new(
+                        address, (uint)port
+                    );
+                    Console.WriteLine("Initial Screen: ip="+address+" port="+port);
+                    c.ShowDialog();
+
+                }
+            ).Start();
+            return;
 
         }
+
         Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
-		//Logging.DisableLog();
-		Console.WriteLine("start");
+        Console.WriteLine("start");
 		Application.Run(new InitialScreen());
 	}
 }
