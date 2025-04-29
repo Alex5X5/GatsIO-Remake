@@ -10,10 +10,10 @@ public static class Programm {
 	public static void Main() {
 		//Programm3.Main_();
 		//return;
-		Logging.DisableColors();
+		//Logging.DisableColors();
 		//RendererGl rd = new();
-		Client2 c = new();
-		return;
+		//Client2 c = new();
+		//return;
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
 		//Logging.DisableLog();

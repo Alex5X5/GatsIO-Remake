@@ -23,16 +23,16 @@ public class Player {
 
 	public Player(Vector3d? newPos, int newHealth, Int64 UUID) {
 		Pos = newPos??new Vector3d(0, 0, 0);
-		Health=newHealth;
+		Health_ =newHealth;
 		PlayerUUID = UUID!=0 ? UUID : new Random().Next();
-		Visible=Health!=-1;
+		Visible=Health_ !=-1;
 	}
 
 	//the constructor for invalid players
 	public Player() {
 		Pos = new(0, 0, 0);
 		//if the health of a player is -1 it is considered invalid and won't be processed
-		Health = -1;
+		Health_ = -1;
 		PlayerUUID = 0;
 		Visible = false;
 	}
@@ -56,7 +56,7 @@ public class Player {
 		Dir.x = 0;
 		Dir.y = 0;
 		Dir.z = 0;
-		Health = -1;
+        Health_ = -1;
 	}
 
 	//	public bool checkEdges() {
@@ -158,7 +158,7 @@ public class Player {
 			BitConverter.GetBytes(-1).CopyTo(*input, offset_);
 			return;
 		}
-		BitConverter.GetBytes(player->Health).CopyTo(*input, offset_);
+		BitConverter.GetBytes(player->Health_).CopyTo(*input, offset_);
 		offset_+=4;
 		BitConverter.GetBytes(player->Pos.x).CopyTo(*input, offset_);
 		offset_+=8;
@@ -180,8 +180,8 @@ public class Player {
 			return;
 		*player ??= new Player(null, 0, 0);
 		//Console.WriteLine("writing "+ *input + " at "+offset_);
-		player->Health = BitConverter.ToInt32(*input, offset_);
-		if (player->Health==-1) {
+		player->Health_ = BitConverter.ToInt32(*input, offset_);
+		if (player->Health_ ==-1) {
 			player->Deactivate();
 			//offset_+=PLAYER_BYTE_LENGTH;
 		} else {
