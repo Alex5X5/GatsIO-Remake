@@ -2,7 +2,7 @@
 using ShGame.game.Net;
 using ShGame.game.Util;
 
-using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Windows.Forms;
@@ -11,7 +11,7 @@ namespace ShGame.game;
 public static class Programm {
 
 	[STAThread]
-	public static void Main(string[] args) {
+    public static void Main(string[] args) {
         //Programm3.Main_();
         //return;
         //Logging.DisableColors();
@@ -19,7 +19,7 @@ public static class Programm {
         //Client2 c = new();
         //return;
 
-        List<string> args_ = args.ToList<string>();
+        System.Collections.Generic.List<string> args_ = args.ToList<string>();
         bool noGui = args_.Contains("-nogui");
         if (args_.Contains("--server")) {
             new Thread(
