@@ -80,9 +80,9 @@ public partial class InitialScreen : Form {
 	private void StartServer(object sender, EventArgs e) {
 		new Thread(
 				() => {
-					GetStartValues(out IPAddress address, out uint port);
+					GetStartValues(out IPAddress address, out int port);
 					Console.WriteLine("Initial Screen: ip="+address+" port="+port);
-					_ = new Net.GameServer(address, (uint)Math.Abs(port));
+					_ = new Net.GameServer(address, (int)Math.Abs(port));
 				}
 		).Start();
 	}
@@ -90,7 +90,7 @@ public partial class InitialScreen : Form {
 	private void StartClient(object sender, EventArgs e) {
 		new Thread(
 				() => {
-					GetStartValues(out IPAddress address, out uint port);
+					GetStartValues(out IPAddress address, out int port);
 					Client.Client c = new(
 						address, port
 					);
@@ -100,7 +100,7 @@ public partial class InitialScreen : Form {
 		).Start();
 	}
 
-	private void GetStartValues(out IPAddress address, out uint port) {
+	private void GetStartValues(out IPAddress address, out int port) {
 		int port_ = -1;
 		IPAddress? address_ = null;
 		try {
@@ -114,7 +114,7 @@ public partial class InitialScreen : Form {
             IpVersion.V6 => address_!=null ? address_.MapToIPv6() : GameServer.GetLocalIP().MapToIPv6(),
             _ => GameServer.GetLocalIP()
         };
-        port=port_>=0 ? (uint)Math.Abs(port_) : 5000;
+        port=port_>=0 ? (int)Math.Abs(port_) : 5000;
     }
 
     public enum IpVersion {

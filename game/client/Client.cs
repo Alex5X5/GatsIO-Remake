@@ -37,9 +37,9 @@ public class Client : Form {
 
 	public Client() : this(5000) { }
 
-	public Client(uint port) : this(GameServer.GetLocalIP(), port) { }
+	public Client(int port) : this(GameServer.GetLocalIP(), port) { }
 
-	public Client(IPAddress address, uint port) : base() {
+	public Client(IPAddress address, int port) : base() {
 		logger=new Logger(mlvl);
 		logger.Log(
 			"address port constructor",
@@ -83,7 +83,7 @@ public class Client : Form {
 		logger.Log("performed layout");
 	}
 
-	private unsafe void StartThreads(IPAddress address, uint port) {
+	private unsafe void StartThreads(IPAddress address, int port) {
         logger.Log("start threads!");
         connectionThread=new Thread(
 			() => {

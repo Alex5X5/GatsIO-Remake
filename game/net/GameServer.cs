@@ -34,9 +34,9 @@ internal class GameServer:Socket {
 	#region constructors
 	public GameServer() : this(5000) { }
 
-	public GameServer(int port) : this(GetLocalIP(), (uint)Math.Abs(port)) { }
+	public GameServer(int port) : this(GetLocalIP(), Math.Abs(port)) { }
 
-	public GameServer(IPAddress address, uint port) : base(address.AddressFamily == AddressFamily.InterNetwork ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp){
+	public GameServer(IPAddress address, int port) : base(address.AddressFamily == AddressFamily.InterNetwork ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp){
 		logger = new Logger(new LoggingLevel("GameServer"));
 		//create a new console that shows the messages of the server
 		console = new(this);

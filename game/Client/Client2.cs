@@ -208,7 +208,7 @@ public class Client2 : Form {
         logger.Log("performed layout");
     }
 
-    private unsafe void StartThreads(IPAddress address, uint port) {
+    private unsafe void StartThreads(IPAddress address, int port) {
         logger.Log("start threads!");
         connectionThread=new Thread(
             () => {
