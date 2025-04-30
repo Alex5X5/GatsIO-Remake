@@ -41,8 +41,8 @@ class Obstacle2:Drawable {
 			BindVBO();
 			Console.WriteLine("gl is not null:");
 			unsafe {
-				fixed (float* ptr = &vertices[0])
-					Drawable.BufferTriangles(ptr, 18, RendererGl.Gl);
+			fixed (float* ptr = &vertices[0]) ;
+					//Drawable.BufferTriangles(ptr, 18, RendererGl.Gl);
 			}
 			UnbindVBO();
 	}

@@ -15,9 +15,9 @@ public static class Programm {
         Logging.DisableColors();
         //Programm3.Main_();
         //return;
-        RendererGl rd = new();
+        //RendererGl rd = new();
         //Client2 c = new();
-        return;
+        //return;
 
         System.Collections.Generic.List<string> args_ = args.ToList<string>();
         bool noGui = args_.Contains("-nogui");
