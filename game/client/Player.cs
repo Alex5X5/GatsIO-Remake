@@ -56,7 +56,7 @@ public class Player {
 		Dir.x = 0;
 		Dir.y = 0;
 		Dir.z = 0;
-        Health_ = -1;
+		Health_ = -1;
 	}
 
 	//	public bool checkEdges() {

@@ -58,8 +58,8 @@ public class Obstacle {
 		boundR = new LineSection3d(boundT.point2, boundB.point2);
 		triangles = new Vector3d[,] {
 			{Pos, Pos.Cpy().Add(0, HEIGHT, 0),Pos.Cpy().Add(WIDTH, 0, 0)},
-            {Pos.Cpy().Add(0, HEIGHT, 0),Pos.Cpy().Add(WIDTH, HEIGHT, 0), Pos.Cpy().Add(WIDTH, 0, 0)}
-        };
+			{Pos.Cpy().Add(0, HEIGHT, 0),Pos.Cpy().Add(WIDTH, HEIGHT, 0), Pos.Cpy().Add(WIDTH, 0, 0)}
+		};
 	}
 
 	public Obstacle(ParsableObstacle obstacle) {

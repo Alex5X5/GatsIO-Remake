@@ -9,7 +9,6 @@ internal class Triangle {
     Vector3d point2;
     Vector3d point3;
 
-
     uint vao;
     uint vbo;
 

@@ -7,7 +7,7 @@ using Silk.NET.Windowing;
 class RendererGl {
 
     private readonly IWindow window;
-    private GL gl;
+    public static GL? Gl;
     
 	private static uint _shaderProgram;
 
@@ -20,52 +20,47 @@ class RendererGl {
 		//#new()
 	];
 
+	private Obstacle2 testObstacle;
+
 	public RendererGl() {
 		var options = WindowOptions.Default;
 		options.Size = new Silk.NET.Maths.Vector2D<int>(800, 600);
 		options.Title = "OpenGL Drawable Triangles";
 
+		testObstacle = new Obstacle2(new Vector3d(100, 100, 100), (byte)1);
+
 		window = Window.Create(options);
 		window.Load += OnLoad;
 		window.Run();
-	}
+    }
 
 	private void OnLoad() {
         // Initialize OpenGL context
-        gl = GL.GetApi(window);
-        window.Render += (double deltaTime) => OnRender(deltaTime, gl);
+        Gl = GL.GetApi(window);
+		window.Render += (double deltaTime) => OnRender(deltaTime, Gl);
 
         // Create the shader program
         _shaderProgram = CreateShaderProgram();
 
-        int screenWidthLocation = gl.GetUniformLocation(_shaderProgram, "u_WindowWidth");
-        int screenHeightLocation = gl.GetUniformLocation(_shaderProgram, "u_WindowHeight");
+        int screenWidthLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowWidth");
+        int screenHeightLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowHeight");
 
         window.FramebufferResize += (Vector2D<int> size) => {
-            gl.Viewport(0, 0, (uint)size.X, (uint)size.Y);
+            Gl.Viewport(0, 0, (uint)size.X, (uint)size.Y);
             // Also update uniforms for width and height if you're using them
-            gl.Uniform1(screenWidthLocation, (float)size.X);
-            gl.Uniform1(screenWidthLocation, (float)size.Y);
+            Gl.Uniform1(screenWidthLocation, (float)size.X);
+            Gl.Uniform1(screenWidthLocation, (float)size.Y);
         };
 
+        testObstacle.Pos = testObstacle.Pos.Cpy().Add(new Vector3d(1, 1, 1));
 
-        foreach (Drawable drawable in dTriangles) {
-            drawable.Setup(gl);
-        }
+
+        //foreach (Drawable drawable in dTriangles) {
+        //    drawable.Setup(Gl);
+        //}
+
+        testObstacle.Setup(Gl);
     }
-
-	public void OnLoad(GL gl) {
-		// Initialize OpenGL context
-		gl = GL.GetApi(window);
-		window.Render += (double deltaTime) => OnRender(deltaTime, gl);
-
-		// Create the shader program
-		_shaderProgram = CreateShaderProgram();
-
-		foreach (Drawable drawable in dTriangles) {
-			drawable.Setup(gl);
-		}
-	}
 
 	public unsafe void OnRender(double deltaTime, GL gl) {
 		gl.Clear((uint)ClearBufferMask.ColorBufferBit);
@@ -77,9 +72,12 @@ class RendererGl {
 		gl.Uniform1(screenWidthLocation, (float)window.Size.X);
 		gl.Uniform1(screenHeightLocation, (float)window.Size.Y);
 
-		foreach (var triangle in dTriangles) {
-			triangle.Draw(gl);
-		}
+		testObstacle.Draw(gl);
+		//foreach (var triangle in dTriangles) {
+		//	triangle.Draw(gl);
+		//}
+
+		
 
 		//i++;
 		//if (i>10) {
@@ -90,7 +88,7 @@ class RendererGl {
 
 	private uint CreateShaderProgram() {
 		
-		uint shaderProgram = gl.CreateProgram();
+		uint shaderProgram = Gl.CreateProgram();
 		
 		// Vertex Shader
 		string vertexShaderSource = @"
@@ -125,35 +123,35 @@ class RendererGl {
 
 
         // Link shaders into a program
-        gl.UseProgram(shaderProgram);
-		gl.AttachShader(shaderProgram, vertexShader);
-		gl.AttachShader(shaderProgram, fragmentShader);
-		gl.LinkProgram(shaderProgram);
+        Gl.UseProgram(shaderProgram);
+		Gl.AttachShader(shaderProgram, vertexShader);
+		Gl.AttachShader(shaderProgram, fragmentShader);
+		Gl.LinkProgram(shaderProgram);
 
 
-        int windowWidthLocation = gl.GetUniformLocation(shaderProgram, "u_WindowWidth");
-        int windowHeightLocation = gl.GetUniformLocation(shaderProgram, "u_WindowHeight");
-        gl.Uniform1(windowWidthLocation, window.Size.X);
-        gl.Uniform1(windowHeightLocation, window.Size.Y);
+        int windowWidthLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowWidth");
+        int windowHeightLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowHeight");
+        Gl.Uniform1(windowWidthLocation, window.Size.X);
+        Gl.Uniform1(windowHeightLocation, window.Size.Y);
 
         //string s = gl.GetActiveUniform(shaderProgram, windowWidthLocation<0 ? 0 : (uint)windowWidthLocation, out int size, out UniformType type);
         //s += " "+gl.GetActiveUniform(shaderProgram, windowHeightLocation<0 ? 0 : (uint)windowWidthLocation, out int size2, out UniformType type2);
         //Console.WriteLine("activeUniforms:"+s);
 
-        gl.DeleteShader(vertexShader);
-        gl.DeleteShader(fragmentShader);
+        Gl.DeleteShader(vertexShader);
+        Gl.DeleteShader(fragmentShader);
 
 		return shaderProgram;
 	}
 
 	private uint CompileShader(ShaderType type, string source) {
-		uint shader = gl.CreateShader(type);
-		gl.ShaderSource(shader, source);
-		gl.CompileShader(shader);
+		uint shader = Gl.CreateShader(type);
+		Gl.ShaderSource(shader, source);
+		Gl.CompileShader(shader);
 
-		gl.GetShader(shader, ShaderParameterName.CompileStatus, out var status);
+		Gl.GetShader(shader, ShaderParameterName.CompileStatus, out var status);
 		if (status == 0) {
-			string infoLog = gl.GetShaderInfoLog(shader);
+			string infoLog = Gl.GetShaderInfoLog(shader);
 			Console.WriteLine($"Error compiling shader ({type}): {infoLog}");
 		}
 
