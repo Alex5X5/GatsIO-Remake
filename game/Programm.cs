@@ -10,14 +10,9 @@ namespace ShGame.game;
 
 public static class Programm {
 
-	[STAThread]
+    [STAThread]
     public static void Main(string[] args) {
         Logging.DisableColors();
-        //Programm3.Main_();
-        //return;
-        //RendererGl rd = new();
-        //Client2 c = new();
-        //return;
 
         System.Collections.Generic.List<string> args_ = args.ToList<string>();
         bool noGui = args_.Contains("-nogui");
@@ -34,12 +29,12 @@ public static class Programm {
                         address = GameServer.GetLocalIP().MapToIPv4();
                     }
                     try {
-                        port = args_.Contains("-port") ? Convert.ToInt32(args_[args_.IndexOf("-port")+1]): -1;
+                        port = args_.Contains("-port") ? Convert.ToInt32(args_[args_.IndexOf("-port")+1]) : 5000;
                     } catch {
                         port = 5000;
                     }
-                    
-                    _ = new Net.GameServer(address, (uint)port);
+
+                    _ = new Net.GameServer(address, port);
 
                 }
             ).Start();
@@ -64,7 +59,7 @@ public static class Programm {
                     }
 
                     Client.Client c = new(
-                        address, (uint)port
+                        address, port
                     );
                     Console.WriteLine("Initial Screen: ip="+address+" port="+port);
                     c.ShowDialog();
@@ -75,8 +70,8 @@ public static class Programm {
         }
 
         Application.EnableVisualStyles();
-		Application.SetCompatibleTextRenderingDefault(false);
+        Application.SetCompatibleTextRenderingDefault(false);
         Console.WriteLine("start");
-		Application.Run(new InitialScreen());
-	}
+        Application.Run(new InitialScreen());
+    }
 }
