@@ -10,7 +10,7 @@ using System.Threading;
 public class NetHandler:Socket {
 
 	private readonly IPAddress IP = new([0, 0, 0, 0]);
-	private readonly uint PORT = 100;
+	private readonly int PORT = 100;
 
 	private bool stop = false;
 
@@ -20,11 +20,11 @@ public class NetHandler:Socket {
 		logger.Log("enpty constructor");
 	}
 
-	internal NetHandler(uint port) : this(GameServer.GetLocalIP(), port) {
+	internal NetHandler(int port) : this(GameServer.GetLocalIP(), port) {
 		logger.Log("port constructor");
 	}
 
-    public NetHandler(IPAddress address, uint port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
+    public NetHandler(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
 		logger.Log("port addresss constructor");
 		logger.Log(address.AddressFamily.ToString());
 		IP = address;

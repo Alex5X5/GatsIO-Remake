@@ -34,9 +34,9 @@ internal class GameServer:Socket {
 	#region constructors
 	public GameServer() : this(5000) { }
 
-	public GameServer(int port) : this(GetLocalIP(), (uint)Math.Abs(port)) { }
+	public GameServer(int port) : this(GetLocalIP(), Math.Abs(port)) { }
 
-	public GameServer(IPAddress address, uint port) : base(address.AddressFamily == AddressFamily.InterNetwork ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp){
+	public GameServer(IPAddress address, int port) : base(address.AddressFamily == AddressFamily.InterNetwork ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp){
 		logger = new Logger(new LoggingLevel("GameServer"));
 		//create a new console that shows the messages of the server
 		console = new(this);
@@ -57,7 +57,7 @@ internal class GameServer:Socket {
 			players[i] = new Player();
 		logger.Log(players.ToString());
 		//create an IPEndpoint with the given address and the given port and bind the server to the IPEndpoint
-		IPEndPoint point = new(address, (int)port);
+		IPEndPoint point = new(address, port);
 		logger.Log("binding, endPoint = "+point.ToString()+" endpint address = " + point.AddressFamily.ToString());
 		Bind(point);
 		logger.Log("bound endPoint="+point.ToString());
