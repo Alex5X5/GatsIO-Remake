@@ -6,7 +6,14 @@ using Silk.NET.Windowing;
 
 class RendererGl {
 
-	private readonly IWindow window;
+	//private readonly IWindow window;
+	private static readonly Logger logger = new(new LoggingLevel("RendererGL"));
+
+    public const int WIDTH = 2500, HEIGHT = 1500;
+
+
+    private bool loaded = false;
+
 	public static GL? Gl;
 	
 	private static uint _shaderProgram;
@@ -23,24 +30,17 @@ class RendererGl {
 	private Obstacle2 testObstacle;
 
 	public RendererGl() {
-		var options = WindowOptions.Default;
-		options.Size = new Silk.NET.Maths.Vector2D<int>(800, 600);
-		options.Title = "OpenGL Drawable Triangles";
-
-		testObstacle = new Obstacle2(new Vector3d(100, 100, 100), (byte)1);
-
-		window = Window.Create(options);
-		window.Load += OnLoad;
-		window.Run();
 	}
 
-	private void OnLoad() {
+	public void OnLoad(IWindow window, Client2 client) {
+		loaded = true;
+
 		// Initialize OpenGL context
 		Gl = GL.GetApi(window);
-		window.Render += (double deltaTime) => OnRender(deltaTime, Gl);
+		//window.Render += (double deltaTime) => OnRender(deltaTime);
 
 		// Create the shader program
-		_shaderProgram = CreateShaderProgram();
+		_shaderProgram = CreateShaderProgram(window);
 
 		int screenWidthLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowWidth");
 		int screenHeightLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowHeight");
@@ -52,41 +52,39 @@ class RendererGl {
 			Gl.Uniform1(screenWidthLocation, (float)size.Y);
 		};
 
-		testObstacle.Pos = testObstacle.Pos.Cpy().Add(new Vector3d(1, 1, 1));
-
-
-		//foreach (Drawable drawable in dTriangles) {
-		//    drawable.Setup(Gl);
-		//}
-
-		testObstacle.Setup(Gl);
+        for (int i = 0; i<client.foreignPlayers.Length; i++) {
+            client.foreignPlayers[i].Setup(Gl);
+        }
+        for(int i=0; i<client.obstacles.Length; i++) {
+            client.obstacles[i].Setup(Gl);
+        }
+        client.player.Setup(Gl);
 	}
 
-	public unsafe void OnRender(double deltaTime, GL gl) {
-		gl.Clear((uint)ClearBufferMask.ColorBufferBit);
+	public unsafe void OnRender(double deltaTime, IWindow window, Client2 client) {
+		if(!loaded) return;
 
-		gl.UseProgram(_shaderProgram);
+		//logger.Log("on render");
+		Gl.Clear((uint)ClearBufferMask.ColorBufferBit);
 
-		int screenWidthLocation = gl.GetUniformLocation(_shaderProgram, "u_WindowWidth");
-		int screenHeightLocation = gl.GetUniformLocation(_shaderProgram, "u_WindowHeight");
-		gl.Uniform1(screenWidthLocation, (float)window.Size.X);
-		gl.Uniform1(screenHeightLocation, (float)window.Size.Y);
+		Gl.UseProgram(_shaderProgram);
 
-		testObstacle.Draw(gl);
-		//foreach (var triangle in dTriangles) {
-		//	triangle.Draw(gl);
-		//}
+		int screenWidthLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowWidth");
+		int screenHeightLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowHeight");
+		Gl.Uniform1(screenWidthLocation, (float)window.Size.X);
+		Gl.Uniform1(screenHeightLocation, (float)window.Size.Y);
 
-		
-
-		//i++;
-		//if (i>10) {
-		//	_window.Close();
-		//	_window.Render-=OnRender;
-		//}
+        client.player.Draw(Gl);
+        for (int i = 0; i<client.foreignPlayers.Length; i++) {
+			if(client.foreignPlayers[i]?.Health!=-1&&client.foreignPlayers[i]?.PlayerUUID!=client.player.PlayerUUID)
+				client.foreignPlayers[i]?.Draw(Gl);
+        }
+        for (int i = 0; i<client.obstacles.Length; i++) {
+            client.obstacles[i]?.Draw(Gl);
+        }
 	}
 
-	private uint CreateShaderProgram() {
+	private uint CreateShaderProgram(IWindow window) {
 		
 		uint shaderProgram = Gl.CreateProgram();
 		

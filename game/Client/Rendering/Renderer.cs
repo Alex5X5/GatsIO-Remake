@@ -66,8 +66,7 @@ internal class Renderer : IDisposable
 				DrawPlayer(player, g);
 			//check whether the main player and the obstackles are not null
 			if (player!=null&&obstacles!=null)
-				if (RESTRICTED_VIEW)
-				{
+				if (RESTRICTED_VIEW){
 					//if the obstackles, the main player are not null and
 					//RESTRICTED_VIEW is enabled draw the obstacle shadows
 					fixed (Vector3d* ptr = &player.Pos)
@@ -104,8 +103,7 @@ internal class Renderer : IDisposable
 
 	#region direction calculations
 
-	private Vector3d[] GetVievRestrictions()
-	{
+	private Vector3d[] GetVievRestrictions() {
 		Vector3d r = logicalMouseVector.Cpy();
 		//		logger.log("",new MessageParameter("r",r.toString()));
 		double angle = Math.Tan(r.y / r.x);
@@ -120,8 +118,7 @@ internal class Renderer : IDisposable
 		return [v1, v2];
 	}
 
-	private Dir GetRoundedVievDirection()
-	{
+	private Dir GetRoundedVievDirection() {
 		if (logicalMouseVector.y > 1.0 / Math.Sqrt(2))
 		{
 			return Dir.T;
@@ -141,8 +138,7 @@ internal class Renderer : IDisposable
 	}
 
 
-	private unsafe Dir RelativeDir(Vector3d pos, Vector3d relativeTo)
-	{
+	private unsafe Dir RelativeDir(Vector3d pos, Vector3d relativeTo) {
 		Vector3d dir = relativeTo.Cpy().Sub(pos).Nor();
 		if (dir.y > 1.0 / Math.Sqrt(2))
 		{

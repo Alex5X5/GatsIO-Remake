@@ -1,60 +1,45 @@
 ﻿namespace ShGame.game.Client.Rendering;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-class Obstacle2:Drawable {
+public class Obstacle2:Drawable {
 	
-	private Vector3d Pos_;
-	public Vector3d Pos {get => Pos_; set => SetPos(value);}
-	public int WIDTH, HEIGHT;
+	public Vector3d Pos;
+	public readonly LineSection3d boundL, boundT, boundR, boundB;
+    public int WIDTH, HEIGHT;
+
 
 	public byte type;
 
-	private void SetPos(Vector3d value) {
-		Console.WriteLine("set!");
-		Pos_ = value;
-		vertices[0] = (float)value.x;
-		vertices[1] = (float)value.y;
-		vertices[2] = 0f;
-		vertices[3] = (float)value.x+WIDTH;
-		vertices[4] = (float)value.y;
-		vertices[5] = 0f;
-		vertices[6] = (float)value.x+WIDTH;
-		vertices[7] = (float)value.y+HEIGHT;
-		vertices[8] = 0f;
-		vertices[9] = (float)value.x;
-		vertices[10] = (float)value.y;
-		vertices[11] = 0f;
-		vertices[12] = (float)value.x;
-		vertices[13] = (float)value.y+HEIGHT;
-		vertices[14] = 0f;
-		vertices[15] = (float)value.x+WIDTH;
-		vertices[16] = (float)value.y+HEIGHT;
-		vertices[17] = 0f;
-		Console.WriteLine("data:");
-		for (int i = 0; i<17; i++) {
-			Console.WriteLine(vertices[i]);
-		}
-			BindVBO();
-			Console.WriteLine("gl is not null:");
-			unsafe {
-			fixed (float* ptr = &vertices[0]) ;
-					//Drawable.BufferTriangles(ptr, 18, RendererGl.Gl);
-			}
-			UnbindVBO();
+	public override void UpdateVertices() {
+        Console.WriteLine("Set!");
+		vertices[0]=(float)Pos.x;
+		vertices[1]=(float)Pos.y;
+		vertices[2]=0;
+		vertices[3]=(float)Pos.x+WIDTH;
+		vertices[4]=(float)Pos.y;
+		vertices[5]=0;
+		vertices[6]=(float)Pos.x+WIDTH;
+		vertices[7]=(float)Pos.y+HEIGHT;
+		vertices[8]=0;
+        vertices[9]=(float)Pos.x;
+		vertices[10]=(float)Pos.y;
+		vertices[11]=0;
+		vertices[12]=(float)Pos.x;
+		vertices[13]=(float)Pos.y+HEIGHT;
+		vertices[14]=0;
+		vertices[15]=(float)Pos.x+WIDTH;
+		vertices[16]=(float)Pos.y+HEIGHT;
+		vertices[17]=0;
 	}
 
-	public Obstacle2(Vector3d? pos__, byte type_):base() {
-		//      Pos = pos_??new Vector3d(0, 0, 0);
+	public Obstacle2(Vector3d? pos_, byte type_):base(18) {
+		Pos = pos_??new Vector3d(0, 0, 0);
 		type = type_;
 		switch (type) {
 			case 1:
 				//logger.log("setting bounds", new MessageParameter("type", type));
-				WIDTH = 100;
-				HEIGHT = 300;
+				WIDTH = 70;
+				HEIGHT = 70;
 				break;
 			case 2:
 				//logger.log("setting bounds", new MessageParameter("type", type));
@@ -71,12 +56,75 @@ class Obstacle2:Drawable {
 				WIDTH = 0;
 				HEIGHT = 0;
 				break;
-		}
-
-		FLOAT_COUNT = 18;
-		Console.WriteLine(vertices);
-		vertices = new float[FLOAT_COUNT];
-		Pos = pos__??new Vector3d(0, 0, 0);
+        }
+        boundL = new LineSection3d(Pos, Pos.Cpy().Add(0, HEIGHT, 0));
+        boundT = new LineSection3d(Pos, Pos.Cpy().Add(WIDTH, 0, 0));
+        boundB = new LineSection3d(boundL.point2, boundL.point2.Cpy().Add(WIDTH, 0, 0));
+        boundR = new LineSection3d(boundT.point2, boundB.point2);
 		Console.WriteLine(vertices);
 	}
+
+    private static unsafe void UpdateBounds(Obstacle2* obstacle) {
+        obstacle->WIDTH = obstacle->type switch {
+            1 => 35,
+            2 => 70,
+            3 => 70,
+            _ => 0,
+        };
+        obstacle->HEIGHT = obstacle->type switch {
+            1 => 70,
+            2 => 35,
+            3 => 70,
+            _ => 0,
+        };
+        obstacle->boundL.point1.Set(obstacle->Pos.x, obstacle->Pos.y, 0);
+        obstacle->boundL.point2.Set(obstacle->Pos.x, obstacle->Pos.y+obstacle->HEIGHT, 0);
+        obstacle->boundR.point1.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y, 0);
+        obstacle->boundR.point2.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y+obstacle->HEIGHT, 0);
+        obstacle->boundT.point1.Set(obstacle->boundT.point1);
+        obstacle->boundT.point2.Set(obstacle->boundR.point1);
+        obstacle->boundB.point1.Set(obstacle->boundL.point2);
+        obstacle->boundB.point2.Set(obstacle->boundR.point2);
+    }
+
+
+    public static unsafe void SerializeObstacle(byte[]* input, Obstacle* obstacle, int offset) {
+        int offset_ = offset;
+        fixed (byte* ptr = *input)
+            if (obstacle==null) {
+                *(ptr+offset_) = 0;
+            } else {
+                *(ptr+offset_) = obstacle->type;
+                offset_ += 4;
+                BitConverter.GetBytes((int)obstacle->Pos.x).CopyTo(*input, offset_);
+                offset_ += 4;
+                BitConverter.GetBytes((int)obstacle->Pos.y).CopyTo(*input, offset_);
+                offset_ += 4;
+                BitConverter.GetBytes(obstacle->WIDTH).CopyTo(*input, offset_);
+                offset_ += 4;
+                BitConverter.GetBytes(obstacle->HEIGHT).CopyTo(*input, offset_);
+            }
+    }
+
+    public static unsafe void DeserializeObstacle(byte[]* input, Obstacle2* obstacle, int offset) {
+        ArgumentNullException.ThrowIfNull(*input);
+        int offset_ = offset;
+        *obstacle ??= new Obstacle2(null, 0);
+        fixed (byte* ptr = *input)
+            obstacle->type = *(ptr+offset_);
+        if (obstacle->type==0) {
+            return;
+        } else {
+            offset_ += 4;
+            obstacle->Pos.x=BitConverter.ToInt32(*input, offset_);
+            offset_ += 4;
+            obstacle->Pos.y=BitConverter.ToInt32(*input, offset_);
+            offset_ += 4;
+            obstacle->WIDTH=BitConverter.ToInt32(*input, offset_);
+            offset_+=4;
+            obstacle->HEIGHT=BitConverter.ToInt32(*input, offset_);
+            UpdateBounds(obstacle);
+        }
+    }
+
 }

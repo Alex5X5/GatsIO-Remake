@@ -91,11 +91,11 @@ public partial class InitialScreen : Form {
 		new Thread(
 				() => {
 					GetStartValues(out IPAddress address, out int port);
-					Client.Client c = new(
+					Client.Client2 c = new(
 						address, port
 					);
 					Console.WriteLine("Initial Screen: ip="+address+" port="+port);
-					c.ShowDialog();
+					//c.ShowDialog();
 				}
 		).Start();
 	}

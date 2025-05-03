@@ -88,12 +88,12 @@ public class Client : Form {
         connectionThread=new Thread(
 			() => {
 				netHandler = new(address, port);
-				if (NetHandlerConnected())
-					netHandler.GetMap(ref obstacles);
+				if (NetHandlerConnected()) ;
+					//netHandler.GetMap(ref obstacles);
 				Console.WriteLine(player);
 				while (!stop && NetHandlerConnected()) {
 					logger.Log("asking for players");
-					netHandler.ExchangePlayers(player, ref players);
+					//netHandler.ExchangePlayers(player, ref players);
 					Thread.Sleep(100);
 				}
 				netHandler?.Dispose();
@@ -150,7 +150,7 @@ public class Client : Form {
 				keyRight=false;
 				break;
 		}
-		player.OnKeyEvent(c: this);
+		//player.OnKeyEvent(c: this);
 		Console.WriteLine("key up, p:"+player.ToString());
     }
 
@@ -172,7 +172,7 @@ public class Client : Form {
 				Stop(this, null);
 				break;
 		}
-		player.OnKeyEvent(c: this);
+		//player.OnKeyEvent(c: this);
 		Console.WriteLine("key up, p:"+player.ToString());
 	}
 

@@ -1,12 +1,18 @@
 ﻿namespace ShGame.game.Client;
+
+using ShGame.game.Client.Rendering;
 using ShGame.game.Logic;
 
 public class Player {
 
 	public const int PLAYER_BYTE_LENGTH = 48;
 
-	public Vector3d Pos;
-	public Vector3d Dir = new(0, 0, 0);
+    public Vector3d Pos;
+    public int WIDTH, HEIGHT;
+
+    public byte type;
+
+    public Vector3d Dir = new(0, 0, 0);
 	public int Speed = 1;
 
 	//private int Health_ = 0;// property
@@ -50,10 +56,8 @@ public class Player {
 
 	public void Deactivate() {
 		Visible = false;
-		Pos.x = 0;
-		Pos.y = 0;
-		Pos.z = 0;
-		Dir.x = 0;
+		Pos = new(0, 0, 0);
+		Dir.x = 0;	
 		Dir.y = 0;
 		Dir.z = 0;
 		Health_ = -1;
@@ -71,7 +75,7 @@ public class Player {
 	//		return EdgeCollision;
 	//	}
 
-	public void OnKeyEvent(Client c) {
+	public void OnKeyEvent(Client2 c) {
 		if(c.keyUp) {
 			if(c.keyLeft) {
 				if(c.keyDown) {

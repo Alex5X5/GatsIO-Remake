@@ -1,5 +1,7 @@
 ﻿namespace ShGame.game.Net;
 
+using ShGame.game.Client.Rendering;
+
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -95,33 +97,34 @@ public class NetHandler:Socket {
 		}
 	}
 
-	public unsafe void GetMap(ref Obstacle[] obstacles) {
+	public unsafe void GetMap(ref Obstacle2[] obstacles) {
 		logger.Log("getting map");
 		SendPacket(Protocoll.PreparePacket(Headers.MAP));
 		byte[] packet = RecievePacket();
 		int counter = 0;
         if (packet!=null)
             for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
-				fixed (Obstacle* ptr = &obstacles[i])
-					Obstacle.DeserializeObstacle(&packet, ptr, i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
-		foreach(Obstacle obstacle in obstacles)
+				fixed (Obstacle2* ptr = &obstacles[i])
+					Obstacle2.DeserializeObstacle(&packet, ptr, i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+		foreach(Obstacle2 obstacle in obstacles)
 			Console.WriteLine(obstacle.ToString());
 	}
 
-	public unsafe void ExchangePlayers(Player p, ref Player[] players) {
+	public unsafe void ExchangePlayers(Player2 p, ref Player2[] players) {
 		logger.Log("exchanging players", [new MessageParameter("player",p.ToString())]);
 		byte[] send = Protocoll.PreparePacket(Headers.PLAYER);
-		Player.SerializePlayer(&send, &p, Protocoll.PAYLOAD_OFFSET);
+		Player2.SerializePlayer(&send, &p, Protocoll.PAYLOAD_OFFSET);
 		try {
 			Send(send);
 			byte[] packet = RecievePacket();
 			if (packet != null)
 				for (int i = 0; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
 					logger.Log("deserializing player", new MessageParameter("player", players[i].ToString()));
-					Player temp = new();
-					Player.DeserializePlayer(&packet, &temp, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
-					if (temp != null && temp.PlayerUUID != p.PlayerUUID)
-						players[i] = temp;
+					//Player2 temp = new();
+					//if (temp != null && temp.PlayerUUID != p.PlayerUUID)
+						//players[i] = temp;
+					fixed(Player2* ptr = &players[i])
+						Player2.DeserializePlayer(&packet, ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
 					logger.Log("deserialized player", new MessageParameter("player", players[i].ToString()));
 				}
 		} catch (Exception e) {

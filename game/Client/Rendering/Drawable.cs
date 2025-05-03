@@ -6,144 +6,83 @@ using System.Runtime.InteropServices;
 using System.Threading;
 
 public abstract class Drawable {
+		
+	protected uint vaoHandle = 0;
+	protected uint vboHandle = 0;
 
-	uint vaoHandle = 0;
-	uint vboHandle = 0;
-
-	protected uint FLOAT_COUNT;
+	private int VERTICES_COUNT;
 
 	public float[] vertices;
 
-	private Vector3d p1 = new(30,1000,0);
-	private Vector3d p2 = new(500,0,0);
-	private Vector3d p3 = new(0,100,0);
-
-	private bool dirty = true;
+	public bool dirty = true;
 
 	private static readonly Logger logger = new(new LoggingLevel("Drawable"));
 
-
-	public Drawable(float[] vertices_) : this() {
-		Console.WriteLine("[Drawable]:gl constructor");
-		vertices = vertices_;
+	public Drawable(int verticesCount) {
+		VERTICES_COUNT = verticesCount;
+        vertices = new float[VERTICES_COUNT];
+        vertices.Initialize();
+        Console.WriteLine("[Drawable]:empty constructor");
 	}
 
-	public Drawable() {
-		Console.WriteLine("[Drawable]:empty constructor");
-	}
+	public virtual void UpdateVertices() { }
 
 	public unsafe void Setup(GL gl) {
-		Console.WriteLine("[Drawable]:setup");
+		//Console.WriteLine("[Drawable]:setup");
 		vaoHandle = gl.GenVertexArray();
 		BindVAO();
 		vboHandle = gl.GenBuffer();
 		BindVBO();
 		gl.EnableVertexAttribArray(0);
-		//gl.EnableVertexAttribArray(1);
 		gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 12, null);
-		gl.BufferData(BufferTargetARB.ArrayBuffer, 9 * sizeof(float), in IntPtr.Zero, BufferUsageARB.StaticDraw);
-		//gl.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 12, (void*)12);
-		//gl.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 12, (void*)24);
-		//gl.DrawArrays(PrimitiveType.Triangles, 0, 1);
+		gl.BufferData(BufferTargetARB.ArrayBuffer, (uint)VERTICES_COUNT * sizeof(float), in IntPtr.Zero, BufferUsageARB.StaticDraw);
 		UnbindVBO();
 		UnbindVAO();
-	}
-
-	public unsafe void Update(GL gl) {
-		//logger.Log("updating");
-		//float* temporaryMemory = (float*)NativeMemory.Alloc(36);
-		//float* ptr = temporaryMemory;
-		//BindVBO();
-		//*ptr = vertices[0];
-		//ptr += 1;
-		//*ptr = vertices[1];
-		//ptr += 1;
-		//*ptr = 0;
-		//ptr += 1;
-		//*ptr = vertices[3];
-		//ptr += 1;
-		//*ptr = vertices[4];
-		//ptr += 1;
-		//*ptr = 0;
-		//ptr += 1;
-		//*ptr = vertices[5];
-		//ptr += 1;
-		//*ptr = vertices[6];
-		//ptr += 1;
-		//*ptr = 0;
-		//ptr += 1;
-		//ptr = temporaryMemory;
-
-		BindVBO();
-		fixed (float* verticesPointer = &vertices[0]) {
-			float* buffer = BufferTriangles_(verticesPointer, 9);
-			gl.BufferSubData(GLEnum.ArrayBuffer, 0, 36, buffer);
-			Console.WriteLine("data:");
-			float* buffer_ = buffer;
-			for (int i = 0; i<9; i++) {
-				Console.WriteLine(*buffer_);
-				buffer_++;
-			}
-			NativeMemory.Free(buffer);
-		}
-		
-		UnbindVBO();
-		BindVAO();
-		gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
-		UnbindVAO();
-		//NativeMemory.Free(temporaryMemory);
-		logger.Log("finished update");
 	}
 
 	public unsafe void Draw(GL gl) {
-		Console.WriteLine("[Drawable]:Draw");
+		if (dirty) {
+			UpdateVertices();
+			dirty = false;
+		}
 		BindVAO();
-		Update(gl);
-		gl.DrawArrays(PrimitiveType.Triangles, 0, 9);
+		BindVBO();
+		for (int i = 0; i<VERTICES_COUNT; i+=9) {
+			fixed (float* verticesPointer = &vertices[i]) {
+				float* buffer = BufferTriangleValues(verticesPointer);
+				gl.BufferSubData(GLEnum.ArrayBuffer, (nint)i*sizeof(float), (uint)9*sizeof(float), buffer);
+				NativeMemory.Free(buffer);
+			}
+		}
+        gl.DrawArrays(PrimitiveType.Triangles, 0, (uint)VERTICES_COUNT+1);
 		UnbindVAO();
-		logger.Log("finished Draw");
+		UnbindVBO();
 	}
 
-	public static unsafe void BufferTriangles(float* triangles, uint count) {
-		logger.Log("buffering triangles");
-		//float* buffer = BufferTriangles_(&vertices);
-		//    (float*)NativeMemory.Alloc((nuint)count*sizeof(float));
-		//float* ptr = buffer;
-		//for (int i = 0; i<count/3; i++) {
-		//    logger.Log(Convert.ToString(*triangles));
-		//    *ptr=*triangles;
-		//    ptr++;
-		//    triangles++;
-		//    logger.Log(Convert.ToString(*triangles));
-		//    *ptr =*triangles;
-		//    ptr++;
-		//    triangles++;
-		//    logger.Log(Convert.ToString(*triangles));
-		//    *ptr = 0;
-		//    triangles++;
-		//    ptr++;
-		//}
-		//gl?.BufferSubData(GLEnum.ArrayBuffer, 0, count, buffer);
-		//NativeMemory.Free(buffer);
-	}
-	public static unsafe float* BufferTriangles_(float* triangles, uint count) {
-		logger.Log("buffering triangles");
-		float* buffer = (float*)NativeMemory.Alloc((nuint)count*sizeof(float));
+	public static unsafe float* BufferTriangleValues(float* vertices) {
+		/*
+			takes an array of nine floats and returns a pointer to a new memory location containing these values
+		 */
+		float* buffer = (float*)NativeMemory.Alloc(9*sizeof(float));
 		float* ptr = buffer;
-		for (int i = 0; i<count/3; i++) {
-			logger.Log(Convert.ToString(*triangles));
-			*ptr=*triangles;
+		//Console.Write("buffering:");
+		for (int i = 0; i<3; i++) {
+			//Console.Write("(");
+            *ptr=*vertices;
+			//Console.Write(*vertices+", ");
 			ptr++;
-			triangles++;
-			logger.Log(Convert.ToString(*triangles));
-			*ptr =*triangles;
+			vertices++;
+			*ptr =*vertices;
+			//Console.Write(*vertices+", ");
 			ptr++;
-			triangles++;
-			logger.Log(Convert.ToString(*triangles));
+			vertices++;
 			*ptr = 0;
-			triangles++;
+			//Console.Write(0+", ");
+			vertices++;
 			ptr++;
+			//Console.Write(")");
 		}
+		//Console.WriteLine();
 		return buffer;
 	}
 

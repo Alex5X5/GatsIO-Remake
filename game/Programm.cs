@@ -14,6 +14,11 @@ public static class Programm {
     public static void Main(string[] args) {
         Logging.DisableColors();
 
+
+        //RendererGl r = new();
+        //Client2 c = new();
+        //return;
+
         System.Collections.Generic.List<string> args_ = args.ToList<string>();
         bool noGui = args_.Contains("-nogui");
 
@@ -58,11 +63,11 @@ public static class Programm {
                         port = 5000;
                     }
 
-                    Client.Client c = new(
+                    Client.Client2 c = new(
                         address, port
                     );
                     Console.WriteLine("Initial Screen: ip="+address+" port="+port);
-                    c.ShowDialog();
+                    //c.ShowDialog();
 
                 }
             ).Start();
