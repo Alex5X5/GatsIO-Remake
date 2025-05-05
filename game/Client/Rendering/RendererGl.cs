@@ -4,6 +4,7 @@ using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
+
 class RendererGl {
 
 	//private readonly IWindow window;
@@ -21,7 +22,7 @@ class RendererGl {
 
 	public static GL? Gl;
 	
-	private static uint _shaderProgram;
+	private static uint shaderProgram;
 
 	private static readonly uint playerShaderProgram;
 	private static readonly uint shadowShaderProgram;
@@ -30,19 +31,16 @@ class RendererGl {
 	public RendererGl() {
 	}
 
-	public void OnLoad(IWindow window, Client2 client) {
+	public void OnLoad(IWindow window, Client client) {
 		loaded = true;
 
-		// Initialize OpenGL context
 		Gl = GL.GetApi(window);
-		//window.Render += (double deltaTime) => OnRender(deltaTime);
 
-		// Create the shader program
-		_shaderProgram = CreateShaderProgram(window);
+		shaderProgram = CreateShaderProgram(window);
 
-		int screenWidthLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowWidth");
-		int screenHeightLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowHeight");
-		int colorTypeLocation = Gl.GetUniformLocation(_shaderProgram, "colorMode");
+		int screenWidthLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowWidth");
+		int screenHeightLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowHeight");
+		int colorTypeLocation = Gl.GetUniformLocation(shaderProgram, "colorMode");
 
 		window.FramebufferResize += (Vector2D<int> size) => {
 			Gl.Viewport(0, 0, (uint)size.X, (uint)size.Y);
@@ -65,17 +63,17 @@ class RendererGl {
         }
     }
 
-    public unsafe void OnRender(double _, IWindow window, Client2 client) {
+    public unsafe void OnRender(double _, IWindow window, Client client) {
 		if(!loaded) return;
 		//logger.Log("on render");
 		Gl.ClearColor(0.5f, 0.5f, 0.6f, 1f);
 		Gl.Clear((uint)ClearBufferMask.ColorBufferBit);
 
-		Gl.UseProgram(_shaderProgram);
+		Gl.UseProgram(shaderProgram);
 
-		int screenWidthLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowWidth");
-		int screenHeightLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowHeight");
-		int colorModeLocation = Gl.GetUniformLocation(_shaderProgram, "colorMode");
+		int screenWidthLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowWidth");
+		int screenHeightLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowHeight");
+		int colorModeLocation = Gl.GetUniformLocation(shaderProgram, "colorMode");
 		Gl.Uniform1(screenWidthLocation, (float)window.Size.X);
 		Gl.Uniform1(screenHeightLocation, (float)window.Size.Y);
 		
@@ -150,7 +148,6 @@ void main()
 		uint fragmentShader = CompileShader(ShaderType.FragmentShader, fragmentShaderSource);
 
 
-		// Link shaders into a program
 		Gl.UseProgram(shaderProgram);
 		Gl.AttachShader(shaderProgram, vertexShader);
 		Gl.AttachShader(shaderProgram, fragmentShader);

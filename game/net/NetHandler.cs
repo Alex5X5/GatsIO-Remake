@@ -1,6 +1,6 @@
 ﻿namespace ShGame.game.Net;
 
-using ShGame.game.Client.Rendering;
+using ShGame.game.Client;
 
 using System.Net;
 using System.Net.Sockets;
@@ -36,7 +36,6 @@ public class NetHandler:Socket {
 		logger.Log(point.ToString());
 		try {
 			logger.Log("trying to connect, point="+point.ToString()+", family="+point.Address.AddressFamily);
-			//Connect_(address, port);
 			Connect(point);
 		} catch(SocketException e) {
 			logger.Warn("failed to connect (reason="+e.ToString()+")");
@@ -45,9 +44,6 @@ public class NetHandler:Socket {
 			logger.Log("connected!");
 		else
 			logger.Warn("no connection");
-			//output=new NetworkStream(this, FileAccess.Write);
-			//output.Flush();
-			//input=new NetworkStream(this, FileAccess.Read);
 	}
 
 	private bool Connect_(IPAddress address, int port) {
@@ -97,23 +93,23 @@ public class NetHandler:Socket {
 		}
 	}
 
-	public unsafe void GetMap(Client2 client_, ref Obstacle2[] obstacles) {
+	public unsafe void GetMap(Client client_, ref Obstacle[] obstacles) {
 		logger.Log("getting map");
 		SendPacket(Protocoll.PreparePacket(Headers.MAP));
 		byte[] packet = RecievePacket();
 		int counter = 0;
         if (packet!=null)
             for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
-				fixed (Obstacle2* ptr = &obstacles[i])
-					Obstacle2.DeserializeObstacle(client_, &packet, ptr, i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
-		foreach(Obstacle2 obstacle in obstacles)
-			Console.WriteLine(obstacle.ToString());
+				fixed (Obstacle* ptr = &obstacles[i])
+					Obstacle.DeserializeObstacle(client_, &packet, ptr, i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+		//foreach(Obstacle obstacle in obstacles)
+			//Console.WriteLine(obstacle.ToString());
 	}
 
-	public unsafe void ExchangePlayers(Player2 p, ref Player2[] players) {
+	public unsafe void ExchangePlayers(Player p, ref Player[] players) {
 		//logger.Log("exchanging players", [new MessageParameter("player",p.ToString())]);
 		byte[] send = Protocoll.PreparePacket(Headers.PLAYER);
-		Player2.SerializePlayer(&send, &p, Protocoll.PAYLOAD_OFFSET);
+		Player.SerializePlayer(&send, &p, Protocoll.PAYLOAD_OFFSET);
 		try {
 			Send(send);
 			byte[] packet = RecievePacket();
@@ -123,8 +119,8 @@ public class NetHandler:Socket {
 					//Player2 temp = new();
 					//if (temp != null && temp.PlayerUUID != p.PlayerUUID)
 						//players[i] = temp;
-					fixed(Player2* ptr = &players[i])
-						Player2.DeserializePlayer(&packet, ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+					fixed(Player* ptr = &players[i])
+						Player.DeserializePlayer(&packet, ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
 					//logger.Log("deserialized player", new MessageParameter("player", players[i].ToString()));
 				}
 		} catch (Exception e) {

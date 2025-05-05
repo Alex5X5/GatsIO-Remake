@@ -1,14 +1,21 @@
 ﻿namespace ShGame.game.Client.Rendering;
-using System;
-using System.Drawing;
 
-using static ShGame.game.Client.Rendering.Renderer;
+using ShGame.game.Client;
+
+using System;
+
+#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
+
+public enum Dir : byte {
+    T, B, L, R,
+}
+
 
 public class Shadow : Drawable {
 
 	static Logger logger = new(new LoggingLevel("shadow"));
 
-	private SupportsShadow attatch;
+	private ISupportsShadow attatch;
 
 	public override void UpdateVertices() {
 		GetShadow(out Vector3d shadowTarget1, out Vector3d shadowTarget2);
@@ -38,11 +45,11 @@ public class Shadow : Drawable {
 		//logger.Log(s);
 	}
 
-	public Shadow(SupportsShadow attatch_) : base(18) {
+	public Shadow(ISupportsShadow attatch_) : base(18) {
 		attatch = attatch_;
 	}
 
-	private static unsafe void CalculatePoints(Obstacle2* obstacle) {
+	private static unsafe void CalculatePoints(Obstacle* obstacle) {
 		obstacle->WIDTH = obstacle->type switch {
 			1 => 35,
 			2 => 70,
@@ -65,7 +72,7 @@ public class Shadow : Drawable {
 		obstacle->boundB.point2.Set(obstacle->boundR.point2);
 	}
 
-	private Dir RelativeDir(Vector3d dir) {
+	private static Dir RelativeDir(Vector3d dir) {
 		dir.Nor();
 		if (dir.y > 1.0 / Math.Sqrt(2)) {
 			return Dir.B;
@@ -82,42 +89,29 @@ public class Shadow : Drawable {
 	private unsafe void GetShadow(out Vector3d shadowTarget1, out Vector3d shadowTarget2) {
 		attatch.GetShadowOrigins(out Vector3d shadowOrigin1, out Vector3d shadowOrigin2);
         Vector3d pointOfView = attatch.GetPointOfView();
-		//a list of points on the screen
-		//PointF[] points = new PointF[3];
-		//Vector3d shadowOrigin1 = new(0, 0, 0);
-		//Vector3d shadoworigin2 = new(0, 0, 0);
 		Vector3d ShadowPoint3 = new(0, 0, 0);
 		Vector3d ShadowPoint4 = new(0, 0, 0);
-		//Vector3d[] sp;
-		//return;
-		//foreach (Obstacle o in *l) {
-			//if (o==null)
-			//	continue;
-			//o.GetShadowPoints(&pointOfView, &shadowOrigin1, &shadowOrigin2);
-			//sp=o.GetShadowPoints(v);
-			//if (!(pointOfView.x >= o.Pos.x && pointOfView.x <= o.Pos.x + o.WIDTH && pointOfView.y >= o.Pos.y && pointOfView->y <= o.Pos.y + o.HEIGHT)) {
 		switch (RelativeDir(attatch.GetRelativeVector())) {
-		//switch (RelativeDir(o.Pos.Cpy().Add(new Vector3d(o.WIDTH / 2.0, o.HEIGHT / 2.0, 0)))) {
 			case Dir.T:
-				fixed (Line3d* line = &BORDER_TOP) {
+				fixed (Line3d* line = &RendererGl.BORDER_TOP) {
                     shadowTarget1 = ShadowHit(&pointOfView, &shadowOrigin1, line);
 					shadowTarget2 = ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.B:
-				fixed (Line3d* line = &BORDER_BOTTOM) {
+				fixed (Line3d* line = &RendererGl.BORDER_BOTTOM) {
                     shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
                     shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.R:
-				fixed (Line3d* line = &BORDER_RIGHT) {
+				fixed (Line3d* line = &RendererGl.BORDER_RIGHT) {
                     shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
                     shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.L:
-				fixed (Line3d* line = &BORDER_LEFT) {
+				fixed (Line3d* line = &RendererGl.BORDER_LEFT) {
                     shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
                     shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
@@ -127,21 +121,8 @@ public class Shadow : Drawable {
 				shadowTarget2 = new(0, 0, 0);
                 //logger.warn("unexpected direction", new MessageParameter("direction", getRoundedVievDirection().toString()));
                 break;
-				//}
-				//fillPolygon(new int[] { (int)p1.x / gScl, (int)sp[0].x / gScl, (int)sp[1].x / gScl }, new int[] { (int)p1.y / gScl, (int)sp[0].y / gScl, (int)sp[1].y / gScl }, 3);
-
-			//}
-
 		}
-		//DrawShadowTriangle(ref points, ref p1.x, ref p1.y, ref p2.x, ref p2.y, ref sp[1].x, ref sp[1].y);
-		//DrawShadowTriangle(ref points, ref p1.x, ref p1.y, ref sp[0].x, ref sp[0].y, ref sp[1].x, ref sp[1].y);
-		//DrawShadowTriangle(ref points, ref ShadowPoint1.x, ref ShadowPoint1.y, ref ShadowPoint2.x, ref ShadowPoint2.y, ref ShadowPoint4.x, ref ShadowPoint4.y);
-		//DrawShadowTriangle(ref points, ref ShadowPoint1.x, ref ShadowPoint1.y, ref ShadowPoint3.x, ref ShadowPoint3.y, ref ShadowPoint4.x, ref ShadowPoint4.y);
 	}
-
-	//	private bool pointOnField(Vector3d v) {
-	//		return v.x>=0&&v.x<=UNSCALED_WIDTH&&v.y>=0&&v.y<=UNSCALED_HEIGHT;
-	//	}
 
 	private unsafe Vector3d ShadowHit(Vector3d* playerPosition, Vector3d* shadowPoint, Line3d* border) {
 		//get the coordinates of the origin point of the border
@@ -179,7 +160,7 @@ public class Shadow : Drawable {
 			oth1Z + u * (oth2Z - oth1Z));
 	}
 }
-public interface SupportsShadow {
+public interface ISupportsShadow {
 
 	public Vector3d GetRelativeVector();
 

@@ -1,6 +1,6 @@
 ﻿namespace ShGame.game.Net;
 
-internal class ConnectException:Exception{
+internal class ConnectException:Exception {
 
 	public ConnectException():base() {}
 

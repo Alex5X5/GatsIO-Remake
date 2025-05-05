@@ -1,6 +1,7 @@
 ﻿namespace ShGame.game.Net;
 
-using ShGame.game.Client.Rendering;
+using ShGame.game.Client;
+
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -15,11 +16,9 @@ internal class GameServer:Socket {
 
 	private bool stop = false;
 	private readonly Logger logger;
-	private readonly ServerConsole console;
-
 
 	//some constants
-	public const int MAP_WIDTH = Renderer.WIDTH, MAP_HEIGHT = Renderer.HEIGHT;
+	public const int MAP_WIDTH = 1400, MAP_HEIGHT = 900;
 	public const int OBSTACKLE_ROWS = 5, OBSTACKLE_LINES = 8;
 	public const int OBSTACLE_ROW_DISANCE = MAP_WIDTH / OBSTACKLE_ROWS;
 	public const int OBSTACLE_LINE_DISTANCE = MAP_HEIGHT / OBSTACKLE_LINES;
@@ -38,13 +37,6 @@ internal class GameServer:Socket {
 
 	public GameServer(IPAddress address, int port) : base(address.AddressFamily == AddressFamily.InterNetwork ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp){
 		logger = new Logger(new LoggingLevel("GameServer"));
-		//create a new console that shows the messages of the server
-		console = new(this);
-		new Thread(
-				() => console.ShowDialog()
-		).Start();
-		Thread.Sleep(100);
-
 		logger.Log(
 			"address port constructor",
 			new MessageParameter("address",address),
@@ -55,7 +47,7 @@ internal class GameServer:Socket {
 		//fill the players with invalid players so the serializers don't face nullpointers
 		for (int i = 0; i < MAX_PLAYER_COUNT; i++)
 			players[i] = new Player();
-		logger.Log(players.ToString());
+		logger.Log(players.ToString()??"");
 		//create an IPEndpoint with the given address and the given port and bind the server to the IPEndpoint
 		IPEndPoint point = new(address, (int)port);
 		logger.Log("binding, endPoint = "+point.ToString()+" endpint address = " + point.AddressFamily.ToString());
@@ -69,7 +61,7 @@ internal class GameServer:Socket {
 	}
 
 	private void OnAccept(Socket s) {
-		Console.WriteLine("[Server]:OnAccept("+s.ToString()+")");
+		logger.Log("[Server]:OnAccept("+s.ToString()+")");
 		//search for a slot for the new connection
 		bool found = false;
 		for(int i = 0; i<clients.Length; i++) {
@@ -207,7 +199,7 @@ internal class GameServer:Socket {
 			}
 	}
 
-	private void PlaceObstacles(int row, int line, int c) {
+	private void PlaceObstacles(int row, int line, int offset) {
 		//since there are OBSTACLE_ROWS rows the distance between the rows has to be MAP_WIDTH/OBSTACLE_ROWS
 		row = MAP_WIDTH / OBSTACKLE_ROWS * row;
 		//substract half of the distance between the rows so the obstakles get placed in the middle of each row
@@ -217,7 +209,8 @@ internal class GameServer:Socket {
 		//substract half of the distance between the lines so the obstakles get placed in the middle of each line
 		line -= (int)(0.5 * MAP_HEIGHT / (OBSTACKLE_LINES));
 		Random r = new();
-		obstacles[c] = new Obstacle(
+		obstacles[offset] = new Obstacle(
+			null,
 			new Vector3d(
 				//the obstacles may also be offset by half the distance to the next row/line
 				//first add half of the distance between the rows to x
@@ -232,6 +225,7 @@ internal class GameServer:Socket {
 			(byte)r.Next(1, 4)
 
 		);
+		logger.Log("generated new Obstacle ", new MessageParameter("obstacle", obstacles[offset]));
 	}
 	public void Stop() {
 		logger.Log("stopping");

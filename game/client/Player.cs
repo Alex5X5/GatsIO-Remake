@@ -3,20 +3,50 @@
 using ShGame.game.Client.Rendering;
 using ShGame.game.Logic;
 
-public class Player {
+#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
+
+public class Player : Drawable {
 
 	public const int PLAYER_BYTE_LENGTH = 48;
 
-    public Vector3d Pos;
-    public int WIDTH, HEIGHT;
+	public const int SIZE = 10, SIDES_COUNT = 100, FLOAT_COUNT = 9*SIDES_COUNT;
 
-    public byte type;
 
-    public Vector3d Dir = new(0, 0, 0);
+	public static readonly int[] CIRCLE_OFFSETS = CalcCircleOffsets();
+
+	private static int[] CalcCircleOffsets() {
+
+		int[] res = new int[FLOAT_COUNT];
+		res[0] = 0;
+		res[1] = 0;
+		res[2] = 0;
+		res[3] = 0;
+		res[4] = SIZE;
+		res[5] = 0;
+		res[6] = (int)(Math.Sin(Math.PI*2/SIDES_COUNT*1)*SIZE);
+		res[7] = (int)(Math.Cos(Math.PI*2/SIDES_COUNT*1)*SIZE);
+		res[8] = 0;
+	   
+		for (int i=9; i<SIDES_COUNT*9; i+=9) {
+			res[i] = res[0];
+			res[i+1] = res[1];
+			res[i+2] = 0;
+			res[i+3] = res[i-3];
+			res[i+4] = res[i-2];
+			res[i+5] = 0;
+			res[i+6] = (int)(Math.Sin(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
+			res[i+7] = (int)(Math.Cos(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
+			res[i+8] = 0;
+		}
+
+		return res;
+	}
+
+	public Vector3d Pos;
+	public Vector3d Dir = new(0, 0, 0);
+
+	public byte type;
 	public int Speed = 1;
-
-	//private int Health_ = 0;// property
-
 	private int Health_;
 	public int Health {
 		get => Health_;
@@ -27,15 +57,17 @@ public class Player {
 	public Int64 PlayerUUID = 0;
 	public bool Visible;
 
-	public Player(Vector3d? newPos, int newHealth, Int64 UUID) {
+
+	public Player(Vector3d? newPos, int newHealth, Int64 UUID):base(FLOAT_COUNT) {
 		Pos = newPos??new Vector3d(0, 0, 0);
-		Health_ =newHealth;
+		dirty = true;
+		Health_ = newHealth;
 		PlayerUUID = UUID!=0 ? UUID : new Random().Next();
 		Visible=Health_ !=-1;
 	}
 
 	//the constructor for invalid players
-	public Player() {
+	public Player():base(FLOAT_COUNT) {
 		Pos = new(0, 0, 0);
 		//if the health of a player is -1 it is considered invalid and won't be processed
 		Health_ = -1;
@@ -43,21 +75,32 @@ public class Player {
 		Visible = false;
 	}
 
-	public override string ToString() => $"game.graphics.client.player[health:{Health}, speed:{Speed}, pos:{Pos} dir:{Dir} UUID:{PlayerUUID}]";
+	public override string ToString() => $"game.graphics.client.Player2[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{Dir}, UUID:{PlayerUUID}, VAO:{vaoHandle}, VBO:{vboHandle}]";
+
+
+	public override void UpdateVertices() {
+		vertices ??= new float[FLOAT_COUNT];
+		for (int i=0; i<FLOAT_COUNT; i+=3) {
+			vertices[i] = (int)Pos.x+CIRCLE_OFFSETS[i];
+			vertices[i+1] = (int)Pos.y+CIRCLE_OFFSETS[i+1];
+			vertices[i+2] = 0;
+		}
+	}
 
 	public unsafe void Move() {
 		Pos.Add(Dir.Cpy().Nor().Scl(Speed));
+		dirty = true;
 	}
 
 	public void Damage(int damage) {
-		if(damage>Health)
+		if (damage>Health)
 			Health=0;
 	}
 
 	public void Deactivate() {
 		Visible = false;
 		Pos = new(0, 0, 0);
-		Dir.x = 0;	
+		Dir.x = 0;
 		Dir.y = 0;
 		Dir.z = 0;
 		Health_ = -1;
@@ -75,11 +118,11 @@ public class Player {
 	//		return EdgeCollision;
 	//	}
 
-	public void OnKeyEvent(Client2 c) {
-		if(c.keyUp) {
-			if(c.keyLeft) {
-				if(c.keyDown) {
-					if(c.keyRight) {
+	public void OnKeyEvent(Client c) {
+		if (c.keyUp) {
+			if (c.keyLeft) {
+				if (c.keyDown) {
+					if (c.keyRight) {
 						Dir.x=0; //wasd
 						Dir.y=0;
 					} else {
@@ -87,17 +130,17 @@ public class Player {
 						Dir.y=0;
 					}
 				} else {
-					if(c.keyRight) {
+					if (c.keyRight) {
 						Dir.x=0; //wad
-						Dir.y=-1;
+						Dir.y=1;
 					} else {
 						Dir.x=(-1)/Math.Sqrt(2); //wa
-						Dir.y=(-1)/Math.Sqrt(2);
+						Dir.y=1/Math.Sqrt(2);
 					}
 				}
 			} else {
-				if(c.keyDown) {
-					if(c.keyRight) {
+				if (c.keyDown) {
+					if (c.keyRight) {
 						Dir.x=1; //wsd
 						Dir.y=0;
 					} else {
@@ -105,27 +148,27 @@ public class Player {
 						Dir.y=0;
 					}
 				} else {
-					if(c.keyRight) {
+					if (c.keyRight) {
 						Dir.x=1/Math.Sqrt(2); //wd
-						Dir.y=(-1)/Math.Sqrt(2);
+						Dir.y=(1)/Math.Sqrt(2);
 					} else {
 						Dir.x=0; //w
-						Dir.y=-1;
+						Dir.y=1;
 					}
 				}
 			}
 		} else {
-			if(c.keyLeft) {
-				if(c.keyDown) {
-					if(c.keyRight) {
+			if (c.keyLeft) {
+				if (c.keyDown) {
+					if (c.keyRight) {
 						Dir.x=0; //asd
-						Dir.y=1;
+						Dir.y=-1;
 					} else {
 						Dir.x=(-1)/Math.Sqrt(2); //as
-						Dir.y=1/Math.Sqrt(2);
+						Dir.y=(-1)/Math.Sqrt(2);
 					}
 				} else {
-					if(c.keyRight) {
+					if (c.keyRight) {
 						Dir.x=0; //ad
 						Dir.y=0;
 					} else {
@@ -134,16 +177,16 @@ public class Player {
 					}
 				}
 			} else {
-				if(c.keyDown) {
-					if(c.keyRight) {
+				if (c.keyDown) {
+					if (c.keyRight) {
 						Dir.x=1/Math.Sqrt(2); //sd
-						Dir.y=1/Math.Sqrt(2);
+						Dir.y=(-1)/Math.Sqrt(2);
 					} else {
 						Dir.x=0; //s
-						Dir.y=1;
+						Dir.y=-1;
 					}
 				} else {
-					if(c.keyRight) {
+					if (c.keyRight) {
 						Dir.x=1; //d
 						Dir.y=0;
 					} else {
@@ -155,91 +198,10 @@ public class Player {
 		}
 	}
 
-    public void OnKeyEvent(Client c) {
-        if (c.keyUp) {
-            if (c.keyLeft) {
-                if (c.keyDown) {
-                    if (c.keyRight) {
-                        Dir.x=0; //wasd
-                        Dir.y=0;
-                    } else {
-                        Dir.x=-1; //was
-                        Dir.y=0;
-                    }
-                } else {
-                    if (c.keyRight) {
-                        Dir.x=0; //wad
-                        Dir.y=-1;
-                    } else {
-                        Dir.x=(-1)/Math.Sqrt(2); //wa
-                        Dir.y=(-1)/Math.Sqrt(2);
-                    }
-                }
-            } else {
-                if (c.keyDown) {
-                    if (c.keyRight) {
-                        Dir.x=1; //wsd
-                        Dir.y=0;
-                    } else {
-                        Dir.x=0; //ws
-                        Dir.y=0;
-                    }
-                } else {
-                    if (c.keyRight) {
-                        Dir.x=1/Math.Sqrt(2); //wd
-                        Dir.y=(-1)/Math.Sqrt(2);
-                    } else {
-                        Dir.x=0; //w
-                        Dir.y=-1;
-                    }
-                }
-            }
-        } else {
-            if (c.keyLeft) {
-                if (c.keyDown) {
-                    if (c.keyRight) {
-                        Dir.x=0; //asd
-                        Dir.y=1;
-                    } else {
-                        Dir.x=(-1)/Math.Sqrt(2); //as
-                        Dir.y=1/Math.Sqrt(2);
-                    }
-                } else {
-                    if (c.keyRight) {
-                        Dir.x=0; //ad
-                        Dir.y=0;
-                    } else {
-                        Dir.x=(-1); //a
-                        Dir.y=0;
-                    }
-                }
-            } else {
-                if (c.keyDown) {
-                    if (c.keyRight) {
-                        Dir.x=1/Math.Sqrt(2); //sd
-                        Dir.y=1/Math.Sqrt(2);
-                    } else {
-                        Dir.x=0; //s
-                        Dir.y=1;
-                    }
-                } else {
-                    if (c.keyRight) {
-                        Dir.x=1; //d
-                        Dir.y=0;
-                    } else {
-                        Dir.x=0; //
-                        Dir.y=0;
-                    }
-                }
-            }
-        }
-    }
-
-
-    public static unsafe void SerializePlayer(byte[]* input, Player* player, int offset) {
+	public static unsafe void SerializePlayer(byte[]* input, Player* player, int offset) {
 		//Console.WriteLine("serializing"+player->ToString());
 		int offset_ = offset;
-		if(player==null) {
+		if (player==null) {
 			BitConverter.GetBytes(-1).CopyTo(*input, offset_);
 			return;
 		}

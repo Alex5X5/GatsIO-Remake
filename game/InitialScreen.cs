@@ -91,7 +91,7 @@ public partial class InitialScreen : Form {
 		new Thread(
 				() => {
 					GetStartValues(out IPAddress address, out int port);
-					Client.Client2 c = new(
+					Client.Client c = new(
 						address, port
 					);
 					Console.WriteLine("Initial Screen: ip="+address+" port="+port);

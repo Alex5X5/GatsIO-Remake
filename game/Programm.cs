@@ -8,15 +8,15 @@ using System.Threading;
 using System.Windows.Forms;
 namespace ShGame.game;
 
+/// <summary>
+/// This class contains the main entry point for the programm.
+/// </summary>
 public static class Programm {
 
 	[STAThread]
 	public static void Main(string[] args) {
 		
 		Logging.DisableColors();
-		//RendererGl r = new();
-		//Client2 c = new();
-		//return;
 
 		System.Collections.Generic.List<string> args_ = args.ToList<string>();
 		bool noGui = args_.Contains("-nogui");
@@ -48,7 +48,6 @@ public static class Programm {
 		if (args_.Contains("--client")) {
 			new Thread(
 				() => {
-					//Console.WriteLine("Initial Screen: ip="+address+" port="+port);
 					IPAddress? address = null;
 					int port = 1;
 					try {
@@ -62,12 +61,10 @@ public static class Programm {
 						port = 5000;
 					}
 
-					Client.Client2 c = new(
+					Client.Client c = new(
 						address, port
 					);
 					Console.WriteLine("Initial Screen: ip="+address+" port="+port);
-					//c.ShowDialog();
-
 				}
 			).Start();
 			return;

@@ -1,99 +1,109 @@
-namespace ShGame.game.Client;
+﻿namespace ShGame.game.Client;
 
 using ShGame.game.Net;
 using System.Windows.Forms;
 using System.Threading;
-using System.Drawing;
 using System.Net;
 using ShGame.game.Client.Rendering;
 using Silk.NET.Windowing;
-using Silk.NET.OpenGL;
+using Silk.NET.Input;
+using System.Numerics;
 
-#pragma warning disable CS8500 //insert spaces instead of tabs
+//#pragma warning disable CS8500 //insert spaces instead of tabs
 
-public class Client : Form {
+public class Client {
 
+	private readonly RendererGl renderer;
+	private IWindow? window;
+	private IInputContext? inputContext;
+
+	private bool stop = false;
 	internal bool keyUp = false;
 	internal bool keyDown = false;
 	internal bool keyLeft = false;
 	internal bool keyRight = false;
 
-	private bool stop = false;
-
 	private readonly Logger logger;
-
-	Client.Panel? panel;
-	private readonly Renderer renderer;
 	private readonly LoggingLevel mlvl = new("Client");
+
 	private NetHandler? netHandler;
 
 	internal Player player;
+	unsafe public Player[] foreignPlayers;
+	unsafe internal Obstacle[] obstacles;
 
-	unsafe private Player[] players;
-	unsafe internal Obstacle2[] obstacles = new Obstacle2[GameServer.OBSTACLE_COUNT];
 	private Thread renderThread = new(() => { });
 	private Thread connectionThread = new(() => { });
 	private Thread playerMoveThread = new(() => { });
 
-	public Client() : this(5000) { }
+	public Vector2 GetCursorPosition() => inputContext.Mice[0].Position;
+
+
+    public Client() : this(5000) { }
+
 
 	public Client(int port) : this(GameServer.GetLocalIP(), port) { }
 
-	public Client(IPAddress address, int port) : base() {
+
+	public Client(IPAddress address, int port) {
 		logger=new Logger(mlvl);
 		logger.Log(
 			"address port constructor",
 			new MessageParameter("address", address.ToString()),
 			new MessageParameter("port", port)
 		);
-
-        SetVisible();
+		renderer=new();
 		Thread.Sleep(500);
 		netHandler=new NetHandler();
 		byte[] temp = new byte[8];
 		new Random().NextBytes(temp);
 		player=new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
-		players=new Player[GameServer.MAX_PLAYER_COUNT];
+		foreignPlayers=new Player[GameServer.MAX_PLAYER_COUNT];
+		obstacles=new Obstacle[GameServer.OBSTACLE_COUNT];
 		for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
-			players[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
-		obstacles.Initialize();
-		renderer=new Renderer();
+			foreignPlayers[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
+		for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
+			obstacles[i] = new Obstacle(this, new Vector3d(300, 500, 0),1);
 		StartThreads(address, port);
 	}
 
+
 	private void SetVisible() {
 		logger.Log("setting vivible");
+		
+		var options = WindowOptions.Default;
+		options.Size = new Silk.NET.Maths.Vector2D<int>(RendererGl.WIDTH, RendererGl.HEIGHT);
+		options.Title = "ShGame";
 
-		SuspendLayout();
-
-		AutoScaleMode=AutoScaleMode.None;
-		ClientSize=new Size(Renderer.WIDTH, Renderer.HEIGHT);
-		Name="Client";
-		FormClosing+=Stop;
-		KeyDown+=new KeyEventHandler(KeyDown_);
-		KeyUp+=new KeyEventHandler(KeyUp_);
-		Text="Client";
-		panel = new() {
-			ClientSize=new Size(Renderer.WIDTH, Renderer.HEIGHT),
-			Name="Panel"
+		window = Window.Create(options);
+		window.Load += ()=> renderer.OnLoad(window, this);
+		window.Load += ()=> {
+			inputContext = window.CreateInput();
+			for (int i = 0; i < inputContext.Keyboards.Count; i++)
+				inputContext.Keyboards[i].KeyDown += KeyDown_;
+			for (int i = 0; i < inputContext.Keyboards.Count; i++)
+				inputContext.Keyboards[i].KeyUp += KeyUp_;
 		};
+		window.Closing+=Stop;
 
-		ResumeLayout(false);
-		PerformLayout();
-		logger.Log("performed layout");
+		window.Render += (double deltaTime) => renderer.OnRender(deltaTime, window, this);
+
+		window.Run();
+
+		return;
 	}
 
 	private unsafe void StartThreads(IPAddress address, int port) {
-        logger.Log("start threads!");
-        connectionThread=new Thread(
+		logger.Log("start threads!");
+		connectionThread=new Thread(
 			() => {
 				netHandler = new(address, port);
-				//if (NetHandlerConnected()) ;
-				//	netHandler.GetMap(this, ref obstacles);
+				if (NetHandlerConnected())
+					netHandler.GetMap(this, ref obstacles);
 				Console.WriteLine(player);
 				while (!stop && NetHandlerConnected()) {
-					logger.Log("asking for players");
-					//netHandler.ExchangePlayers(player, ref players);
+					//logger.Log("asking for players");
+					netHandler.ExchangePlayers(player, ref foreignPlayers);
 					Thread.Sleep(100);
 				}
 				netHandler?.Dispose();
@@ -101,32 +111,24 @@ public class Client : Form {
 		);
 		connectionThread.Start();
 
-		renderThread=new Thread(
-				() => {
-					while (!CanRaiseEvents&&!stop)
-						Thread.Sleep(10);
-					while (!stop) {
-						Thread.Sleep(30);
-						Invalidate();
-					}
-				}
-		);
+		renderThread=new Thread(SetVisible);
+
 		renderThread.Start();
 		logger.Log("started render thread");
 
 		playerMoveThread=new Thread(
 				() => {
-					while (!CanRaiseEvents&&!stop)
-						Thread.Sleep(10);
 					while (!stop) {
-						foreach (Player p in players) {
+						foreach (Player p in foreignPlayers) {
 							if (p!=null)
 								if (p.Health!=-1)
 									p.Move();
 						}
 						if (player!=null)
-							if (player.Health!=-1)
+							if (player.Health!=-1) {
+								//logger.Log("moving player ", new MessageParameter("player", player.ToString()));
 								player.Move();
+							}
 						Thread.Sleep(10);
 					}
 				}
@@ -135,87 +137,59 @@ public class Client : Form {
 		logger.Log("started player move thread");
 	}
 
-	private void KeyUp_(object? sender, KeyEventArgs e) {
-		switch (e.KeyCode) {
-			case Keys.W:
+	private void KeyUp_(IKeyboard keyboard, Key key, int keyCode) {
+		//logger.Log("key "+key+" up");
+		switch (key) {
+			case Key.W:
 				keyUp=false;
 				break;
-			case Keys.S:
+			case Key.S:
 				keyDown=false;
 				break;
-			case Keys.A:
+			case Key.A:
 				keyLeft=false;
 				break;
-			case Keys.D:
+			case Key.D:
 				keyRight=false;
 				break;
 		}
-		player.OnKeyEvent(c: this);
-		Console.WriteLine("key up, p:"+player.ToString());
-    }
+		player.OnKeyEvent(this);
+		//Console.WriteLine("key up, p:"+player.ToString());
+	}
 
-	private void KeyDown_(object? sender, KeyEventArgs e) {
-		switch (e.KeyCode) {
-			case Keys.W:
+	private void KeyDown_(IKeyboard keyboard, Key key, int keyCode) {
+		//logger.Log("key "+key+" down");
+		switch (key) {
+			case Key.W:
 				keyUp=true;
 				break;
-			case Keys.S:
+			case Key.S:
 				keyDown=true;
 				break;
-			case Keys.A:
+			case Key.A:
 				keyLeft=true;
 				break;
-			case Keys.D:
+			case Key.D:
 				keyRight=true;
 				break;
-			case Keys.Escape:
-				Stop(this, null);
+			case Key.Escape:
+				Stop();
 				break;
 		}
-		player.OnKeyEvent(c: this);
-		Console.WriteLine("key up, p:"+player.ToString());
+		player.OnKeyEvent(this);
+		//Console.WriteLine("key up, p:"+player.ToString());
 	}
 
-	protected override void OnPaint(PaintEventArgs e) {
-		unsafe {
-			fixed (Obstacle2[]* ob = &obstacles)
-				if (!stop)
-					e.Graphics.DrawImage(renderer.Render(ref players, ref player, ob), 0, 0);
-		}
-	}
-
-	protected override void OnPaintBackground(PaintEventArgs e) {
-		//Don't allow the background to paint
-	}
-
-private bool NetHandlerConnected() {
+	private bool NetHandlerConnected() {
 		if (netHandler != null)
 			if (netHandler.Connected)
 				return true;
 		return false;
 	}
 
-	private unsafe void Stop(object? sender, FormClosingEventArgs? e) {
+	private unsafe void Stop() {
 		stop=true;
-		if (sender==this) {
-			logger.Log("stopping");
-			renderer.Dispose();
-			Dispose();
-			Thread.Sleep(500);
-		}
-	}
-
 		
-	private class Panel : System.Windows.Forms.Panel {
-		public Panel() : base() { 
-		}
-		protected override void OnPaintBackground(PaintEventArgs e) {
-			
-		}
-
-		protected override void OnPaint(PaintEventArgs e) {
-			//if (!stop)
-				//e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
-		}
+		inputContext?.Dispose();
 	}
 }

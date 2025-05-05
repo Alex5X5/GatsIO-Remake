@@ -4,8 +4,12 @@ using Silk.NET.OpenGL;
 
 using System.Runtime.InteropServices;
 
+	/// <summary>
+	/// This is a Base class for objects that have to be drawn.
+	/// </summary>
 public abstract class Drawable {
-		
+
+
 	protected uint vaoHandle = 0;
 	protected uint vboHandle = 0;
 
@@ -19,9 +23,9 @@ public abstract class Drawable {
 
 	public Drawable(int verticesCount) {
 		VERTICES_COUNT = verticesCount;
-        vertices = new float[VERTICES_COUNT];
-        vertices.Initialize();
-        Console.WriteLine("[Drawable]:empty constructor");
+		vertices = new float[VERTICES_COUNT];
+		vertices.Initialize();
+		//Console.WriteLine("[Drawable]:empty constructor");
 	}
 
 	public virtual void UpdateVertices() { }
@@ -53,21 +57,18 @@ public abstract class Drawable {
 				NativeMemory.Free(buffer);
 			}
 		}
-        gl.DrawArrays(PrimitiveType.Triangles, 0, (uint)VERTICES_COUNT+1);
+		gl.DrawArrays(PrimitiveType.Triangles, 0, (uint)VERTICES_COUNT+1);
 		UnbindVAO();
 		UnbindVBO();
 	}
 
-	public static unsafe float* BufferTriangleValues(float* vertices) {
-		/*
-			takes an array of nine floats and returns a pointer to a new memory location containing these values
-		 */
+	public static unsafe float* BufferTriangleValues(float* vertices) { //
 		float* buffer = (float*)NativeMemory.Alloc(9*sizeof(float));
 		float* ptr = buffer;
 		//Console.Write("buffering:");
 		for (int i = 0; i<3; i++) {
 			//Console.Write("(");
-            *ptr=*vertices;
+			*ptr=*vertices;
 			//Console.Write(*vertices+", ");
 			ptr++;
 			vertices++;
