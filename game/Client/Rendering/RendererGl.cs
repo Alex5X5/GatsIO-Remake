@@ -18,16 +18,9 @@ class RendererGl {
 	
 	private static uint _shaderProgram;
 
-	private static uint playerShaderProgram;
-	private static uint shadowShaderProgram;
-	private static uint obstackleShaderProgram;
-
-	private static readonly Drawable[] dTriangles = [
-		//new([0,0,0,10,0,0,0,10,0])
-		//#new()
-	];
-
-	private Obstacle2 testObstacle;
+	private static readonly uint playerShaderProgram;
+	private static readonly uint shadowShaderProgram;
+	private static readonly uint obstackleShaderProgram;
 
 	public RendererGl() {
 	}
@@ -44,8 +37,9 @@ class RendererGl {
 
 		int screenWidthLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowWidth");
 		int screenHeightLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowHeight");
+		int colorTypeLocation = Gl.GetUniformLocation(_shaderProgram, "colorMode");
 
-		window.FramebufferResize += (Vector2D<int> size) => {
+        window.FramebufferResize += (Vector2D<int> size) => {
 			Gl.Viewport(0, 0, (uint)size.X, (uint)size.Y);
 			// Also update uniforms for width and height if you're using them
 			Gl.Uniform1(screenWidthLocation, (float)size.X);
@@ -61,9 +55,8 @@ class RendererGl {
         client.player.Setup(Gl);
 	}
 
-	public unsafe void OnRender(double deltaTime, IWindow window, Client2 client) {
+	public unsafe void OnRender(double _, IWindow window, Client2 client) {
 		if(!loaded) return;
-
 		//logger.Log("on render");
 		Gl.Clear((uint)ClearBufferMask.ColorBufferBit);
 
@@ -71,20 +64,23 @@ class RendererGl {
 
 		int screenWidthLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowWidth");
 		int screenHeightLocation = Gl.GetUniformLocation(_shaderProgram, "u_WindowHeight");
-		Gl.Uniform1(screenWidthLocation, (float)window.Size.X);
+		int colorModeLocation = Gl.GetUniformLocation(_shaderProgram, "colorMode");
+        Gl.Uniform1(screenWidthLocation, (float)window.Size.X);
 		Gl.Uniform1(screenHeightLocation, (float)window.Size.Y);
+		Gl.Uniform1(colorModeLocation, 1);
 
         client.player.Draw(Gl);
         for (int i = 0; i<client.foreignPlayers.Length; i++) {
 			if(client.foreignPlayers[i]?.Health!=-1&&client.foreignPlayers[i]?.PlayerUUID!=client.player.PlayerUUID)
 				client.foreignPlayers[i]?.Draw(Gl);
         }
+		Gl.Uniform1(colorModeLocation, 2);
         for (int i = 0; i<client.obstacles.Length; i++) {
             client.obstacles[i]?.Draw(Gl);
         }
 	}
 
-	private uint CreateShaderProgram(IWindow window) {
+    private static uint CreateShaderProgram(IWindow window) {
 		
 		uint shaderProgram = Gl.CreateProgram();
 		
@@ -107,13 +103,26 @@ class RendererGl {
 		";
 		
 		string fragmentShaderSource = @"
-			#version 330 core
-			in vec3 vertexColor;
-			out vec4 FragColor;
-			void main()
-			{
-			   FragColor = vec4(0.5, 0.5, 0.5, 1.0f);
-			}
+#version 330 core
+out vec4 FragColor;
+
+uniform int colorMode;
+
+void main()
+{
+    vec3 color;
+
+    if (colorMode == 0)
+        color = vec3(1.0, 0.0, 0.0); // Red
+    else if (colorMode == 1)
+        color = vec3(0.0, 1.0, 0.0); // Green
+    else if (colorMode == 2)
+        color = vec3(0.0, 0.0, 1.0); // Blue
+    else
+        color = vec3(1.0); // Default white
+
+    FragColor = vec4(color, 1.0);
+}
 		";
 		
 		uint vertexShader = CompileShader(ShaderType.VertexShader, vertexShaderSource);
@@ -129,20 +138,22 @@ class RendererGl {
 
 		int windowWidthLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowWidth");
 		int windowHeightLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowHeight");
-		Gl.Uniform1(windowWidthLocation, window.Size.X);
+		int colorTypeLocation = Gl.GetUniformLocation(shaderProgram, "u_ColorType");
+        Gl.Uniform1(windowWidthLocation, window.Size.X);
 		Gl.Uniform1(windowHeightLocation, window.Size.Y);
+		Gl.Uniform1(colorTypeLocation, 1);
 
-		//string s = gl.GetActiveUniform(shaderProgram, windowWidthLocation<0 ? 0 : (uint)windowWidthLocation, out int size, out UniformType type);
-		//s += " "+gl.GetActiveUniform(shaderProgram, windowHeightLocation<0 ? 0 : (uint)windowWidthLocation, out int size2, out UniformType type2);
-		//Console.WriteLine("activeUniforms:"+s);
+        //string s = gl.GetActiveUniform(shaderProgram, windowWidthLocation<0 ? 0 : (uint)windowWidthLocation, out int size, out UniformType type);
+        //s += " "+gl.GetActiveUniform(shaderProgram, windowHeightLocation<0 ? 0 : (uint)windowWidthLocation, out int size2, out UniformType type2);
+        //Console.WriteLine("activeUniforms:"+s);
 
-		Gl.DeleteShader(vertexShader);
+        Gl.DeleteShader(vertexShader);
 		Gl.DeleteShader(fragmentShader);
 
 		return shaderProgram;
 	}
 
-	private uint CompileShader(ShaderType type, string source) {
+	private static uint CompileShader(ShaderType type, string source) {
 		uint shader = Gl.CreateShader(type);
 		Gl.ShaderSource(shader, source);
 		Gl.CompileShader(shader);

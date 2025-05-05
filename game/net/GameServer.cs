@@ -99,7 +99,7 @@ internal class GameServer:Socket {
 		//serialize all of the obstacles into the packet
 		for (int i = 0; i<OBSTACLE_COUNT; i++) {
             fixed (Obstacle* ptr = &obstacles[i]) {
-				logger.Log("serializing requested obstacle",new MessageParameter(" packet offset", (Protocoll.PAYLOAD_OFFSET+i*Obstacle.OBSTACLE_BYTE_LENGTH)),new MessageParameter(" Obstacle"+ptr->ToString()));
+				//logger.Log("serializing requested obstacle",new MessageParameter(" packet offset", (Protocoll.PAYLOAD_OFFSET+i*Obstacle.OBSTACLE_BYTE_LENGTH)),new MessageParameter(" Obstacle"+ptr->ToString()));
 				Obstacle.SerializeObstacle(&result, ptr, Protocoll.PAYLOAD_OFFSET+i*Obstacle.OBSTACLE_BYTE_LENGTH);
 			}
 		}
@@ -121,7 +121,7 @@ internal class GameServer:Socket {
 			//create a temporary player and read it's properties from the packet
 			Player temp = new(null, 0, 0);
 			Player.DeserializePlayer(&packet, &temp, Protocoll.PAYLOAD_OFFSET);
-			logger.Log("processing player request",new MessageParameter("player",temp));
+			//logger.Log("processing player request",new MessageParameter("player",temp));
 			if (!IsPlayerRegistered(temp)) {
 				RegisterNewPlayer(temp);
 			}
@@ -136,7 +136,7 @@ internal class GameServer:Socket {
 					players[i].Pos = temp.Pos;
 					players[i].Dir = temp.Dir;
 				}
-				logger.Log("serializing player",new MessageParameter("player", players[i].ToString()));
+				//logger.Log("serializing player",new MessageParameter("player", players[i].ToString()));
 				//create a pointer to a player in the array of the players
 				fixed (Player* ptr = &players[i])
 					Player.SerializePlayer(&result, ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
@@ -174,7 +174,7 @@ internal class GameServer:Socket {
 				unsafe {
 					players[i].Dir=player.Dir.Nor();
 				}
-                logger.Log("sucessfully registred new player", new MessageParameter("UUID", player.PlayerUUID));
+                //logger.Log("sucessfully registred new player", new MessageParameter("UUID", player.PlayerUUID));
                 return true;
             }
         }
@@ -255,8 +255,7 @@ internal class GameServer:Socket {
 				try {
 					//create a Task that starts to try to accept a socket and in case of success stops to listen
 					//the result of the listening is a  socket that is connected to a client
-					Socket clientConnection =
-						await Task.Factory.FromAsync(BeginAccept, EndAccept, null);
+					Socket clientConnection = await Task.Factory.FromAsync(BeginAccept, EndAccept, null);
 					_=Task.Run(()=>OnAccept(clientConnection));
 				} catch (Exception e) {
 					if (!stop) {

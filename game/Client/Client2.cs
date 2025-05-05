@@ -3,17 +3,16 @@
 using ShGame.game.Net;
 using System.Windows.Forms;
 using System.Threading;
-using System.Drawing;
 using System.Net;
 using ShGame.game.Client.Rendering;
 using Silk.NET.Windowing;
 using Silk.NET.Input;
 
-#pragma warning disable CS8500 //insert spaces instead of tabs
+//#pragma warning disable CS8500 //insert spaces instead of tabs
 
 public class Client2 {
 
-	private RendererGl renderer;
+	private readonly RendererGl renderer;
 	private IWindow window;
 	private IInputContext inputContext;
 
@@ -73,7 +72,7 @@ public class Client2 {
 		options.Size = new Silk.NET.Maths.Vector2D<int>(RendererGl.WIDTH, RendererGl.HEIGHT);
 		options.Title = "ShGame";
 
-		window = Silk.NET.Windowing.Window.Create(options);
+		window = Window.Create(options);
 		window.Load += ()=> renderer.OnLoad(window, this);
 		window.Load += ()=> {
 			inputContext = window.CreateInput();
@@ -100,7 +99,7 @@ public class Client2 {
 					netHandler.GetMap(ref obstacles);
 				Console.WriteLine(player);
 				while (!stop && NetHandlerConnected()) {
-					logger.Log("asking for players");
+					//logger.Log("asking for players");
 					netHandler.ExchangePlayers(player, ref foreignPlayers);
 					Thread.Sleep(100);
 				}
@@ -192,6 +191,7 @@ public class Client2 {
 
 	private unsafe void Stop() {
 		stop=true;
+		
 		inputContext?.Dispose();
 		//window.Dispose();
 	}

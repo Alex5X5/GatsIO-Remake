@@ -34,7 +34,7 @@ public partial class InitialScreen : Form {
 	}
 
 	private void UseIpV4(object sender, EventArgs e) {
-		//make sure that only inV4Button was clicked
+		//make sure that only V4Button was clicked
 		if (sender!=ipV4Button)
             return;
         //uncheck the other button 
@@ -56,7 +56,7 @@ public partial class InitialScreen : Form {
     }
 
 	private void UseIpV6(object sender, EventArgs e) {
-        //make sure that only inV6Button was clicked
+        //make sure that only V6Button was clicked
         if (sender!=ipV6Button)
 			return;
 		//uncheck the other button
