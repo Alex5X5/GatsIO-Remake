@@ -42,7 +42,7 @@ internal class Renderer : IDisposable
 		graphics = Graphics.FromImage(image);
 	}
 
-	public unsafe Image Render(ref Player[] players, ref Player player, Obstacle[]* obstacles)
+	public unsafe Image Render(ref Player[] players, ref Player player, Obstacle2[]* obstacles)
 	{
 		//create a graphics object from the main image
 		using (Graphics g = Graphics.FromImage(image))
@@ -80,9 +80,9 @@ internal class Renderer : IDisposable
 		return image;
 	}
 
-	private void RenderObstacles(Obstacle[] l, Graphics g)
+	private void RenderObstacles(Obstacle2[] l, Graphics g)
 	{
-		foreach (Obstacle o in l)
+		foreach (Obstacle2 o in l)
 		{
 			switch (o?.type)
 			{
@@ -180,7 +180,7 @@ internal class Renderer : IDisposable
 		}
 	}
 
-	private unsafe void RenderObstacleShadows(Vector3d* v, Obstacle[]* l) {
+	private unsafe void RenderObstacleShadows(Vector3d* v, Obstacle2[]* l) {
 		ArgumentNullException.ThrowIfNull(&v);
 		//a list of points on the screen
 		PointF[] points = new PointF[3];
@@ -190,11 +190,11 @@ internal class Renderer : IDisposable
 		Vector3d ShadowPoint4 = new(0, 0, 0);
 		Vector3d[] sp;
 		//return;
-		foreach (Obstacle o in *l)
+		foreach (Obstacle2 o in *l)
 		{
 			if (o==null)
 				continue;
-			o.GetShadowPoints(v, &ShadowPoint1, &ShadowPoint2);
+			//o.GetShadowPoints(v, &ShadowPoint1, &ShadowPoint2);
 			//sp=o.GetShadowPoints(v);
 			if (!(v->x >= o.Pos.x && v->x <= o.Pos.x + o.WIDTH && v->y >= o.Pos.y && v->y <= o.Pos.y + o.HEIGHT))
 			{

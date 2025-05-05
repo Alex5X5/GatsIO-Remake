@@ -155,7 +155,88 @@ public class Player {
 		}
 	}
 
-	public static unsafe void SerializePlayer(byte[]* input, Player* player, int offset) {
+    public void OnKeyEvent(Client c) {
+        if (c.keyUp) {
+            if (c.keyLeft) {
+                if (c.keyDown) {
+                    if (c.keyRight) {
+                        Dir.x=0; //wasd
+                        Dir.y=0;
+                    } else {
+                        Dir.x=-1; //was
+                        Dir.y=0;
+                    }
+                } else {
+                    if (c.keyRight) {
+                        Dir.x=0; //wad
+                        Dir.y=-1;
+                    } else {
+                        Dir.x=(-1)/Math.Sqrt(2); //wa
+                        Dir.y=(-1)/Math.Sqrt(2);
+                    }
+                }
+            } else {
+                if (c.keyDown) {
+                    if (c.keyRight) {
+                        Dir.x=1; //wsd
+                        Dir.y=0;
+                    } else {
+                        Dir.x=0; //ws
+                        Dir.y=0;
+                    }
+                } else {
+                    if (c.keyRight) {
+                        Dir.x=1/Math.Sqrt(2); //wd
+                        Dir.y=(-1)/Math.Sqrt(2);
+                    } else {
+                        Dir.x=0; //w
+                        Dir.y=-1;
+                    }
+                }
+            }
+        } else {
+            if (c.keyLeft) {
+                if (c.keyDown) {
+                    if (c.keyRight) {
+                        Dir.x=0; //asd
+                        Dir.y=1;
+                    } else {
+                        Dir.x=(-1)/Math.Sqrt(2); //as
+                        Dir.y=1/Math.Sqrt(2);
+                    }
+                } else {
+                    if (c.keyRight) {
+                        Dir.x=0; //ad
+                        Dir.y=0;
+                    } else {
+                        Dir.x=(-1); //a
+                        Dir.y=0;
+                    }
+                }
+            } else {
+                if (c.keyDown) {
+                    if (c.keyRight) {
+                        Dir.x=1/Math.Sqrt(2); //sd
+                        Dir.y=1/Math.Sqrt(2);
+                    } else {
+                        Dir.x=0; //s
+                        Dir.y=1;
+                    }
+                } else {
+                    if (c.keyRight) {
+                        Dir.x=1; //d
+                        Dir.y=0;
+                    } else {
+                        Dir.x=0; //
+                        Dir.y=0;
+                    }
+                }
+            }
+        }
+    }
+
+
+    public static unsafe void SerializePlayer(byte[]* input, Player* player, int offset) {
 		//Console.WriteLine("serializing"+player->ToString());
 		int offset_ = offset;
 		if(player==null) {

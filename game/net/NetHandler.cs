@@ -97,7 +97,7 @@ public class NetHandler:Socket {
 		}
 	}
 
-	public unsafe void GetMap(ref Obstacle2[] obstacles) {
+	public unsafe void GetMap(Client2 client_, ref Obstacle2[] obstacles) {
 		logger.Log("getting map");
 		SendPacket(Protocoll.PreparePacket(Headers.MAP));
 		byte[] packet = RecievePacket();
@@ -105,7 +105,7 @@ public class NetHandler:Socket {
         if (packet!=null)
             for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
 				fixed (Obstacle2* ptr = &obstacles[i])
-					Obstacle2.DeserializeObstacle(&packet, ptr, i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+					Obstacle2.DeserializeObstacle(client_, &packet, ptr, i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
 		foreach(Obstacle2 obstacle in obstacles)
 			Console.WriteLine(obstacle.ToString());
 	}

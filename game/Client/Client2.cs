@@ -7,6 +7,7 @@ using System.Net;
 using ShGame.game.Client.Rendering;
 using Silk.NET.Windowing;
 using Silk.NET.Input;
+using System.Numerics;
 
 //#pragma warning disable CS8500 //insert spaces instead of tabs
 
@@ -35,8 +36,10 @@ public class Client2 {
 	private Thread connectionThread = new(() => { });
 	private Thread playerMoveThread = new(() => { });
 
+	public Vector2 GetCursorPosition() => inputContext.Mice[0].Position;
 
-	public Client2() : this(5000) { }
+
+    public Client2() : this(5000) { }
 
 
 	public Client2(int port) : this(GameServer.GetLocalIP(), port) { }
@@ -56,11 +59,11 @@ public class Client2 {
 		new Random().NextBytes(temp);
 		player=new Player2(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
 		foreignPlayers=new Player2[GameServer.MAX_PLAYER_COUNT];
-        obstacles=new Obstacle2[GameServer.OBSTACLE_COUNT];
-        for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
-            foreignPlayers[i] = new Player2(new Vector3d(0, 0, 0), -1, 1);
-        for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
-            obstacles[i] = new Obstacle2(new Vector3d(300, 500, 0),1);
+		obstacles=new Obstacle2[GameServer.OBSTACLE_COUNT];
+		for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
+			foreignPlayers[i] = new Player2(new Vector3d(0, 0, 0), -1, 1);
+		for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
+			obstacles[i] = new Obstacle2(this, new Vector3d(300, 500, 0),1);
 		StartThreads(address, port);
 	}
 
@@ -96,7 +99,7 @@ public class Client2 {
 			() => {
 				netHandler = new(address, port);
 				if (NetHandlerConnected())
-					netHandler.GetMap(ref obstacles);
+					netHandler.GetMap(this, ref obstacles);
 				Console.WriteLine(player);
 				while (!stop && NetHandlerConnected()) {
 					//logger.Log("asking for players");
@@ -194,19 +197,5 @@ public class Client2 {
 		
 		inputContext?.Dispose();
 		//window.Dispose();
-	}
-
-
-	private class Panel : System.Windows.Forms.Panel {
-		public Panel() : base() {
-		}
-		protected override void OnPaintBackground(PaintEventArgs e) {
-
-		}
-
-		protected override void OnPaint(PaintEventArgs e) {
-			//if (!stop)
-			//e.Graphics.DrawImage(renderer.Render(ref players, ref player, ref obstacles), 0, 0);
-		}
 	}
 }

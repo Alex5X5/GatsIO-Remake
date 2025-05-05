@@ -30,7 +30,7 @@ public class Client : Form {
 	internal Player player;
 
 	unsafe private Player[] players;
-	unsafe internal Obstacle[] obstacles = new Obstacle[GameServer.OBSTACLE_COUNT];
+	unsafe internal Obstacle2[] obstacles = new Obstacle2[GameServer.OBSTACLE_COUNT];
 	private Thread renderThread = new(() => { });
 	private Thread connectionThread = new(() => { });
 	private Thread playerMoveThread = new(() => { });
@@ -49,7 +49,7 @@ public class Client : Form {
 
         SetVisible();
 		Thread.Sleep(500);
-		//handler=new NetHandler();
+		netHandler=new NetHandler();
 		byte[] temp = new byte[8];
 		new Random().NextBytes(temp);
 		player=new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
@@ -88,8 +88,8 @@ public class Client : Form {
         connectionThread=new Thread(
 			() => {
 				netHandler = new(address, port);
-				if (NetHandlerConnected()) ;
-					//netHandler.GetMap(ref obstacles);
+				//if (NetHandlerConnected()) ;
+				//	netHandler.GetMap(this, ref obstacles);
 				Console.WriteLine(player);
 				while (!stop && NetHandlerConnected()) {
 					logger.Log("asking for players");
@@ -150,7 +150,7 @@ public class Client : Form {
 				keyRight=false;
 				break;
 		}
-		//player.OnKeyEvent(c: this);
+		player.OnKeyEvent(c: this);
 		Console.WriteLine("key up, p:"+player.ToString());
     }
 
@@ -172,13 +172,13 @@ public class Client : Form {
 				Stop(this, null);
 				break;
 		}
-		//player.OnKeyEvent(c: this);
+		player.OnKeyEvent(c: this);
 		Console.WriteLine("key up, p:"+player.ToString());
 	}
 
 	protected override void OnPaint(PaintEventArgs e) {
 		unsafe {
-			fixed (Obstacle[]* ob = &obstacles)
+			fixed (Obstacle2[]* ob = &obstacles)
 				if (!stop)
 					e.Graphics.DrawImage(renderer.Render(ref players, ref player, ob), 0, 0);
 		}

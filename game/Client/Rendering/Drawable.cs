@@ -3,7 +3,6 @@
 using Silk.NET.OpenGL;
 
 using System.Runtime.InteropServices;
-using System.Threading;
 
 public abstract class Drawable {
 		
