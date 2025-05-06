@@ -2,17 +2,18 @@
 
 using ShGame.game.Client.Rendering;
 using System;
+using System.Runtime.InteropServices;
 
 public class Obstacle:Drawable, ISupportsShadow {
 
-    public const int OBSTACLE_BYTE_LENGTH = 20;
+	public const int OBSTACLE_BYTE_LENGTH = 20;
 	public int WIDTH, HEIGHT;
 	public byte type;
 
 	public readonly LineSection3d boundL, boundT, boundR, boundB;
 	public Vector3d Pos;
 
-    public Shadow? shadow;
+	public Shadow? shadow;
 
 	private Client? client;
 
@@ -50,31 +51,55 @@ public class Obstacle:Drawable, ISupportsShadow {
 		//Console.WriteLine(vertices);
 	}
 
-    public override void UpdateVertices() {
-        vertices[0]=(float)Pos.x;
-        vertices[1]=(float)Pos.y;
-        vertices[2]=0;
-        vertices[3]=(float)Pos.x+WIDTH;
-        vertices[4]=(float)Pos.y;
-        vertices[5]=0;
-        vertices[6]=(float)Pos.x+WIDTH;
-        vertices[7]=(float)Pos.y+HEIGHT;
-        vertices[8]=0;
-        vertices[9]=(float)Pos.x;
-        vertices[10]=(float)Pos.y;
-        vertices[11]=0;
-        vertices[12]=(float)Pos.x;
-        vertices[13]=(float)Pos.y+HEIGHT;
-        vertices[14]=0;
-        vertices[15]=(float)Pos.x+WIDTH;
-        vertices[16]=(float)Pos.y+HEIGHT;
-        vertices[17]=0;
-    }
+	public override void Dispose() {
+		GC.SuppressFinalize(this);
+		base.Dispose();
+		shadow?.Dispose();
+	}
 
-    /// <summary>
-    /// updates the bound objects of an obstacle to match its width and height.
-    /// </summary>
-    private static unsafe void UpdateBounds(Obstacle* obstacle) {
+	public unsafe override void UpdateVertices() {
+		float* ptr = VertexDataPtr;
+		*ptr=(float)Pos.x;
+		ptr++;
+        *ptr=(float)Pos.y;
+        ptr++;
+        *ptr=0;
+        ptr++;
+        *ptr=(float)Pos.x+WIDTH;
+        ptr++;
+        *ptr=(float)Pos.y;
+        ptr++;
+        *ptr=0;
+        ptr++;
+        *ptr=(float)Pos.x+WIDTH;
+        ptr++;
+        *ptr=(float)Pos.y+HEIGHT;
+        ptr++;
+        *ptr=0;
+        ptr++;
+        *ptr=(float)Pos.x;
+        ptr++;
+        *ptr=(float)Pos.y;
+        ptr++;
+        *ptr=0;
+        ptr++;
+        *ptr=(float)Pos.x;
+        ptr++;
+        *ptr=(float)Pos.y+HEIGHT;
+        ptr++;
+        *ptr=0;
+        ptr++;
+        *ptr=(float)Pos.x+WIDTH;
+        ptr++;
+        *ptr=(float)Pos.y+HEIGHT;
+        ptr++;
+        *ptr=0;
+	}
+
+	/// <summary>
+	/// updates the bound objects of an obstacle to match its width and height.
+	/// </summary>
+	private static unsafe void UpdateBounds(Obstacle* obstacle) {
 		obstacle->WIDTH = obstacle->type switch {
 			1 => 35,
 			2 => 70,
@@ -97,11 +122,7 @@ public class Obstacle:Drawable, ISupportsShadow {
 		obstacle->boundB.point2.Set(obstacle->boundR.point2);
 	}
 
-    /// <summary>
-    /// This class performs an important function.
-    /// </summary>
-
-    public static unsafe void SerializeObstacle(byte[]* input, Obstacle* obstacle, int offset) {
+	public static unsafe void SerializeObstacle(byte[]* input, Obstacle* obstacle, int offset) {
 		int offset_ = offset;
 		fixed (byte* ptr = *input)
 			if (obstacle==null) {
@@ -118,6 +139,9 @@ public class Obstacle:Drawable, ISupportsShadow {
 				BitConverter.GetBytes(obstacle->HEIGHT).CopyTo(*input, offset_);
 			}
 	}
+	/// <summary>
+	/// reads the next 17 bytes after the offset from a bytearray. 
+	/// </summary>
 
 	public static unsafe void DeserializeObstacle(Client? client_, byte[]* input, Obstacle* obstacle, int offset) {
 		ArgumentNullException.ThrowIfNull(*input);
@@ -138,6 +162,7 @@ public class Obstacle:Drawable, ISupportsShadow {
 			obstacle->HEIGHT=BitConverter.ToInt32(*input, offset_);
 			UpdateBounds(obstacle);
 		}
+		
 	}
 
 	private unsafe int RelativeX(Vector3d* v) {
@@ -161,7 +186,7 @@ public class Obstacle:Drawable, ISupportsShadow {
 	public Vector3d GetPointOfView() => client!=null ? client.player.Pos:new Vector3d(0,0,0);
 
 	public Vector3d GetRelativeVector() =>
-		Pos.Cpy().Add(new Vector3d(WIDTH, HEIGHT, 0)).Sub(GetPointOfView()).Nor();
+		Pos.Cpy().Add(new Vector3d(WIDTH/2, HEIGHT/2, 0)).Sub(GetPointOfView()).Nor();
 
 	public unsafe void GetShadowOrigins(out Vector3d point1, out Vector3d point2) {
 		point1 = new(0, 0, 0);

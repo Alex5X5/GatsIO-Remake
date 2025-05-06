@@ -17,27 +17,45 @@ public class Shadow : Drawable {
 
 	private ISupportsShadow attatch;
 
-	public override void UpdateVertices() {
+	public unsafe override void UpdateVertices() {
 		GetShadow(out Vector3d shadowTarget1, out Vector3d shadowTarget2);
 		attatch.GetShadowOrigins(out Vector3d shadowOrigin1, out Vector3d shadowOrigin2);
-		vertices[0]=(float)shadowOrigin1.x;
-		vertices[1]=(float)shadowOrigin1.y;
-		vertices[2]=0;
-		vertices[3]=(float)shadowOrigin2.x;
-		vertices[4]=(float)shadowOrigin2.y;
-		vertices[5]=0;
-		vertices[6]=(float)shadowTarget2.x;
-		vertices[7]=(float)shadowTarget2.y;
-		vertices[8]=0;
-		vertices[9]=(float)shadowOrigin1.x;
-		vertices[10]=(float)shadowOrigin1.y;
-		vertices[11]=0;
-		vertices[12]=(float)shadowTarget1.x;
-		vertices[13]=(float)shadowTarget1.y;
-		vertices[14]=0;
-		vertices[15]=(float)shadowTarget2.x;
-		vertices[16]=(float)shadowTarget2.y;
-		vertices[17]=0;
+		float* ptr = VertexDataPtr;
+		*ptr=(float)shadowOrigin1.x;
+		ptr++;
+		*ptr=(float)shadowOrigin1.y;
+        ptr++;
+		*ptr=0;
+        ptr++;
+        *ptr=(float)shadowOrigin2.x;
+        ptr++;
+        *ptr=(float)shadowOrigin2.y;
+        ptr++;
+        *ptr=0;
+        ptr++;
+        *ptr=(float)shadowTarget2.x;
+        ptr++;
+        *ptr=(float)shadowTarget2.y;
+        ptr++;
+        *ptr=0;
+		ptr++;
+		*ptr=(float)shadowOrigin1.x;
+        ptr++;
+        *ptr=(float)shadowOrigin1.y;
+        ptr++;
+        *ptr=0;
+        ptr++;
+        *ptr=(float)shadowTarget1.x;
+        ptr++;
+        *ptr=(float)shadowTarget1.y;
+        ptr++;
+        *ptr=0;
+        ptr++;
+        *ptr=(float)shadowTarget2.x;
+        ptr++;
+        *ptr=(float)shadowTarget2.y;
+        ptr++;
+        *ptr=0;
 
 		//string s = "";
 		//foreach (float f in vertices)

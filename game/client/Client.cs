@@ -39,7 +39,7 @@ public class Client {
 	public Vector2 GetCursorPosition() => inputContext.Mice[0].Position;
 
 
-    public Client() : this(5000) { }
+	public Client() : this(5000) { }
 
 
 	public Client(int port) : this(GameServer.GetLocalIP(), port) { }
@@ -87,6 +87,7 @@ public class Client {
 		window.Closing+=Stop;
 
 		window.Render += (double deltaTime) => renderer.OnRender(deltaTime, window, this);
+		window.Closing += () => renderer.OnClosing(window, this);
 
 		window.Run();
 

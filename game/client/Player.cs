@@ -78,13 +78,17 @@ public class Player : Drawable {
 	public override string ToString() => $"game.graphics.client.Player2[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{Dir}, UUID:{PlayerUUID}, VAO:{vaoHandle}, VBO:{vboHandle}]";
 
 
-	public override void UpdateVertices() {
-		vertices ??= new float[FLOAT_COUNT];
+	public unsafe override void UpdateVertices() {
+		//vertices ??= new float[FLOAT_COUNT];
+		float* ptr = VertexDataPtr;
 		for (int i=0; i<FLOAT_COUNT; i+=3) {
-			vertices[i] = (int)Pos.x+CIRCLE_OFFSETS[i];
-			vertices[i+1] = (int)Pos.y+CIRCLE_OFFSETS[i+1];
-			vertices[i+2] = 0;
-		}
+			*ptr=(int)Pos.x+CIRCLE_OFFSETS[i];
+			ptr++;
+			*ptr=(int)Pos.y+CIRCLE_OFFSETS[i+1];
+            ptr++;
+            *ptr=0;
+            ptr++;
+        }
 	}
 
 	public unsafe void Move() {

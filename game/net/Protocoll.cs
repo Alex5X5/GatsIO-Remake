@@ -33,10 +33,10 @@ public static class Protocoll {
 }
 
 public class Headers {
-    public const byte PING = 1;
-    public const byte ABORT_CONNECTION = 2;
-    public const byte MAP = 5;
-    public const byte PLAYER = 6;
+	public const byte PING = 1;
+	public const byte ABORT_CONNECTION = 2;
+	public const byte MAP = 5;
+	public const byte PLAYER = 6;
 	public const byte ABILITY = 7;
-    public const byte PAYER_LIMIT = 11;
+	public const byte PAYER_LIMIT = 11;
 }

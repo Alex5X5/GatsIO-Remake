@@ -7,25 +7,33 @@ using System.Runtime.InteropServices;
 	/// <summary>
 	/// This is a Base class for objects that have to be drawn.
 	/// </summary>
-public abstract class Drawable {
+public unsafe abstract class Drawable:IDisposable {
 
 
 	protected uint vaoHandle = 0;
 	protected uint vboHandle = 0;
 
-	private int VERTICES_COUNT;
+	private nuint VERTICES_COUNT;
 
-	public float[] vertices;
+	//public float[] vertices;
+	public float* VertexDataPtr;
+
 
 	public bool dirty = true;
 
 	private static readonly Logger logger = new(new LoggingLevel("Drawable"));
 
 	public Drawable(int verticesCount) {
-		VERTICES_COUNT = verticesCount;
-		vertices = new float[VERTICES_COUNT];
-		vertices.Initialize();
+		VertexDataPtr = (float*)NativeMemory.AllocZeroed((uint)verticesCount*3*sizeof(float));
+		VERTICES_COUNT = (uint)verticesCount;
+		//vertices = new float[VERTICES_COUNT];
+		//vertices.Initialize();
 		//Console.WriteLine("[Drawable]:empty constructor");
+	}
+
+	public virtual void Dispose() {
+		GC.SuppressFinalize(this);
+		NativeMemory.Free(VertexDataPtr);
 	}
 
 	public virtual void UpdateVertices() { }
@@ -50,19 +58,17 @@ public abstract class Drawable {
 		}
 		BindVAO();
 		BindVBO();
-		for (int i = 0; i<VERTICES_COUNT; i+=9) {
-			fixed (float* verticesPointer = &vertices[i]) {
-				float* buffer = BufferTriangleValues(verticesPointer);
-				gl.BufferSubData(GLEnum.ArrayBuffer, (nint)i*sizeof(float), (uint)9*sizeof(float), buffer);
-				NativeMemory.Free(buffer);
-			}
-		}
-		gl.DrawArrays(PrimitiveType.Triangles, 0, (uint)VERTICES_COUNT+1);
+		float* ptr = VertexDataPtr;
+		for (nuint i = 0; i<VERTICES_COUNT; i+=9) {
+			gl.BufferSubData(GLEnum.ArrayBuffer, (nint)i*sizeof(float), (uint)9*sizeof(float), ptr);
+			ptr+=(uint)9;
+        }
+		gl.DrawArrays(PrimitiveType.Triangles, 0, (uint)VERTICES_COUNT);
 		UnbindVAO();
 		UnbindVBO();
 	}
 
-	public static unsafe float* BufferTriangleValues(float* vertices) { //
+	public static unsafe float* BufferTriangleValues(float* vertices) {
 		float* buffer = (float*)NativeMemory.Alloc(9*sizeof(float));
 		float* ptr = buffer;
 		//Console.Write("buffering:");

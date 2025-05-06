@@ -26,7 +26,7 @@ public class NetHandler:Socket {
 		logger.Log("port constructor");
 	}
 
-    public NetHandler(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
+	public NetHandler(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
 		logger.Log("port addresss constructor");
 		logger.Log(address.AddressFamily.ToString());
 		IP = address;
@@ -98,8 +98,8 @@ public class NetHandler:Socket {
 		SendPacket(Protocoll.PreparePacket(Headers.MAP));
 		byte[] packet = RecievePacket();
 		int counter = 0;
-        if (packet!=null)
-            for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
+		if (packet!=null)
+			for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
 				fixed (Obstacle* ptr = &obstacles[i])
 					Obstacle.DeserializeObstacle(client_, &packet, ptr, i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
 		//foreach(Obstacle obstacle in obstacles)

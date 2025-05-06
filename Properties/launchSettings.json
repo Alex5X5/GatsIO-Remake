@@ -1,10 +1,22 @@
 {
   "profiles": {
-		"ShGame": {
-			"commandName": "Project",
-			"nativeDebugging": true,
-			"jsWebView2Debugging": false,
-			"sqlDebugging": false
-		}
+    "ShGame": {
+      "commandName": "Executable",
+      "commandLineArgs": "",
+      "workingDirectory": "C:\\Users\\alex\\source\\repos\\ShGame",
+      "executablePath": "C:\\Users\\alex\\source\\repos\\ShGame\\bin\\Debug\\net8.0-windows\\ShGame.exe"
+    },
+    "Server": {
+      "commandName": "Executable",
+      "commandLineArgs": "--server",
+      "workingDirectory": "C:\\Users\\alex\\source\\repos\\ShGame",
+      "executablePath": "C:\\Users\\alex\\source\\repos\\ShGame\\bin\\Debug\\net8.0-windows\\ShGame.exe"
+    },
+    "Client": {
+      "commandName": "Executable",
+      "commandLineArgs": "--client",
+      "workingDirectory": "C:\\Users\\alex\\source\\repos\\ShGame",
+      "executablePath": "C:\\Users\\alex\\source\\repos\\ShGame\\bin\\Debug\\net8.0-windows\\ShGame.exe"
+    }
   }
 }

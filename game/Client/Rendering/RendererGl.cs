@@ -12,13 +12,13 @@ class RendererGl {
 
 	public const int WIDTH = 2500, HEIGHT = 1500;
 
-    public static readonly Line3d BORDER_TOP = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(WIDTH, 0, 0));
-    public static readonly Line3d BORDER_BOTTOM = Line3d.FromPoints(new Vector3d(0, HEIGHT, 0), new Vector3d(WIDTH, HEIGHT, 0));
-    public static readonly Line3d BORDER_LEFT = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(0, HEIGHT, 0));
-    public static readonly Line3d BORDER_RIGHT = Line3d.FromPoints(new Vector3d(WIDTH, 0, 0), new Vector3d(WIDTH, HEIGHT, 0));
+	public static readonly Line3d BORDER_TOP = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(WIDTH, 0, 0));
+	public static readonly Line3d BORDER_BOTTOM = Line3d.FromPoints(new Vector3d(0, HEIGHT, 0), new Vector3d(WIDTH, HEIGHT, 0));
+	public static readonly Line3d BORDER_LEFT = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(0, HEIGHT, 0));
+	public static readonly Line3d BORDER_RIGHT = Line3d.FromPoints(new Vector3d(WIDTH, 0, 0), new Vector3d(WIDTH, HEIGHT, 0));
 
 
-    private bool loaded = false;
+	private bool loaded = false;
 
 	public static GL? Gl;
 	
@@ -56,14 +56,12 @@ class RendererGl {
 			client.obstacles[i].Setup(Gl);
 		}
 		client.player.Setup(Gl);
-        for (int i = 0; i<client.obstacles.Length; i++) {
-            if (client.obstacles[i]!=null && client.obstacles[i].shadow!=null) {
-                client.obstacles[i].shadow.Setup(Gl);
-            }
-        }
-    }
+		for (int i = 0; i<client.obstacles.Length; i++) {
+			client.obstacles[i]?.shadow?.Setup(Gl);
+		}
+	}
 
-    public unsafe void OnRender(double _, IWindow window, Client client) {
+	public unsafe void OnRender(double _, IWindow window, Client client) {
 		if(!loaded) return;
 		//logger.Log("on render");
 		Gl.ClearColor(0.5f, 0.5f, 0.6f, 1f);
@@ -84,23 +82,32 @@ class RendererGl {
 				client.foreignPlayers[i]?.Draw(Gl);
 		}
 
-        Gl.Uniform1(colorModeLocation, 0);
-        for (int i = 0; i<client.obstacles.Length; i++) {
+		Gl.Uniform1(colorModeLocation, 0);
+		for (int i = 0; i<client.obstacles.Length; i++) {
 			if (client.obstacles[i]!=null && client.obstacles[i].shadow!=null) {
 				client.obstacles[i].shadow.dirty = true;
 				client.obstacles[i].shadow.Draw(Gl);
 			}
-        }
+		}
 
 		Gl.Uniform1(colorModeLocation, 2);
 		for (int i = 0; i<client.obstacles.Length; i++) {
 			client.obstacles[i]?.Draw(Gl);
 		}
+	}
 
-    }
+	public unsafe void OnClosing(IWindow window, Client client) {
+		foreach(Obstacle obstacle in client.obstacles)
+			obstacle.Dispose();
+		foreach (Player player in client.foreignPlayers)
+			player.Dispose();
+		client.player.Dispose();
+
+	}
 
 	private static uint CreateShaderProgram(IWindow window) {
-		
+		if (Gl==null)
+			return 32767;
 		uint shaderProgram = Gl.CreateProgram();
 		
 		// Vertex Shader
@@ -113,8 +120,8 @@ uniform float u_WindowHeight;
 void main()
 {
 	vec2 ndc = vec2(
-		aPos.x / (u_WindowWidth  / 4.0) - 1.0,
-		aPos.y / (u_WindowHeight / 4.0) - 1.0
+		aPos.x / (2000  / 4.0) - 1.0,
+		aPos.y / (1200 / 4.0) - 1.0
 	);
 	gl_Position = vec4(ndc, aPos.z, 1.0);
 
