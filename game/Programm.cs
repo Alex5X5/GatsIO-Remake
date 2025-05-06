@@ -5,7 +5,6 @@ using ShGame.game.Util;
 using System.Linq;
 using System.Net;
 using System.Threading;
-using System.Windows.Forms;
 namespace ShGame.game;
 
 /// <summary>
@@ -70,9 +69,9 @@ public static class Programm {
 			return;
 		}
 
-		Application.EnableVisualStyles();
-		Application.SetCompatibleTextRenderingDefault(false);
-		Console.WriteLine("start");
-		Application.Run(new InitialScreen());
+		//Application.EnableVisualStyles();
+		//Application.SetCompatibleTextRenderingDefault(false);
+		//Console.WriteLine("start");
+		//Application.Run(new InitialScreen());
 	}
 }
