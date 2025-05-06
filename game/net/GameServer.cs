@@ -1,5 +1,7 @@
 ﻿namespace ShGame.game.Net;
 
+using Avalonia.Controls.Documents;
+
 using ShGame.game.Client;
 
 using System.Net;
@@ -55,9 +57,7 @@ internal class GameServer:Socket {
 		logger.Log("bound endPoint="+point.ToString());
 		logger.Log(Convert.ToString(IsBound));
 		//start the main thread
-		new Thread(
-				start: Run
-		).Start();
+		Run();
 	}
 
 	private void OnAccept(Socket s) {
@@ -240,29 +240,39 @@ internal class GameServer:Socket {
 		Dispose();
 	}
 
-	private async void Run() {
+    private void Run() {
 		logger.Log("run");
-		//loop until the server is about to stop
-		while (!stop) {
-			Listen(1);
-			while (!stop) {
+        //loop until the server is about to stop
+        while (!stop) {
+            logger.Log("listening");
+            Listen(1);
+            while (!stop) {
 				try {
+					logger.Log("starting accept task");
 					//create a Task that starts to try to accept a socket and in case of success stops to listen
 					//the result of the listening is a  socket that is connected to a client
-					Socket clientConnection = await Task.Factory.FromAsync(BeginAccept, EndAccept, null);
-					_=Task.Run(()=>OnAccept(clientConnection));
+					Socket clientConnection = Accept();
+					//Socket clientConnection = await Task.Factory.FromAsync(BeginAccept, EndAccept, null);
+					logger.Log("started accept task");
+                    //Thread.Sleep(5000);
+                    _=Task.Run(()=>OnAccept(clientConnection));
 				} catch (Exception e) {
 					if (!stop) {
 						//if the Exception wasn't caught because the server is stopping and it's socket is therefore closing,
 						//a different error must have happened so print it's message
 						Console.WriteLine(e.ToString());
 					} else {
-						//since the server is stopping, ignore the error and break the main loop
-						break;
+                        Console.WriteLine(e.ToString());
+
+                        //since the server is stopping, ignore the error and break the main loop
+						logger.Log("exit accept connection loop");
+                        break;
 					}
 				}
 			}
+			logger.Log("exit accept connection loop");
 		}
+		logger.Log("exiting run");
 	}
 
 	public static IPAddress GetLocalIPv4() =>
