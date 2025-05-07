@@ -48,8 +48,8 @@ internal class Renderer:IDisposable {
 			if(players!=null)
 				foreach (Player p in players) {
 					//if the player isn't null draw it
-					if (p!=null) {
-						logger.Log("drawing player ",new MessageParameter("player",p.ToString()));
+					if (p!=null&&p.Health>=0) {
+						//logger.Log("drawing player ",new MessageParameter("player",p.ToString()));
                         DrawPlayer(p, g);
                     }
 				}
