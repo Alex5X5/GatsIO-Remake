@@ -1,7 +1,5 @@
 ﻿namespace ShGame.game.Net;
 
-using Avalonia.Controls.Documents;
-
 using ShGame.game.Client;
 
 using System.Net;
@@ -67,7 +65,7 @@ internal class GameServer:Socket {
 		for(int i = 0; i<clients.Length; i++) {
 			if(clients[i]==null) {
 				//close the newly created socket an create a ServerConnection from the socket's information so the ServerConnection is bound to the incoming connection
-				clients[i]=new ServerConnection(s.DuplicateAndClose(Environment.ProcessId), this, i);
+				clients[i]=new ServerConnection(s, this, i);
 				found = true;
 				break;
 			}
@@ -240,39 +238,32 @@ internal class GameServer:Socket {
 		Dispose();
 	}
 
-    private void Run() {
+	private async void Run() {
 		logger.Log("run");
-        //loop until the server is about to stop
-        while (!stop) {
-            logger.Log("listening");
-            Listen(1);
-            while (!stop) {
+		//loop until the server is about to stop
+		while (!stop) {
+			Listen(1);
+			while (!stop) {
 				try {
-					logger.Log("starting accept task");
 					//create a Task that starts to try to accept a socket and in case of success stops to listen
 					//the result of the listening is a  socket that is connected to a client
-					Socket clientConnection = Accept();
+					//Accept();
 					//Socket clientConnection = await Task.Factory.FromAsync(BeginAccept, EndAccept, null);
-					logger.Log("started accept task");
-                    //Thread.Sleep(5000);
-                    _=Task.Run(()=>OnAccept(clientConnection));
+					//_=Task.Run(()=>OnAccept(clientConnection));
+					OnAccept(Accept());
+					logger.Log("accepted");
 				} catch (Exception e) {
 					if (!stop) {
 						//if the Exception wasn't caught because the server is stopping and it's socket is therefore closing,
 						//a different error must have happened so print it's message
 						Console.WriteLine(e.ToString());
 					} else {
-                        Console.WriteLine(e.ToString());
-
-                        //since the server is stopping, ignore the error and break the main loop
-						logger.Log("exit accept connection loop");
-                        break;
+						//since the server is stopping, ignore the error and break the main loop
+						break;
 					}
 				}
 			}
-			logger.Log("exit accept connection loop");
 		}
-		logger.Log("exiting run");
 	}
 
 	public static IPAddress GetLocalIPv4() =>
@@ -290,4 +281,3 @@ internal class GameServer:Socket {
 			GetIPProperties().UnicastAddresses[^1].
 				Address;
 }
-
