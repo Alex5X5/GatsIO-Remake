@@ -105,7 +105,7 @@ public class Client {
 				while (!stop && NetHandlerConnected()) {
 					//logger.Log("asking for players");
 					netHandler.ExchangePlayers(player, ref foreignPlayers);
-					Thread.Sleep(100);
+					Thread.Sleep(50);
 				}
 				netHandler?.Dispose();
 			}
