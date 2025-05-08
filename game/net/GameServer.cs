@@ -238,7 +238,7 @@ internal class GameServer:Socket {
 		Dispose();
 	}
 
-	private async void Run() {
+	private void Run() {
 		logger.Log("run");
 		//loop until the server is about to stop
 		while (!stop) {

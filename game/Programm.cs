@@ -20,7 +20,7 @@ public static class Programm {
 		System.Collections.Generic.List<string> args_ = args.ToList<string>();
 		bool noGui = args_.Contains("-nogui");
 
-		if (args_.Contains("-server")) {
+		if (args_.Contains("--server")) {
 			new Thread(
 				() => {
 					//Console.WriteLine("Initial Screen: ip="+address+" port="+port);
@@ -44,7 +44,7 @@ public static class Programm {
 			return;
 		}
 
-		if (args_.Contains("-client")) {
+		if (args_.Contains("--client")) {
 			new Thread(
 				() => {
 					IPAddress? address = null;
