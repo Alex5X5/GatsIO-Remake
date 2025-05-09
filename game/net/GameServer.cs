@@ -240,7 +240,7 @@ internal class GameServer:Socket {
 		Dispose();
 	}
 
-	private async void Run() {
+	private void Run() {
 		logger.Log("run");
 		//loop until the server is about to stop
 		while (!stop) {
@@ -249,7 +249,7 @@ internal class GameServer:Socket {
 				try {
 					//create a Task that starts to try to accept a socket and in case of success stops to listen
 					//the result of the listening is a  socket that is connected to a client
-					Socket clientConnection = await Task.Factory.FromAsync(BeginAccept, EndAccept, null);
+					Socket clientConnection = Accept();
 					_=Task.Run(()=>OnAccept(clientConnection));
 				} catch (Exception e) {
 					if (!stop) {

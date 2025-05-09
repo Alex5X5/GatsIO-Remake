@@ -26,11 +26,13 @@ public class Client {
 	private readonly Logger logger;
 	private readonly LoggingLevel mlvl = new("Client");
 
-	private NetHandler? netHandler;
+	private NetHandler? NetHandler;
 
-	internal Player player;
-	unsafe public Player[] foreignPlayers;
-	unsafe internal Obstacle[] obstacles;
+	internal Player Player;
+	public Player[] ForeignPlayers;
+	public Obstacle[] Obstacles;
+	public Bullet[] Bullets;
+
 
 	private Thread renderThread = new(() => { });
 	private Thread connectionThread = new(() => { });
@@ -54,16 +56,16 @@ public class Client {
 		);
 		renderer=new();
 		Thread.Sleep(500);
-		netHandler=new NetHandler();
+		NetHandler=new NetHandler();
 		byte[] temp = new byte[8];
 		new Random().NextBytes(temp);
-		player=new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
-		foreignPlayers=new Player[GameServer.MAX_PLAYER_COUNT];
-		obstacles=new Obstacle[GameServer.OBSTACLE_COUNT];
+		Player=new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
+		ForeignPlayers=new Player[GameServer.MAX_PLAYER_COUNT];
+		Obstacles=new Obstacle[GameServer.OBSTACLE_COUNT];
 		for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
-			foreignPlayers[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
+			ForeignPlayers[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
 		for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
-			obstacles[i] = new Obstacle(this, new Vector3d(300, 500, 0),1);
+			Obstacles[i] = new Obstacle(this, new Vector3d(300, 500, 0),1);
 		StartThreads(address, port);
 	}
 
@@ -98,16 +100,16 @@ public class Client {
 		logger.Log("start threads!");
 		connectionThread=new Thread(
 			() => {
-				netHandler = new(address, port);
+				NetHandler = new(address, port);
 				if (NetHandlerConnected())
-					netHandler.GetMap(this, ref obstacles);
-				Console.WriteLine(player);
+					NetHandler.GetMap(this, ref Obstacles);
+				Console.WriteLine(Player);
 				while (!stop && NetHandlerConnected()) {
 					//logger.Log("asking for players");
-					netHandler.ExchangePlayers(player, ref foreignPlayers);
+					NetHandler.ExchangePlayers(Player, ref ForeignPlayers);
 					Thread.Sleep(50);
 				}
-				netHandler?.Dispose();
+				NetHandler?.Dispose();
 			}
 		);
 		connectionThread.Start();
@@ -120,15 +122,15 @@ public class Client {
 		playerMoveThread=new Thread(
 				() => {
 					while (!stop) {
-						foreach (Player p in foreignPlayers) {
+						foreach (Player p in ForeignPlayers) {
 							if (p!=null)
 								if (p.Health!=-1)
 									p.Move();
 						}
-						if (player!=null)
-							if (player.Health!=-1) {
+						if (Player!=null)
+							if (Player.Health!=-1) {
 								//logger.Log("moving player ", new MessageParameter("player", player.ToString()));
-								player.Move();
+								Player.Move();
 							}
 						Thread.Sleep(10);
 					}
@@ -154,7 +156,7 @@ public class Client {
 				keyRight=false;
 				break;
 		}
-		player.OnKeyEvent(this);
+		Player.OnKeyEvent(this);
 		//Console.WriteLine("key up, p:"+player.ToString());
 	}
 
@@ -177,13 +179,13 @@ public class Client {
 				Stop();
 				break;
 		}
-		player.OnKeyEvent(this);
+		Player.OnKeyEvent(this);
 		//Console.WriteLine("key up, p:"+player.ToString());
 	}
 
 	private bool NetHandlerConnected() {
-		if (netHandler != null)
-			if (netHandler.Connected)
+		if (NetHandler != null)
+			if (NetHandler.Connected)
 				return true;
 		return false;
 	}

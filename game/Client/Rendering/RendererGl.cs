@@ -49,15 +49,15 @@ class RendererGl {
 			Gl.Uniform1(screenWidthLocation, (float)size.Y);
 		};
 
-		for (int i = 0; i<client.foreignPlayers.Length; i++) {
-			client.foreignPlayers[i].Setup(Gl);
+		for (int i = 0; i<client.ForeignPlayers.Length; i++) {
+			client.ForeignPlayers[i].Setup(Gl);
 		}
-		for(int i=0; i<client.obstacles.Length; i++) {
-			client.obstacles[i].Setup(Gl);
+		for(int i=0; i<client.Obstacles.Length; i++) {
+			client.Obstacles[i].Setup(Gl);
 		}
-		client.player.Setup(Gl);
-		for (int i = 0; i<client.obstacles.Length; i++) {
-			client.obstacles[i]?.shadow?.Setup(Gl);
+		client.Player.Setup(Gl);
+		for (int i = 0; i<client.Obstacles.Length; i++) {
+			client.Obstacles[i]?.shadow?.Setup(Gl);
 		}
 	}
 
@@ -76,32 +76,32 @@ class RendererGl {
 		Gl.Uniform1(screenHeightLocation, (float)window.Size.Y);
 		
 		Gl.Uniform1(colorModeLocation, 1);
-		client.player.Draw(Gl);
-		for (int i = 0; i<client.foreignPlayers.Length; i++) {
-			if(client.foreignPlayers[i]?.Health!=-1&&client.foreignPlayers[i]?.PlayerUUID!=client.player.PlayerUUID)
-				client.foreignPlayers[i]?.Draw(Gl);
+		client.Player.Draw(Gl);
+		for (int i = 0; i<client.ForeignPlayers.Length; i++) {
+			if(client.ForeignPlayers[i]?.Health!=-1&&client.ForeignPlayers[i]?.PlayerUUID!=client.Player.PlayerUUID)
+				client.ForeignPlayers[i]?.Draw(Gl);
 		}
 
 		Gl.Uniform1(colorModeLocation, 0);
-		for (int i = 0; i<client.obstacles.Length; i++) {
-			if (client.obstacles[i]!=null && client.obstacles[i].shadow!=null) {
-				client.obstacles[i].shadow.dirty = true;
-				client.obstacles[i].shadow.Draw(Gl);
+		for (int i = 0; i<client.Obstacles.Length; i++) {
+			if (client.Obstacles[i]!=null && client.Obstacles[i].shadow!=null) {
+				client.Obstacles[i].shadow.dirty = true;
+				client.Obstacles[i].shadow.Draw(Gl);
 			}
 		}
 
 		Gl.Uniform1(colorModeLocation, 2);
-		for (int i = 0; i<client.obstacles.Length; i++) {
-			client.obstacles[i]?.Draw(Gl);
+		for (int i = 0; i<client.Obstacles.Length; i++) {
+			client.Obstacles[i]?.Draw(Gl);
 		}
 	}
 
 	public unsafe void OnClosing(IWindow window, Client client) {
-		foreach(ShGame.game.Client.Obstacle obstacle in client.obstacles)
+		foreach(ShGame.game.Client.Obstacle obstacle in client.Obstacles)
 			obstacle.Dispose();
-		foreach (Player player in client.foreignPlayers)
+		foreach (Player player in client.ForeignPlayers)
 			player.Dispose();
-		client.player.Dispose();
+		client.Player.Dispose();
 
 	}
 

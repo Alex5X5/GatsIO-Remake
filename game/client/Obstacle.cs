@@ -183,7 +183,7 @@ public class Obstacle:Drawable, ISupportsShadow {
 			return 3;
 	}
 
-	public Vector3d GetPointOfView() => client!=null ? client.player.Pos:new Vector3d(0,0,0);
+	public Vector3d GetPointOfView() => client!=null ? client.Player.Pos:new Vector3d(0,0,0);
 
 	public Vector3d GetRelativeVector() =>
 		Pos.Cpy().Add(new Vector3d(WIDTH/2, HEIGHT/2, 0)).Sub(GetPointOfView()).Nor();
@@ -193,7 +193,7 @@ public class Obstacle:Drawable, ISupportsShadow {
 		point2 = new(0, 0, 0);
 		if (client==null) 
 			return;
-		fixed (Vector3d* pos = &client.player.Pos) {
+		fixed (Vector3d* pos = &client.Player.Pos) {
 			if (RelativeX(pos)==1&&RelativeY(pos)==1) {
 				point1.x=boundR.point1.x;
 				point1.y=boundR.point1.y;

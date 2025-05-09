@@ -202,58 +202,58 @@ public class Player : Drawable {
 		}
 	}
 
-	public static unsafe void SerializePlayer(byte[]* input, Player* player, int offset) {
-		//Console.WriteLine("serializing"+player->ToString());
-		int offset_ = offset;
-		if (player==null) {
-			BitConverter.GetBytes(-1).CopyTo(*input, offset_);
-			return;
-		}
-		BitConverter.GetBytes(player->Health_).CopyTo(*input, offset_);
-		offset_+=4;
-		BitConverter.GetBytes(player->Pos.x).CopyTo(*input, offset_);
-		offset_+=8;
-		BitConverter.GetBytes(player->Pos.y).CopyTo(*input, offset_);
-		offset_+=8;
-		BitConverter.GetBytes(player->Dir.x).CopyTo(*input, offset_);
-		offset_+=8;
-		BitConverter.GetBytes(player->Dir.y).CopyTo(*input, offset_);
-		offset_+=8;
-		BitConverter.GetBytes(player->Speed).CopyTo(*input, offset_);
-		offset_+=4;
-		BitConverter.GetBytes(player->PlayerUUID).CopyTo(*input, offset_);
-		//Console.WriteLine("finished serializing"+player->ToString());
-	}
+    public static unsafe void SerializePlayer(byte[]* input, Player* player, int offset) {
+        //Console.WriteLine("serializing"+player->ToString());
+        int offset_ = offset;
+        if (player==null) {
+            BitConverter.GetBytes(-1).CopyTo(*input, offset_);
+            return;
+        }
+        BitConverter.GetBytes(player->Health_).CopyTo(*input, offset_);
+        offset_+=4;
+        BitConverter.GetBytes(player->Pos.x).CopyTo(*input, offset_);
+        offset_+=8;
+        BitConverter.GetBytes(player->Pos.y).CopyTo(*input, offset_);
+        offset_+=8;
+        BitConverter.GetBytes(player->Dir.x).CopyTo(*input, offset_);
+        offset_+=8;
+        BitConverter.GetBytes(player->Dir.y).CopyTo(*input, offset_);
+        offset_+=8;
+        BitConverter.GetBytes(player->Speed).CopyTo(*input, offset_);
+        offset_+=4;
+        BitConverter.GetBytes(player->PlayerUUID).CopyTo(*input, offset_);
+        //Console.WriteLine("finished serializing"+player->ToString());
+    }
 
-	public static unsafe void DeserializePlayer(byte[]* input, Player* player, int offset) {
-		int offset_ = offset;
-		if (input==null)
-			return;
-		*player ??= new Player(null, 0, 0);
-		//Console.WriteLine("writing "+ *input + " at "+offset_);
-		player->Health_ = BitConverter.ToInt32(*input, offset_);
-		if (player->Health_ ==-1) {
-			player->Deactivate();
-			//offset_+=PLAYER_BYTE_LENGTH;
-		} else {
-			//Console.WriteLine("writing "+ *input + " at "+offset_);
-			offset_+=4;
-			player->Pos.x=BitConverter.ToDouble(*input, offset_);
-			//Console.WriteLine("writing "+ *input + " at "+offset_ );
-			offset_+=8;
-			player->Pos.y=BitConverter.ToDouble(*input, offset_);
-			//Console.WriteLine("writing "+ *input + " at "+offset_);
-			offset_+=8;
-			player->Dir.x=BitConverter.ToDouble(*input, offset_);
-			//Console.WriteLine("writing "+ *input + " at "+offset_);
-			offset_+=8;
-			player->Dir.y=BitConverter.ToDouble(*input, offset_);
-			//Console.WriteLine("writing "+ *input + " at "+offset_);
-			offset_+=8;
-			player->Speed=BitConverter.ToInt32(*input, offset_);
-			//Console.WriteLine("writing "+ *input + " at "+offset_);
-			offset_+=4;
-			player->PlayerUUID = BitConverter.ToInt64(*input, offset_);
-		}
-	}
+    public static unsafe void DeserializePlayer(byte[]* input, Player* player, int offset) {
+        int offset_ = offset;
+        if (input==null)
+            return;
+        *player ??= new Player(null, 0, 0);
+        //Console.WriteLine("writing "+ *input + " at "+offset_);
+        player->Health_ = BitConverter.ToInt32(*input, offset_);
+        if (player->Health_ ==-1) {
+            player->Deactivate();
+            //offset_+=PLAYER_BYTE_LENGTH;
+        } else {
+            //Console.WriteLine("writing "+ *input + " at "+offset_);
+            offset_+=4;
+            player->Pos.x=BitConverter.ToDouble(*input, offset_);
+            //Console.WriteLine("writing "+ *input + " at "+offset_ );
+            offset_+=8;
+            player->Pos.y=BitConverter.ToDouble(*input, offset_);
+            //Console.WriteLine("writing "+ *input + " at "+offset_);
+            offset_+=8;
+            player->Dir.x=BitConverter.ToDouble(*input, offset_);
+            //Console.WriteLine("writing "+ *input + " at "+offset_);
+            offset_+=8;
+            player->Dir.y=BitConverter.ToDouble(*input, offset_);
+            //Console.WriteLine("writing "+ *input + " at "+offset_);
+            offset_+=8;
+            player->Speed=BitConverter.ToInt32(*input, offset_);
+            //Console.WriteLine("writing "+ *input + " at "+offset_);
+            offset_+=4;
+            player->PlayerUUID = BitConverter.ToInt64(*input, offset_);
+        }
+    }
 }
