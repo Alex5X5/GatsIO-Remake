@@ -1,7 +1,5 @@
 ﻿namespace ShGame.game.Client.Rendering;
 
-using ShGame.game.Client;
-
 using System;
 
 #pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
@@ -67,7 +65,7 @@ public class Shadow : Drawable {
 		attatch = attatch_;
 	}
 
-	private static unsafe void CalculatePoints(Obstacle* obstacle) {
+	private static unsafe void CalculatePoints(ShGame.game.Client.Obstacle* obstacle) {
 		obstacle->WIDTH = obstacle->type switch {
 			1 => 35,
 			2 => 70,

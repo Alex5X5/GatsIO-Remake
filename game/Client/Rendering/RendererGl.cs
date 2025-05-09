@@ -97,7 +97,7 @@ class RendererGl {
 	}
 
 	public unsafe void OnClosing(IWindow window, Client client) {
-		foreach(Obstacle obstacle in client.obstacles)
+		foreach(ShGame.game.Client.Obstacle obstacle in client.obstacles)
 			obstacle.Dispose();
 		foreach (Player player in client.foreignPlayers)
 			player.Dispose();
