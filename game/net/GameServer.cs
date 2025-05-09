@@ -248,9 +248,9 @@ internal class GameServer:Socket {
 					//create a Task that starts to try to accept a socket and in case of success stops to listen
 					//the result of the listening is a  socket that is connected to a client
 					//Accept();
-					//Socket clientConnection = await Task.Factory.FromAsync(BeginAccept, EndAccept, null);
-					//_=Task.Run(()=>OnAccept(clientConnection));
-					OnAccept(Accept());
+					Socket clientConnection = await Task.Factory.FromAsync(BeginAccept, EndAccept, null);
+					_=Task.Run(()=>OnAccept(clientConnection));
+					//OnAccept(Accept());
 					logger.Log("accepted");
 				} catch (Exception e) {
 					if (!stop) {
@@ -262,6 +262,7 @@ internal class GameServer:Socket {
 						break;
 					}
 				}
+
 			}
 		}
 	}
