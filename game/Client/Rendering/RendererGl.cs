@@ -5,7 +5,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
 
-class RendererGl {
+public class RendererGl {
 
 	//private readonly IWindow window;
 	private static readonly Logger logger = new(new LoggingLevel("RendererGL"));
@@ -49,16 +49,16 @@ class RendererGl {
 			Gl.Uniform1(screenWidthLocation, (float)size.Y);
 		};
 
-		for (int i = 0; i<client.ForeignPlayers.Length; i++) {
-			client.ForeignPlayers[i].Setup(Gl);
+		client.player.Setup(Gl);
+		for(int i = 0; i<client.foreignPlayers.Length; i++)
+			client.foreignPlayers[i].Setup(Gl);
+
+		for(int i=0; i<client.obstacles.Length; i++) {
+			client.obstacles[i].Setup(Gl);
+			client.obstacles[i]?.shadow?.Setup(Gl);
 		}
-		for(int i=0; i<client.Obstacles.Length; i++) {
-			client.Obstacles[i].Setup(Gl);
-		}
-		client.Player.Setup(Gl);
-		for (int i = 0; i<client.Obstacles.Length; i++) {
-			client.Obstacles[i]?.shadow?.Setup(Gl);
-		}
+		for(int i = 0; i<client.obstacles.Length; i++)
+			client.bullets[i].Setup(Gl);
 	}
 
 	public unsafe void OnRender(double _, IWindow window, Client client) {
@@ -72,37 +72,45 @@ class RendererGl {
 		int screenWidthLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowWidth");
 		int screenHeightLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowHeight");
 		int colorModeLocation = Gl.GetUniformLocation(shaderProgram, "colorMode");
-		Gl.Uniform1(screenWidthLocation, (float)window.Size.X);
-		Gl.Uniform1(screenHeightLocation, (float)window.Size.Y);
-		
+		//Gl.Uniform1(screenWidthLocation, (float)window.Size.X);
+		//Gl.Uniform1(screenHeightLocation, (float)window.Size.Y);
+		Gl.Uniform1(screenWidthLocation, (float)Net.GameServer.MAP_WIDTH);
+		Gl.Uniform1(screenHeightLocation, (float)Net.GameServer.MAP_HEIGHT);
+
 		Gl.Uniform1(colorModeLocation, 1);
-		client.Player.Draw(Gl);
-		for (int i = 0; i<client.ForeignPlayers.Length; i++) {
-			if(client.ForeignPlayers[i]?.Health!=-1&&client.ForeignPlayers[i]?.PlayerUUID!=client.Player.PlayerUUID)
-				client.ForeignPlayers[i]?.Draw(Gl);
+		client.player.Draw(Gl);
+		for (int i = 0; i<client.foreignPlayers.Length; i++) {
+			if(client.foreignPlayers[i]?.Health!=-1&&client.foreignPlayers[i]?.PlayerUUID!=client.player.PlayerUUID)
+				client.foreignPlayers[i]?.Draw(Gl);
 		}
 
 		Gl.Uniform1(colorModeLocation, 0);
-		for (int i = 0; i<client.Obstacles.Length; i++) {
-			if (client.Obstacles[i]!=null && client.Obstacles[i].shadow!=null) {
-				client.Obstacles[i].shadow.dirty = true;
-				client.Obstacles[i].shadow.Draw(Gl);
+		for (int i = 0; i<client.obstacles.Length; i++) {
+			if (client.obstacles[i]!=null && client.obstacles[i].shadow!=null) {
+				client.obstacles[i].shadow.dirty = true;
+				client.obstacles[i].shadow.Draw(Gl);
 			}
 		}
 
 		Gl.Uniform1(colorModeLocation, 2);
-		for (int i = 0; i<client.Obstacles.Length; i++) {
-			client.Obstacles[i]?.Draw(Gl);
+		for (int i = 0; i<client.obstacles.Length; i++)
+			client.obstacles[i]?.Draw(Gl);
+
+		Gl.Uniform1(colorModeLocation, 3);
+		for (int i = 0; i<client.bullets.Length; i++) {
+			client.bullets[i].dirty = true;
+			client.bullets[i].Draw(Gl);
 		}
 	}
 
 	public unsafe void OnClosing(IWindow window, Client client) {
-		foreach(ShGame.game.Client.Obstacle obstacle in client.Obstacles)
-			obstacle.Dispose();
-		foreach (Player player in client.ForeignPlayers)
-			player.Dispose();
-		client.Player.Dispose();
-
+		for (int i = 0; i<client.obstacles.Length; i++)
+			client.obstacles[i].Dispose();
+		for (int i = 0; i<client.foreignPlayers.Length; i++)
+			client.foreignPlayers[i].Dispose();
+		for (int i = 0; i<client.bullets.Length; i++)
+			client.bullets[i].Dispose();
+		client.player.Dispose();
 	}
 
 	private static uint CreateShaderProgram(IWindow window) {
@@ -144,6 +152,8 @@ void main()
 		color = vec3(1.0, 0.0, 0.0); // Red
 	else if (colorMode == 2)
 		color = vec3(0.0, 0.0, 1.0); // Blue
+	else if (colorMode == 3)
+		color = vec3(0.0, 0.0, 0.0); // BLACK
 	else
 		color = vec3(1.0); // Default white
 

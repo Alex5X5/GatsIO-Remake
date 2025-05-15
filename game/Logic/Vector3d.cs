@@ -16,13 +16,12 @@ public unsafe struct Vector3d {
 	public static readonly Vector3d Z = new(0, 0, 1);
     public static readonly Vector3d Zero = new(0, 0, 0);
 
-    public static implicit operator Vector3f(Vector3d? v) => 
-		new(
-			(float)Math.Floor(v!=null ? v.Value.x:0),
-			(float)Math.Floor(v!=null ? v.Value.y:0),
-			(float)Math.Floor(v!=null ? v.Value.z:0)
-		);
-
+    public static implicit operator Vector3f(Vector3d? v) =>
+        new(
+            (float)Math.Floor(v!=null ? v.Value.x : 0),
+            (float)Math.Floor(v!=null ? v.Value.y : 0),
+            (float)Math.Floor(v!=null ? v.Value.z : 0)
+        );
 
     public Vector3d():this(0,0,0) {
 	}
@@ -43,7 +42,6 @@ public unsafe struct Vector3d {
 		this.x=x_;
 		this.y=y_;
 		this.z=z_;
-		fixed (double* ptr = &this.x)
 		return this;
 	}
 
@@ -194,9 +192,7 @@ public unsafe struct Vector3d {
 		return Set(this.y*z-this.z*y, this.z*x-this.x*z, this.x*y-this.y*x);
 	}
 
-	public override string ToString() {
-		return "("+x+","+y+","+z+")";
-	}
+	public override string ToString() => "("+x+"|"+y+"|"+z+")";
 
 	public Vector3d Limit(double limit) {
 		return Limit2(limit*limit);

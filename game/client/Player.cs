@@ -3,16 +3,22 @@
 using ShGame.game.Client.Rendering;
 using ShGame.game.Logic;
 
-#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
+//#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
 
 public class Player : Drawable {
 
-	public const int PLAYER_BYTE_LENGTH = 48;
+	public const int PLAYER_BYTE_LENGTH = 54;
 
 	public const int SIZE = 10, SIDES_COUNT = 100, FLOAT_COUNT = 9*SIDES_COUNT;
 
 
 	public static readonly int[] CIRCLE_OFFSETS = CalcCircleOffsets();
+
+	public short weaponCooldownTicks = 10;
+    public short weaponCooldownTicksDone = 10;
+
+    public byte shooting = 0x0;
+	public byte default_shoot_speed = 0x3;
 
 	private static int[] CalcCircleOffsets() {
 

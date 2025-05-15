@@ -18,13 +18,16 @@ internal class GameServer:Socket {
 	private readonly Logger logger;
 
 	//some constants
+	public const int TARGET_TPS = 60;
 	public const int MAP_WIDTH = 1400, MAP_HEIGHT = 900;
 	public const int OBSTACKLE_ROWS = 5, OBSTACKLE_LINES = 8;
 	public const int OBSTACLE_ROW_DISANCE = MAP_WIDTH / OBSTACKLE_ROWS;
 	public const int OBSTACLE_LINE_DISTANCE = MAP_HEIGHT / OBSTACKLE_LINES;
-	public const int MAX_PLAYER_COUNT = 20, OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES;
+	public const int MAX_PLAYER_COUNT = 20;
+	public const int OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES, BULLET_COUNT = 200;
 
-	internal readonly ServerConnection?[] clients = new ServerConnection[MAX_PLAYER_COUNT];
+
+    internal readonly ServerConnection?[] clients = new ServerConnection[MAX_PLAYER_COUNT];
 	internal Player[] players = new Player[MAX_PLAYER_COUNT];
 	private unsafe readonly Obstacle[] obstacles = new Obstacle[OBSTACLE_COUNT];
 
