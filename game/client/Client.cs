@@ -7,11 +7,15 @@ using ShGame.game.Client.Rendering;
 using Silk.NET.Windowing;
 using Silk.NET.Input;
 using System.Numerics;
-using Windows.Devices.Bluetooth;
+//using Silk.NET.GLFW;
+//using Silk.NET.Windowing;
 
 //#pragma warning disable CS8500 //insert spaces instead of tabs
 
 public class Client {
+
+	public static readonly int SCREEN_PIXEL_WIDTH = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size.Y;
+	public static readonly int SCREEN_PIXEL_HEIGHT = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size.X;
 
 	private readonly RendererGl renderer;
 	private IWindow? window;
@@ -44,8 +48,7 @@ public class Client {
 	private Thread bulletThread = new(() => { });
 	private Thread abilityThread = new(() => { });
 
-	public Vector2 GetCursorPosition() => inputContext.Mice[0].Position;
-
+	//public Vector2 GetCursorPosition() => inputContext.Mice[0].Position;
 
 	public Client() : this(5000) { }
 
@@ -72,7 +75,7 @@ public class Client {
 		for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++)
 			foreignPlayers[i] = new Player(new Vector3d(0, 0, 0), -1, 1);
 		for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
-			obstacles[i] = new Obstacle(this, new Vector3d(300, 500, 0),1);
+			obstacles[i] = new Obstacle(this, new Vector3d(100, 100, 0),1);
 		for (int i = 0; i<GameServer.BULLET_COUNT; i++)
 			bullets[i] = new Bullet(null, null, 10, 20);
 		StartThreads(address, port);

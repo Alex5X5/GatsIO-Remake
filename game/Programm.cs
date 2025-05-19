@@ -1,12 +1,10 @@
-﻿using ShGame.game.Client.Rendering;
+﻿namespace ShGame.game;
+
 using ShGame.game.Net;
-using ShGame.game.Util;
 
 using System.Linq;
 using System.Net;
 using System.Threading;
-using System.Windows.Forms;
-namespace ShGame.game;
 
 /// <summary>
 /// This class contains the main entry point for the programm.
@@ -70,9 +68,9 @@ public static class Programm {
 			return;
 		}
 
-		Application.EnableVisualStyles();
-		Application.SetCompatibleTextRenderingDefault(false);
-		Console.WriteLine("start");
-		Application.Run(new InitialScreen());
+		//Application.EnableVisualStyles();
+		//Application.SetCompatibleTextRenderingDefault(false);
+		//Console.WriteLine("start");
+		//Application.Run(new InitialScreen());
 	}
 }
