@@ -19,6 +19,8 @@ public static class Programm {
 		System.Collections.Generic.List<string> args_ = args.ToList<string>();
 		bool noGui = args_.Contains("-nogui");
 
+		//start a server if the --server argument is provided
+		//otherwise start a client
 		if (args_.Contains("--server")) {
 			new Thread(
 				() => {
@@ -41,9 +43,7 @@ public static class Programm {
 				}
 			).Start();
 			return;
-		}
-
-		if (args_.Contains("--client")) {
+		} else {
 			new Thread(
 				() => {
 					IPAddress? address = null;

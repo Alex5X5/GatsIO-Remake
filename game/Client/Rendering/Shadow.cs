@@ -2,8 +2,6 @@
 
 using System;
 
-#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
-
 public enum Dir : byte {
     T, B, L, R,
 }
@@ -12,7 +10,6 @@ public enum Dir : byte {
 public class Shadow : Drawable {
 
 	static Logger logger = new(new LoggingLevel("shadow"));
-
 	private ISupportsShadow attatch;
 
 	public unsafe override void UpdateVertices() {
@@ -65,7 +62,7 @@ public class Shadow : Drawable {
 		attatch = attatch_;
 	}
 
-	private static unsafe void CalculatePoints(ShGame.game.Client.Obstacle* obstacle) {
+	private static unsafe void CalculatePoints(Obstacle* obstacle) {
 		obstacle->WIDTH = obstacle->type switch {
 			1 => 35,
 			2 => 70,

@@ -22,7 +22,8 @@ public class RendererGl {
 
 	public static GL? Gl;
 	
-	private static uint shaderProgram;
+	private static uint staticShaderProgram;
+	private static uint textureShaderProgram;
 
 	private static readonly uint playerShaderProgram;
 	private static readonly uint shadowShaderProgram;
@@ -35,12 +36,104 @@ public class RendererGl {
 		loaded = true;
 
 		Gl = GL.GetApi(window);
+		string vertexShaderSource =
+@"
+#version 330 core
 
-		shaderProgram = CreateShaderProgram(window);
+layout(location = 0) in vec3 aPos;
+uniform float u_WindowWidth;
+uniform float u_WindowHeight;
+void main()
+{
+	vec2 ndc = vec2(
+		aPos.x / (2000  / 4.0) - 1.0,
+		aPos.y / (1200 / 4.0) - 1.0
+	);
+	gl_Position = vec4(ndc, aPos.z, 1.0);
+}";
 
-		int screenWidthLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowWidth");
-		int screenHeightLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowHeight");
-		int colorTypeLocation = Gl.GetUniformLocation(shaderProgram, "u_colorMode");
+		string fragmgentShaderSource =
+@"
+#version 330 core
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+out vec4 FragColor;
+uniform int colorMode;
+uniform vec2 u_mouse;
+uniform float u_time;
+uniform float u_colorMode;
+uniform float u_WindowWidth;
+uniform float u_WindowHeight;
+
+float function(vec2 point) {
+	return ((sin(point.y*1.804-2.228)+sin(((point.x*7.168-1.476)/(0.948)))+((sin(8.920*point.x+8.160*point.y-
+		9.224)+1.2*pow(sin(point.x*7.864+-1.512)+
+		((sin(point.x*8.988+point.y*7.0-(sin(u_time/20.0)/2.0+0.5)*1.1))/(2.0)),2.0)+
+		sin(point.x*3.104+5.124-(sin(u_time/20.0)/2.0+0.5)*14.220*point.y))/(2.400))+3.504)/(7.0));
+}
+
+void main()
+{
+	vec2 u_resolution = vec2(u_WindowWidth,u_WindowHeight);
+	vec2 st = gl_FragCoord.xy/u_resolution.xy;
+	st.x *= u_resolution.x/u_resolution.y;
+	st.y *= u_resolution.y/u_resolution.x;
+
+	vec3 color;
+
+	if (colorMode == 0)
+		color = vec3(
+			function(st*0.5)*0.28+0.3,
+			function(st*0.5)*0.36+0.3,
+			function(st*0.5)*0.48+0.3
+		);
+	else if (colorMode == 1)
+		color = vec3(1.0, 0.0, 0.0); // Red
+	else if (colorMode == 2)
+		color = vec3(0.0, 0.0, 1.0); // Blue
+	else if (colorMode == 3)
+		color = vec3(0.0, 0.0, 0.0); // BLACK
+	else
+		color = vec3(1.0); // Default white
+
+	FragColor = vec4(color, 1.0);
+}";
+
+		staticShaderProgram = CreateShaderProgram(window,vertexShaderSource,fragmgentShaderSource);
+
+		vertexShaderSource = @"
+#version 330 core
+layout(location = 0) in vec2 aPos;
+layout(location = 1) in vec2 aTexCoord;
+
+out vec2 TexCoord;
+
+void main()
+{
+	gl_Position = vec4(aPos, 0.0, 1.0);
+	TexCoord = aTexCoord;
+}
+";
+		fragmgentShaderSource =@"
+#version 330 core
+out vec4 FragColor;
+
+in vec2 TexCoord;
+
+uniform sampler2D texture0;
+
+void main()
+{
+	FragColor = texture(texture0, TexCoord);
+}
+";
+		textureShaderProgram = CreateShaderProgram(window, vertexShaderSource, fragmgentShaderSource);
+
+		int screenWidthLocation = Gl.GetUniformLocation(staticShaderProgram, "u_WindowWidth");
+		int screenHeightLocation = Gl.GetUniformLocation(staticShaderProgram, "u_WindowHeight");
+		int colorTypeLocation = Gl.GetUniformLocation(staticShaderProgram, "u_colorMode");
 
 		window.FramebufferResize += (Vector2D<int> size) => {
 			Gl.Viewport(0, 0, (uint)size.X, (uint)size.Y);
@@ -61,156 +154,81 @@ public class RendererGl {
 			client.bullets[i].Setup(Gl);
 	}
 
-    public unsafe void OnRender(double _, IWindow window, Client client) {
-        if (!loaded) return;
-        //logger.Log("on render");
-        Gl.ClearColor(0.5f, 0.5f, 0.6f, 1f);
-        Gl.Clear((uint)ClearBufferMask.ColorBufferBit);
 
-        Gl.UseProgram(shaderProgram);
+	public unsafe void OnRender(double _, IWindow window, Client client) {
+		if (!loaded) return;
+		//logger.Log("on render");
+		Gl.ClearColor(0.5f, 0.5f, 0.6f, 1f);
+		Gl.Clear((uint)ClearBufferMask.ColorBufferBit);
 
-        int screenWidthLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowWidth");
-        int screenHeightLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowHeight");
-        int colorModeLocation = Gl.GetUniformLocation(shaderProgram, "colorMode");
-        //Gl.Uniform1(screenWidthLocation, (float)window.Size.X);
-        //Gl.Uniform1(screenHeightLocation, (float)window.Size.Y);
-        Gl.Uniform1(screenWidthLocation, (float)Net.GameServer.MAP_WIDTH);
-        Gl.Uniform1(screenHeightLocation, (float)Net.GameServer.MAP_HEIGHT);
+		Gl.UseProgram(staticShaderProgram);
 
-        Gl.Uniform1(colorModeLocation, 1);
-        client.player.Draw(Gl);
-        for (int i = 0; i<client.foreignPlayers.Length; i++) {
-            if (client.foreignPlayers[i]?.Health!=-1&&client.foreignPlayers[i]?.PlayerUUID!=client.player.PlayerUUID)
-                client.foreignPlayers[i]?.Draw(Gl);
-        }
+		int screenWidthLocation = Gl.GetUniformLocation(staticShaderProgram, "u_WindowWidth");
+		int screenHeightLocation = Gl.GetUniformLocation(staticShaderProgram, "u_WindowHeight");
+		int colorModeLocation = Gl.GetUniformLocation(staticShaderProgram, "colorMode");
+		//Gl.Uniform1(screenWidthLocation, (float)window.Size.X);
+		//Gl.Uniform1(screenHeightLocation, (float)window.Size.Y);
+		Gl.Uniform1(screenWidthLocation, (float)Net.GameServer.MAP_WIDTH);
+		Gl.Uniform1(screenHeightLocation, (float)Net.GameServer.MAP_HEIGHT);
 
-        Gl.Uniform1(colorModeLocation, 0);
-        for (int i = 0; i<client.obstacles.Length; i++) {
-            if (client.obstacles[i]!=null && client.obstacles[i].shadow!=null) {
-                client.obstacles[i].shadow.dirty = true;
-                client.obstacles[i].shadow.Draw(Gl);
-            }
-        }
+		Gl.Uniform1(colorModeLocation, 1);
+		client.player.Draw(Gl);
+		for (int i = 0; i<client.foreignPlayers.Length; i++) {
+			if (client.foreignPlayers[i]?.Health!=-1&&client.foreignPlayers[i]?.PlayerUUID!=client.player.PlayerUUID)
+				client.foreignPlayers[i]?.Draw(Gl);
+		}
 
-        Gl.Uniform1(colorModeLocation, 2);
-        for (int i = 0; i<client.obstacles.Length; i++)
-            client.obstacles[i]?.Draw(Gl);
+		Gl.Uniform1(colorModeLocation, 0);
+		for (int i = 0; i<client.obstacles.Length; i++) {
+			if (client.obstacles[i]!=null && client.obstacles[i].shadow!=null) {
+				client.obstacles[i].shadow.dirty = true;
+				client.obstacles[i].shadow.Draw(Gl);
+			}
+		}
 
-        Gl.Uniform1(colorModeLocation, 3);
-        for (int i = 0; i<client.bullets.Length; i++) {
-            client.bullets[i].dirty = true;
-            client.bullets[i].Draw(Gl);
-        }
-    }
-
-    public unsafe void OnClosing(IWindow window, Client client) {
+		Gl.Uniform1(colorModeLocation, 2);
 		for (int i = 0; i<client.obstacles.Length; i++)
-			client.obstacles[i].Dispose();
-		for (int i = 0; i<client.foreignPlayers.Length; i++)
-			client.foreignPlayers[i].Dispose();
-		for (int i = 0; i<client.bullets.Length; i++)
-			client.bullets[i].Dispose();
-		client.player.Dispose();
+			client.obstacles[i]?.Draw(Gl);
+
+		Gl.Uniform1(colorModeLocation, 3);
+		for (int i = 0; i<client.bullets.Length; i++) {
+			client.bullets[i].dirty = true;
+			client.bullets[i].Draw(Gl);
+		}
 	}
 
-    private static uint CreateShaderProgram(IWindow window) {
-        if (Gl==null)
-            return 32767;
-        uint shaderProgram = Gl.CreateProgram();
+	private static uint CreateShaderProgram(IWindow window, string vertexShaderSource, string fragmentShaderSource) {
+		if (Gl==null)
+			return 32767;
+		uint shaderProgram = Gl.CreateProgram();
 
-        // Vertex Shader
-        string vertexShaderSource = @"
-#version 330 core
-
-layout(location = 0) in vec3 aPos;
-uniform float u_WindowWidth;
-uniform float u_WindowHeight;
-void main()
-{
-	vec2 ndc = vec2(
-		aPos.x / (2000  / 4.0) - 1.0,
-		aPos.y / (1200 / 4.0) - 1.0
-	);
-	gl_Position = vec4(ndc, aPos.z, 1.0);
-
-}
-";
-
-        string fragmentShaderSource = @"
-#version 330 core
-#ifdef GL_ES
-precision mediump float;
-#endif
-
-out vec4 FragColor;
-uniform int colorMode;
-uniform vec2 u_mouse;
-uniform float u_time;
-uniform float u_colorMode;
-uniform float u_WindowWidth;
-uniform float u_WindowHeight;
-
-float function(vec2 point) {
-    return ((sin(point.y*1.804-2.228)+sin(((point.x*7.168-1.476)/(0.948)))+((sin(8.920*point.x+8.160*point.y-
-		9.224)+1.2*pow(sin(point.x*7.864+-1.512)+
-		((sin(point.x*8.988+point.y*7.0-(sin(u_time/20.0)/2.0+0.5)*1.1))/(2.0)),2.0)+
-		sin(point.x*3.104+5.124-(sin(u_time/20.0)/2.0+0.5)*14.220*point.y))/(2.400))+3.504)/(7.0));
-}
-
-void main()
-{
-	vec2 u_resolution = vec2(u_WindowWidth,u_WindowHeight);
-    vec2 st = gl_FragCoord.xy/u_resolution.xy;
-    st.x *= u_resolution.x/u_resolution.y;
-
-	vec3 color;
-
-	if (colorMode == 0)
-		color = vec3(
-			function(st*0.5)*0.28+0.3,
-			function(st*0.5)*0.36+0.3,
-			function(st*0.5)*0.48+0.3
-		);
-	else if (colorMode == 1)
-		color = vec3(1.0, 0.0, 0.0); // Red
-	else if (colorMode == 2)
-		color = vec3(0.0, 0.0, 1.0); // Blue
-	else if (colorMode == 3)
-		color = vec3(0.0, 0.0, 0.0); // BLACK
-	else
-		color = vec3(1.0); // Default white
-
-	FragColor = vec4(color, 1.0);
-}
-		";
-
-        uint vertexShader = CompileShader(ShaderType.VertexShader, vertexShaderSource);
-        uint fragmentShader = CompileShader(ShaderType.FragmentShader, fragmentShaderSource);
+		uint vertexShader = CompileShader(ShaderType.VertexShader, vertexShaderSource);
+		uint fragmentShader = CompileShader(ShaderType.FragmentShader, fragmentShaderSource);
 
 
-        Gl.UseProgram(shaderProgram);
-        Gl.AttachShader(shaderProgram, vertexShader);
-        Gl.AttachShader(shaderProgram, fragmentShader);
-        Gl.LinkProgram(shaderProgram);
+		Gl.UseProgram(shaderProgram);
+		Gl.AttachShader(shaderProgram, vertexShader);
+		Gl.AttachShader(shaderProgram, fragmentShader);
+		Gl.LinkProgram(shaderProgram);
 
 
-        int windowWidthLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowWidth");
-        int windowHeightLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowHeight");
-        int colorTypeLocation = Gl.GetUniformLocation(shaderProgram, "u_ColorType");
-        Gl.Uniform1(windowWidthLocation, window.Size.X);
-        Gl.Uniform1(windowHeightLocation, window.Size.Y);
-        Gl.Uniform1(colorTypeLocation, 1);
+		int windowWidthLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowWidth");
+		int windowHeightLocation = Gl.GetUniformLocation(shaderProgram, "u_WindowHeight");
+		int colorTypeLocation = Gl.GetUniformLocation(shaderProgram, "u_ColorType");
+		Gl.Uniform1(windowWidthLocation, window.Size.X);
+		Gl.Uniform1(windowHeightLocation, window.Size.Y);
+		Gl.Uniform1(colorTypeLocation, 1);
 
-        //string s = gl.GetActiveUniform(shaderProgram, windowWidthLocation<0 ? 0 : (uint)windowWidthLocation, out int size, out UniformType type);
-        //s += " "+gl.GetActiveUniform(shaderProgram, windowHeightLocation<0 ? 0 : (uint)windowWidthLocation, out int size2, out UniformType type2);
-        //Console.WriteLine("activeUniforms:"+s);
+		//string s = gl.GetActiveUniform(shaderProgram, windowWidthLocation<0 ? 0 : (uint)windowWidthLocation, out int size, out UniformType type);
+		//s += " "+gl.GetActiveUniform(shaderProgram, windowHeightLocation<0 ? 0 : (uint)windowWidthLocation, out int size2, out UniformType type2);
+		//Console.WriteLine("activeUniforms:"+s);
 
-        Gl.DeleteShader(vertexShader);
-        Gl.DeleteShader(fragmentShader);
+		Gl.DeleteShader(vertexShader);
+		Gl.DeleteShader(fragmentShader);
 
 
 		return shaderProgram;
-    }
+	}
 
 	private static uint CompileShader(ShaderType type, string source) {
 		uint shader = Gl.CreateShader(type);

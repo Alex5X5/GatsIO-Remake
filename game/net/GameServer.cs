@@ -8,7 +8,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
 
 internal class GameServer:Socket {
 
@@ -18,7 +17,7 @@ internal class GameServer:Socket {
 	private readonly Logger logger;
 
 	//some constants
-	public const int TARGET_TPS = 60;
+	public const int TARGET_TPS = 50;
 	public const int MAP_WIDTH = 1400, MAP_HEIGHT = 900;
 	public const int OBSTACKLE_ROWS = 5, OBSTACKLE_LINES = 8;
 	public const int OBSTACLE_ROW_DISANCE = MAP_WIDTH / OBSTACKLE_ROWS;

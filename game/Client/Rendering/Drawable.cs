@@ -13,9 +13,8 @@ public unsafe abstract class Drawable:IDisposable {
 	protected uint vaoHandle = 0;
 	protected uint vboHandle = 0;
 
-	private nuint VERTICES_COUNT;
+	protected nuint VERTICES_COUNT;
 
-	//public float[] vertices;
 	public float* VertexDataPtr;
 
 
@@ -23,12 +22,9 @@ public unsafe abstract class Drawable:IDisposable {
 
 	private static readonly Logger logger = new(new LoggingLevel("Drawable"));
 
-	public Drawable(int verticesCount) {
+	public Drawable(uint verticesCount) {
 		VertexDataPtr = (float*)NativeMemory.AllocZeroed((uint)verticesCount*3*sizeof(float));
 		VERTICES_COUNT = (uint)verticesCount;
-		//vertices = new float[VERTICES_COUNT];
-		//vertices.Initialize();
-		//Console.WriteLine("[Drawable]:empty constructor");
 	}
 
 	public virtual void Dispose() {
@@ -39,7 +35,6 @@ public unsafe abstract class Drawable:IDisposable {
 	public virtual void UpdateVertices() { }
 
 	public unsafe void Setup(GL gl) {
-		//Console.WriteLine("[Drawable]:setup");
 		vaoHandle = gl.GenVertexArray();
 		BindVAO();
 		vboHandle = gl.GenBuffer();

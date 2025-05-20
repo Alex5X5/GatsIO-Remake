@@ -3,7 +3,6 @@ using ShGame.game.Client.Rendering;
 using ShGame.game.Net;
 
 using System;
-using System.Runtime.InteropServices;
 
 public class Bullet:Drawable {
 

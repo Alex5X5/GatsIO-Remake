@@ -117,15 +117,24 @@ public class Client {
 
 		window.Render += (double deltaTime) =>
 				renderer.OnRender(deltaTime, window, this);
-		window.Closing += () => 
-				renderer.OnClosing(window, this);
+		window.Closing += OnClosing;
 
 		window.Run();
 
 		return;
-	}
+    }
 
-	private unsafe void StartThreads(IPAddress address, int port) {
+    public unsafe void OnClosing() {
+        for (int i = 0; i<obstacles.Length; i++)
+            obstacles[i].Dispose();
+        for (int i = 0; i<foreignPlayers.Length; i++)
+            foreignPlayers[i].Dispose();
+        for (int i = 0; i<bullets.Length; i++)
+            bullets[i].Dispose();
+		player.Dispose();
+    }
+
+    private unsafe void StartThreads(IPAddress address, int port) {
 		logger.Log("start threads!");
 		connectionThread=new Thread(
 			() => {
@@ -280,8 +289,10 @@ public class Client {
 		}
 	}
 
-	private void OnMouseMove(IMouse cursor, System.Numerics.Vector2 pos) {
-		mousePos = pos;
+	private void OnMouseMove(IMouse cursor, Vector2 pos) {
+		mousePos.X = pos.X;
+		mousePos.Y = window.Size.Y-pos.Y;
+		//mousePos = pos-new Vector2(window.Position.X,window.Size.Y-window.Position.Y);
 		//Console.WriteLine("I Moved! "+mousePos);
 	}
 
