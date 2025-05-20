@@ -3,7 +3,7 @@
 public static class Protocoll {
 
 	public const byte PING_HEADER = 1, PLAYER_HEADER = 11, MAP_HEADER = 3;
-	public const short PACKET_BYTE_LENGTH = 1200, PAYLOAD_OFFSET = 1;
+	public const short PACKET_BYTE_LENGTH = 2000, PAYLOAD_OFFSET = 1;
 	
 
 	public static byte AnalyzePacket(byte[] packet) {
