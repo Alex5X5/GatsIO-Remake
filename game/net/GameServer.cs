@@ -57,36 +57,34 @@ internal class GameServer:Socket {
 		logger.Log("bound endPoint="+point.ToString());
 		logger.Log(Convert.ToString(IsBound));
 		//start the main thread
-		new Thread(
-				start: Run
-		).Start();
+		Run();
 	}
 
-	private void OnAccept(Socket s) {
-		logger.Log("[Server]:OnAccept("+s.ToString()+")");
-		//search for a slot for the new connection
-		bool found = false;
-		for(int i = 0; i<clients.Length; i++) {
-			if(clients[i]==null) {
-				//close the newly created socket an create a ServerConnection from the socket's information so the ServerConnection is bound to the incoming connection
-				clients[i]=new ServerConnection(s.DuplicateAndClose(Environment.ProcessId), this, i);
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			byte[] buffer = Protocoll.PreparePacket(Headers.PAYER_LIMIT);
-			s.Send(buffer);
-			s.Close();
-			s.Dispose();
-		}
-	}
+    private void OnAccept(Socket s) {
+        logger.Log("[Server]:OnAccept("+s.ToString()+")");
+        //search for a slot for the new connection
+        bool found = false;
+        for (int i = 0; i<clients.Length; i++) {
+            if (clients[i]==null) {
+                //close the newly created socket an create a ServerConnection from the socket's information so the ServerConnection is bound to the incoming connection
+                clients[i]=new ServerConnection(s, this, i);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            byte[] buffer = Protocoll.PreparePacket(Headers.PAYER_LIMIT);
+            s.Send(buffer);
+            s.Close();
+            s.Dispose();
+        }
+    }
 
-	#endregion constructors
+    #endregion constructors
 
-	#region request events
+    #region request events
 
-	internal unsafe byte[] OnMapRequest() {
+    internal unsafe byte[] OnMapRequest() {
 		//prepare a new Packet
 		byte[] result = Protocoll.PreparePacket(Headers.MAP);
 		int counter = 0;
