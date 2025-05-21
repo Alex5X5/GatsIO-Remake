@@ -18,7 +18,7 @@ internal class GameServer:Socket {
 
 	//some constants
 	public const int TARGET_TPS = 50;
-	public const int MAP_WIDTH = 1400, MAP_HEIGHT = 900;
+	public const int MAP_WIDTH = 2100, MAP_HEIGHT = 1200;
 	public const int OBSTACKLE_ROWS = 5, OBSTACKLE_LINES = 8;
 	public const int OBSTACLE_ROW_DISANCE = MAP_WIDTH / OBSTACKLE_ROWS;
 	public const int OBSTACLE_LINE_DISTANCE = MAP_HEIGHT / OBSTACKLE_LINES;

@@ -93,7 +93,7 @@ public class Client {
 		logger.Log("setting vivible");
 
 		var options = WindowOptions.Default;
-		options.Size = new Silk.NET.Maths.Vector2D<int>(RendererGl.WIDTH, RendererGl.HEIGHT);
+		options.Size = new Silk.NET.Maths.Vector2D<int>(GameServer.MAP_WIDTH, GameServer.MAP_HEIGHT);
 		options.Title = "ShGame";
 
 		window = Window.Create(options);
@@ -290,8 +290,8 @@ public class Client {
 	}
 
 	private void OnMouseMove(IMouse cursor, Vector2 pos) {
-		mousePos.X = pos.X;
-		mousePos.Y = window.Size.Y-pos.Y;
+		mousePos.X = pos.X*(GameServer.MAP_WIDTH/window.Size.X);
+		mousePos.Y = GameServer.MAP_HEIGHT-pos.Y*(GameServer.MAP_HEIGHT/window.Size.Y);
 		//mousePos = pos-new Vector2(window.Position.X,window.Size.Y-window.Position.Y);
 		//Console.WriteLine("I Moved! "+mousePos);
 	}

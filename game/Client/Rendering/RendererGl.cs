@@ -1,5 +1,7 @@
 ﻿namespace ShGame.Game.Client.Rendering;
 
+using ShGame.Game.Net;
+
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
@@ -10,12 +12,10 @@ public class RendererGl {
 	//private readonly IWindow window;
 	private static readonly Logger logger = new(new LoggingLevel("RendererGL"));
 
-	public const int WIDTH = 2500, HEIGHT = 1500;
-
-	public static readonly Line3d BORDER_TOP = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(WIDTH, 0, 0));
-	public static readonly Line3d BORDER_BOTTOM = Line3d.FromPoints(new Vector3d(0, HEIGHT, 0), new Vector3d(WIDTH, HEIGHT, 0));
-	public static readonly Line3d BORDER_LEFT = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(0, HEIGHT, 0));
-	public static readonly Line3d BORDER_RIGHT = Line3d.FromPoints(new Vector3d(WIDTH, 0, 0), new Vector3d(WIDTH, HEIGHT, 0));
+	public static readonly Line3d BORDER_TOP = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(GameServer.MAP_WIDTH, 0, 0));
+	public static readonly Line3d BORDER_BOTTOM = Line3d.FromPoints(new Vector3d(0, GameServer.MAP_HEIGHT, 0), new Vector3d(GameServer.MAP_WIDTH, GameServer.MAP_HEIGHT, 0));
+	public static readonly Line3d BORDER_LEFT = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(0, GameServer.MAP_HEIGHT, 0));
+	public static readonly Line3d BORDER_RIGHT = Line3d.FromPoints(new Vector3d(GameServer.MAP_WIDTH, 0, 0), new Vector3d(GameServer.MAP_WIDTH, GameServer.MAP_HEIGHT, 0));
 
 
 	private bool loaded = false;
@@ -46,8 +46,8 @@ uniform float u_WindowHeight;
 void main()
 {
 	vec2 ndc = vec2(
-		aPos.x / (2000  / 4.0) - 1.0,
-		aPos.y / (1200 / 4.0) - 1.0
+		aPos.x / ("+GameServer.MAP_WIDTH+@"/2) - 1.0,
+		aPos.y / ("+GameServer.MAP_HEIGHT+@"/2) - 1.0
 	);
 	gl_Position = vec4(ndc, aPos.z, 1.0);
 }";
@@ -85,9 +85,9 @@ void main()
 
 	if (colorMode == 0)
 		color = vec3(
-			function(st*0.5)*0.28+0.3,
-			function(st*0.5)*0.36+0.3,
-			function(st*0.5)*0.48+0.3
+			function(st*2.0)*0.28+0.3,
+			function(st*2.0)*0.36+0.3,
+			function(st*2.0)*0.48+0.3
 		);
 	else if (colorMode == 1)
 		color = vec3(1.0, 0.0, 0.0); // Red
@@ -112,7 +112,8 @@ out vec2 TexCoord;
 
 void main()
 {
-	gl_Position = vec4(aPos, 0.0, 1.0);
+	aPos.x / ("+GameServer.MAP_WIDTH+@"  / 4.0) - 1.0,
+	aPos.y / ("+GameServer.MAP_HEIGHT+@" / 4.0) - 1.0
 	TexCoord = aTexCoord;
 }
 ";

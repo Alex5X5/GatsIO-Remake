@@ -25,18 +25,18 @@ public class Obstacle:Drawable, ISupportsShadow {
 		switch (type) {
 			case 1:
 				//logger.log("setting bounds", new MessageParameter("type", type));
-				WIDTH = 70;
-				HEIGHT = 70;
+				WIDTH = 150;
+				HEIGHT = 150;
 				break;
 			case 2:
 				//logger.log("setting bounds", new MessageParameter("type", type));
-				WIDTH = 70;
-				HEIGHT = 35;
+				WIDTH = 150;
+				HEIGHT = 75;
 				break;
 			case 3:
 				//logger.log("setting bounds", new MessageParameter("type", type));
-				WIDTH = 70;
-				HEIGHT = 70;
+				WIDTH = 75;
+				HEIGHT = 150;
 				break;
 			default:
 				//logger.error("illegal type", new MessageParameter("type", type));

@@ -70,7 +70,7 @@ public class Bullet:Drawable {
 		if (Pos.x<0|Pos.y<0|Pos.x>GameServer.MAP_WIDTH|Pos.y>GameServer.MAP_HEIGHT) {
 			Pos.Set(10, 10, 0);
             Dir.Set(0, 1, 0);
-			//WIDTH=0;
+			//SCREEN_PIXEL_WIDTH=0;
 			//LENGHT=0;
 			Speed=0;
 			Console.WriteLine("dealloc bullet");
