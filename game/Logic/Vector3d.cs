@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace ShGame.game.Logic;
+namespace ShGame.Game.Logic;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)][Serializable]// Ensures no extra padding is added
 public unsafe struct Vector3d {

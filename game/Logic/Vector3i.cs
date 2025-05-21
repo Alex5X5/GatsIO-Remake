@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ShGame.game.Logic;
+namespace ShGame.Game.Logic;
 #pragma warning disable IDE0130 // Der Namespace entspricht stimmt nicht der Ordnerstruktur.
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)] // Ensures no extra padding is added

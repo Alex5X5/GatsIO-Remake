@@ -1,6 +1,6 @@
-﻿namespace ShGame.game.Net;
+﻿namespace ShGame.Game.Net;
 
-using ShGame.game.Client;
+using ShGame.Game.Client;
 
 using System.Net;
 using System.Net.Sockets;
@@ -136,6 +136,6 @@ public class NetHandler : Socket {
     }
 
     public override string ToString() {
-        return "sh_game.game.net.NetHandler:[ip="+IP.ToString()+", port="+Convert.ToString(PORT)+"]";
+        return "sh_game.Game.net.NetHandler:[ip="+IP.ToString()+", port="+Convert.ToString(PORT)+"]";
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace ShGame.game.Util {
+namespace ShGame.Game.Util {
 	public class ConsoleRedirector {
 		private readonly string LogDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
 

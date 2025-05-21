@@ -1,9 +1,11 @@
-﻿namespace ShGame.game;
+﻿namespace ShGame.Game;
 
-using ShGame.game.Net;
+using ShGame.Game.Net;
 
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading;
 
 /// <summary>
@@ -13,8 +15,9 @@ public static class Programm {
 
 	[STAThread]
 	public static void Main(string[] args) {
-		
-		Logging.DisableColors();
+		Console.WriteLine(AppDomain.CurrentDomain.BaseDirectory);
+		Util.Paths.ExtractFiles();
+        Logging.DisableColors();
 
 		System.Collections.Generic.List<string> args_ = args.ToList<string>();
 		bool noGui = args_.Contains("-nogui");

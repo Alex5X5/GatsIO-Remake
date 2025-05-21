@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Threading;
 
-namespace ShGame.game.Net;
+namespace ShGame.Game.Net;
 
 internal class ServerConnection {
     private readonly Socket socket;

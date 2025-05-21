@@ -1,4 +1,4 @@
-﻿namespace ShGame.game.Logic;
+﻿namespace ShGame.Game.Logic;
 
 public class Line3d {
 
@@ -100,7 +100,7 @@ public class Line3d {
 
 
 	public override string ToString() {
-		return "game.client.logic.vector.Line3d[origin:"+origin.ToString()+",direction:"+direction.ToString()+"]";
+		return "Game.client.logic.vector.Line3d[origin:"+origin.ToString()+",direction:"+direction.ToString()+"]";
 	}
 
 	//	public static void main(String[] args) {

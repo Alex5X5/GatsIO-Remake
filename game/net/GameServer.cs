@@ -1,6 +1,6 @@
-﻿namespace ShGame.game.Net;
+﻿namespace ShGame.Game.Net;
 
-using ShGame.game.Client;
+using ShGame.Game.Client;
 
 using System.Net;
 using System.Net.NetworkInformation;
@@ -24,7 +24,6 @@ internal class GameServer:Socket {
 	public const int OBSTACLE_LINE_DISTANCE = MAP_HEIGHT / OBSTACKLE_LINES;
 	public const int MAX_PLAYER_COUNT = 20;
 	public const int OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES, BULLET_COUNT = 200;
-
 
     internal readonly ServerConnection?[] clients = new ServerConnection[MAX_PLAYER_COUNT];
 	internal Player[] players = new Player[MAX_PLAYER_COUNT];

@@ -1,6 +1,6 @@
-﻿namespace ShGame.game.Client;
+﻿namespace ShGame.Game.Client;
 
-using ShGame.game.Client.Rendering;
+using ShGame.Game.Client.Rendering;
 using System;
 using System.Runtime.InteropServices;
 

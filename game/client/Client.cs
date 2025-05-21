@@ -1,9 +1,9 @@
-﻿namespace ShGame.game.Client;
+﻿namespace ShGame.Game.Client;
 
-using ShGame.game.Net;
+using ShGame.Game.Net;
 using System.Threading;
 using System.Net;
-using ShGame.game.Client.Rendering;
+using ShGame.Game.Client.Rendering;
 using Silk.NET.Windowing;
 using Silk.NET.Input;
 using System.Numerics;

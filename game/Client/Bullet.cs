@@ -1,6 +1,6 @@
-﻿namespace ShGame.game.Client;
-using ShGame.game.Client.Rendering;
-using ShGame.game.Net;
+﻿namespace ShGame.Game.Client;
+using ShGame.Game.Client.Rendering;
+using ShGame.Game.Net;
 
 using System;
 

@@ -1,4 +1,4 @@
-﻿namespace ShGame.game.Net;
+﻿namespace ShGame.Game.Net;
 
 internal class ConnectException:Exception {
 

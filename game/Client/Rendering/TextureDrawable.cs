@@ -1,16 +1,9 @@
-﻿namespace ShGame.game.Client.Rendering;
+﻿namespace ShGame.Game.Client.Rendering;
 
 using Silk.NET.OpenGL;
 
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 public unsafe abstract class TextureDrawable:Drawable {
 

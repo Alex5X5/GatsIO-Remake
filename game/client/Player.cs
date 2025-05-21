@@ -1,7 +1,7 @@
-﻿namespace ShGame.game.Client;
+﻿namespace ShGame.Game.Client;
 
-using ShGame.game.Client.Rendering;
-using ShGame.game.Logic;
+using ShGame.Game.Client.Rendering;
+using ShGame.Game.Logic;
 
 //#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
 
@@ -81,7 +81,7 @@ public class Player : Drawable {
 		Visible = false;
 	}
 
-	public override string ToString() => $"game.graphics.client.Player2[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{Dir}, UUID:{PlayerUUID}, VAO:{vaoHandle}, VBO:{vboHandle}]";
+	public override string ToString() => $"Game.graphics.client.Player2[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{Dir}, UUID:{PlayerUUID}, VAO:{vaoHandle}, VBO:{vboHandle}]";
 
 
 	public unsafe override void UpdateVertices() {

@@ -1,4 +1,4 @@
-﻿namespace ShGame.game.Logic;
+﻿namespace ShGame.Game.Logic;
 
 [Serializable]
 public class LineSection3d {

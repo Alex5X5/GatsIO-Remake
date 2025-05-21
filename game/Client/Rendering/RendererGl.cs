@@ -1,4 +1,4 @@
-﻿namespace ShGame.game.Client.Rendering;
+﻿namespace ShGame.Game.Client.Rendering;
 
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
