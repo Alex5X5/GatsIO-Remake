@@ -109,19 +109,20 @@ public class NetHandler : Socket {
     public unsafe void ExchangePlayers(Player p, ref Player[] players) {
         //logger.Log("exchanging players", [new MessageParameter("player",p.ToString())]);
         byte[] send = Protocoll.PreparePacket(Headers.PLAYER);
-        Player.SerializePlayer(&send, &p, Protocoll.PAYLOAD_OFFSET);
+        fixed(byte* ptr = &send[Protocoll.PAYLOAD_OFFSET])
+        Player.SerializePlayer(ptr, p, Protocoll.PAYLOAD_OFFSET);
         try {
             Send(send);
             byte[] packet = RecievePacket();
             if (packet != null)
                 for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++) {
-                    //logger.Log("deserializing player", new MessageParameter("player", players[i].ToString()));
+                    logger.Log("deserializing player", new MessageParameter("player", players[i].ToString()));
                     //Player2 temp = new();
                     //if (temp != null && temp.PlayerUUID != p.PlayerUUID)
                     //players[i] = temp;
-                    fixed (Player* ptr = &players[i])
-                        Player.DeserializePlayer(&packet, ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
-                    //logger.Log("deserialized player", new MessageParameter("player", players[i].ToString()));
+                    fixed (byte* ptr = &packet[i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET])
+                        Player.DeserializePlayer(ptr, players[i], 0);
+                    logger.Log("deserialized player", new MessageParameter("player", players[i].ToString()));
                 }
         } catch (Exception e) {
             logger.Log(e.ToString());

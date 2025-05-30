@@ -241,9 +241,10 @@ public class Player : Drawable {
 	/// byte 10 to 13 are converted to an int and are set as the new height of the player
 	/// </summary>
 	public static unsafe void DeserializePlayer(byte* buffer, Player player, int offset) {
-		Console.WriteLine("Deserializing"+player.ToString());
+		//Console.WriteLine("Deserializing"+player.ToString());
 		byte* ptr = buffer;
 		ptr+=offset;
+		//Console.WriteLine("player was:"+player.ToString());
 		player ??= new Player(null, 0, 0);
 		player.Health = Unsafe.Read<Int32>(ptr);
 		if (player.Health_ ==-1) {

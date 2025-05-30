@@ -46,6 +46,7 @@ public unsafe abstract class Drawable : IDisposable {
 		gl.BufferData(BufferTargetARB.ArrayBuffer, (uint)VERTICES_COUNT * sizeof(float), in IntPtr.Zero, BufferUsageARB.StaticDraw);
 		UnbindVBO();
 		UnbindVAO();
+		DidSetup = true;
 	}
 
 	public unsafe void Draw(GL gl) {

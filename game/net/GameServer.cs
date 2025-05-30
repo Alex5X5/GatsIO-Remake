@@ -114,7 +114,8 @@ internal class GameServer:Socket {
 		if (Protocoll.AnalyzePacket(packet)==Headers.PLAYER) {
 			//create a temporary player and read it's properties from the packet
 			Player temp = new(null, 0, 0);
-			Player.DeserializePlayer(&packet, &temp, Protocoll.PAYLOAD_OFFSET);
+			fixed(byte* ptr = &packet[Protocoll.PAYLOAD_OFFSET])
+			Player.DeserializePlayer(ptr, temp, 0);
 			//logger.Log("processing player request",new MessageParameter("player",temp));
 			if (!IsPlayerRegistered(temp)) {
 				RegisterNewPlayer(temp);
@@ -132,8 +133,8 @@ internal class GameServer:Socket {
 				}
 				//logger.Log("serializing player",new MessageParameter("player", players[i].ToString()));
 				//create a pointer to a player in the array of the players
-				fixed (Player* ptr = &players[i])
-					Player.SerializePlayer(&result, ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+				fixed (byte* ptr = &result[i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET])
+					Player.SerializePlayer(ptr, players[i], 0);
 			}
 			return result;
 		} else {

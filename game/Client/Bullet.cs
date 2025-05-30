@@ -26,7 +26,6 @@ public class Bullet : Drawable {
 	}
 
 	public unsafe override void UpdateVertices() {
-
 		float* ptr = VertexDataPtr;
 		*ptr=(float)Pos.x;
 		ptr++;
@@ -67,8 +66,7 @@ public class Bullet : Drawable {
 		Pos.Add(
 			Dir.Cpy().Scl(Speed)
 		);
-		if (Pos.x<0|Pos.y<0|Pos.x>GameServer.MAP_WIDTH|Pos.y>GameServer.MAP_HEIGHT)
-		{
+		if (Pos.x<0|Pos.y<0|Pos.x>GameServer.MAP_WIDTH|Pos.y>GameServer.MAP_HEIGHT) {
 			Pos.Set(10, 10, 0);
 			Dir.Set(0, 1, 0);
 			//SCREEN_PIXEL_WIDTH=0;
@@ -81,8 +79,7 @@ public class Bullet : Drawable {
 	}
 
 	public void CheckObstacleCollision(Obstacle[] obstacles) {
-		foreach (Obstacle obstacle in obstacles)
-		{
+		foreach (Obstacle obstacle in obstacles) {
 			Vector3d bulletCorner1 = Pos;
 			Vector3d bulletCorner2 = Pos.Cpy().Add(WIDTH, LENGHT, 0);
 
@@ -92,8 +89,7 @@ public class Bullet : Drawable {
 			if (
 				bulletCorner1.x <= obstacleCorner2.x && bulletCorner1.y <= obstacleCorner2.y &&
 				bulletCorner2.x >= obstacleCorner1.x && bulletCorner2.y >= obstacleCorner1.y
-			)
-			{
+			) {
 				Pos.Set(10, 10, 0);
 				Dir.Set(0, 1, 0);
 				//WIDTH=0;
