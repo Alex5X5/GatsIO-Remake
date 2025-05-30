@@ -4,10 +4,10 @@ using Silk.NET.OpenGL;
 
 using System.Runtime.InteropServices;
 
-	/// <summary>
-	/// This is a Base class for objects that have to be drawn.
-	/// </summary>
-public unsafe abstract class Drawable:IDisposable {
+/// <summary>
+/// This is a Base class for objects that have to be drawn.
+/// </summary>
+public unsafe abstract class Drawable : IDisposable {
 
 
 	protected uint vaoHandle = 0;
@@ -19,14 +19,15 @@ public unsafe abstract class Drawable:IDisposable {
 
 
 	public bool dirty = true;
+	private bool DidSetup = false;
 
 	private static readonly Logger logger = new(new LoggingLevel("Drawable"));
 
 	public Drawable(uint verticesCount) {
 		VertexDataPtr = (float*)NativeMemory.AllocZeroed((uint)verticesCount*3*sizeof(float));
 		VERTICES_COUNT = (uint)verticesCount;
-        dirty = true;
-    }
+		dirty = true;
+	}
 
 	public virtual void Dispose() {
 		GC.SuppressFinalize(this);
@@ -48,6 +49,8 @@ public unsafe abstract class Drawable:IDisposable {
 	}
 
 	public unsafe void Draw(GL gl) {
+		if (!DidSetup)
+			Setup(gl);
 		if (dirty) {
 			UpdateVertices();
 			dirty = false;
@@ -58,7 +61,7 @@ public unsafe abstract class Drawable:IDisposable {
 		for (nuint i = 0; i<VERTICES_COUNT; i+=9) {
 			gl.BufferSubData(GLEnum.ArrayBuffer, (nint)i*sizeof(float), (uint)9*sizeof(float), ptr);
 			ptr+=(uint)9;
-        }
+		}
 		gl.DrawArrays(PrimitiveType.Triangles, 0, (uint)VERTICES_COUNT);
 		UnbindVAO();
 		UnbindVBO();

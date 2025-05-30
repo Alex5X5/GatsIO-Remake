@@ -5,9 +5,6 @@ using ShGame.Game.Net;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
-
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp;
 using ShGame.Game.Util;
 using System.Collections.Generic;
 
@@ -21,13 +18,15 @@ public class RendererGl {
 	public static readonly Line3d BORDER_LEFT = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(0, GameServer.MAP_HEIGHT, 0));
 	public static readonly Line3d BORDER_RIGHT = Line3d.FromPoints(new Vector3d(GameServer.MAP_WIDTH, 0, 0), new Vector3d(GameServer.MAP_WIDTH, GameServer.MAP_HEIGHT, 0));
 
+	private List<DebugDrawable> DebugDrawables = new();
+
 	private double Time;
 	private double LastFrame;
 
 	private bool loaded = false;
 
 	public static GL? Gl;
-	
+
 	private static uint staticShaderProgram;
 	private static uint textureShaderProgram;
 
@@ -38,7 +37,7 @@ public class RendererGl {
 	private static readonly uint shadowShaderProgram;
 	private static readonly uint obstackleShaderProgram;
 
-	
+
 	public RendererGl() {
 	}
 
@@ -81,16 +80,16 @@ public class RendererGl {
 			Gl.Uniform1(screenWidthLocation, (float)size.Y);
 		};
 
-		
+
 		client.player.Setup(Gl);
-		for(int i = 0; i<client.foreignPlayers.Length; i++)
+		for (int i = 0; i<client.foreignPlayers.Length; i++)
 			client.foreignPlayers[i].Setup(Gl);
 
-		for(int i=0; i<client.obstacles.Length; i++) {
+		for (int i = 0; i<client.obstacles.Length; i++) {
 			client.obstacles[i].Setup(Gl);
 			client.obstacles[i]?.shadow?.Setup(Gl);
 		}
-		for(int i = 0; i<client.obstacles.Length; i++)
+		for (int i = 0; i<client.obstacles.Length; i++)
 			client.bullets[i].Setup(Gl);
 	}
 
@@ -100,7 +99,8 @@ public class RendererGl {
 		//	LastFrame = Time;
 
 		//}
-		if (!loaded) return;
+		if (!loaded)
+			return;
 		//logger.Log("on render");
 		Gl.ClearColor(0.5f, 0.5f, 0.6f, 1f);
 		Gl.Clear((uint)ClearBufferMask.ColorBufferBit);
@@ -141,6 +141,15 @@ public class RendererGl {
 		for (int i = 0; i<client.bullets.Length; i++) {
 			client.bullets[i].dirty = true;
 			client.bullets[i].Draw(Gl);
+		}
+
+		Gl.UseProgram(staticShaderProgram);
+		colorModeLocation = Gl.GetUniformLocation(staticShaderProgram, "colorMode");
+
+		Gl.Uniform1(colorModeLocation, 1);
+		foreach (DebugDrawable drawable in DebugDrawables) {
+			drawable.dirty = true;
+			drawable.Draw(Gl);
 		}
 	}
 
