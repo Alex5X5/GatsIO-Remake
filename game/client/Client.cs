@@ -168,11 +168,9 @@ public class Client {
 								//logger.Log("moving player ", new MessageParameter("player", player.ToString()));
 								player.Move();
 							}
-						Thread.Sleep(10);
+						Thread.Sleep(1000/GameServer.TARGET_TPS);
 					}
 				}
-
-				
 		);
 		moveThread.Start();
 		logger.Log("started player move thread");

@@ -21,6 +21,8 @@ public class RendererGl {
 	public static readonly Line3d BORDER_LEFT = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(0, GameServer.MAP_HEIGHT, 0));
 	public static readonly Line3d BORDER_RIGHT = Line3d.FromPoints(new Vector3d(GameServer.MAP_WIDTH, 0, 0), new Vector3d(GameServer.MAP_WIDTH, GameServer.MAP_HEIGHT, 0));
 
+	private double Time;
+	private double LastFrame;
 
 	private bool loaded = false;
 
@@ -30,12 +32,12 @@ public class RendererGl {
 	private static uint textureShaderProgram;
 
 	private static uint shadowTexture;
+	private Dictionary<string, uint> textures;
 
 	private static readonly uint playerShaderProgram;
 	private static readonly uint shadowShaderProgram;
 	private static readonly uint obstackleShaderProgram;
 
-	private Dictionary<string, uint> textures;
 	
 	public RendererGl() {
 	}
@@ -92,7 +94,12 @@ public class RendererGl {
 			client.bullets[i].Setup(Gl);
 	}
 
-	public unsafe void OnRender(double _, IWindow window, Client client) {
+	public unsafe void OnRender(double deltaTime, IWindow window, Client client) {
+		//Time+=deltaTime;
+		//if (Time-LastFrame>=1/GameServer.TARGET_TPS) {
+		//	LastFrame = Time;
+
+		//}
 		if (!loaded) return;
 		//logger.Log("on render");
 		Gl.ClearColor(0.5f, 0.5f, 0.6f, 1f);

@@ -3,21 +3,18 @@
     "ShGame": {
       "commandName": "Executable",
       "commandLineArgs": "",
-      //"workingDirectory": "C:\\Users\\alex\\source\\repos\\ShGame",
-      "executablePath": "C:\\Users\\alex\\source\\repos\\ShGame\\bin\\Debug\\net9.0-windows10.0.17763.0\\win-x64\\ShGame.exe"
+      "executablePath": ".\\ShGame.exe"
     },
     "Server": {
       "commandName": "Executable",
       "commandLineArgs": "--server",
-      //"workingDirectory": "C:\\Users\\alex\\source\\repos\\ShGame",
-      "executablePath": "C:\\Users\\alex\\source\\repos\\ShGame\\bin\\Debug\\net9.0-windows10.0.17763.0\\win-x64\\ShGame.exe"
+      "executablePath": ".\\ShGame.exe"
     },
     "Client": {
-      "targetProject": "C:\\Users\\alex\\source\\repos\\ShGame\\ShGame.csproj",
+      "targetProject": "ShGame.csproj",
       "commandName": "Executable",
       "commandLineArgs": "--client",
-      //"workingDirectory": "C:\\Users\\alex\\source\\repos\\ShGame",
-      "executablePath": "C:\\Users\\alex\\source\\repos\\ShGame\\bin\\Debug\\net9.0-windows10.0.17763.0\\win-x64\\ShGame.exe"
+      "executablePath": ".\\ShGame.exe"
     }
   }
 }

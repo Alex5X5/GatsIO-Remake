@@ -24,7 +24,7 @@ public class Player : Drawable {
 	public Vector3d Dir = new(0, 0, 0);
 
 	public byte type;
-	public int Speed = 1;
+	public double Speed = 2;
 	private int Health_;
 	public int Health {
 		get => Health_;
