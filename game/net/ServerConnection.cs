@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ShGame.Game.Net;
 
@@ -16,7 +17,7 @@ internal class ServerConnection {
         logger = new Logger(new LoggingLevel("ServerConnection"));
         logger.Log("Constructor");
         id = id_;
-        new Thread(() => Run(gs)).Start();
+        Task.Run(() => Run(gs));
     }
 
     private bool ReceivePacket(ref byte[] buffer) {

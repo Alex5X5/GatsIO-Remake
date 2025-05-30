@@ -3,6 +3,8 @@
 using ShGame.Game.Client.Rendering;
 using ShGame.Game.Logic;
 
+using System.Runtime.CompilerServices;
+
 //#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
 
 public class Player : Drawable {
@@ -15,9 +17,9 @@ public class Player : Drawable {
 	public static readonly int[] CIRCLE_OFFSETS = CalcCircleOffsets();
 
 	public short weaponCooldownTicks = 10;
-    public short weaponCooldownTicksDone = 10;
+	public short weaponCooldownTicksDone = 10;
 
-    public byte shooting = 0x0;
+	public byte shooting = 0x0;
 	public byte default_shoot_speed = 0x10;
 
 	public Vector3d Pos;
@@ -35,35 +37,35 @@ public class Player : Drawable {
 	public Int64 PlayerUUID = 0;
 	public bool Visible;
 
-    private static int[] CalcCircleOffsets() {
+	private static int[] CalcCircleOffsets() {
 
-        int[] res = new int[FLOAT_COUNT];
-        res[0] = 0;
-        res[1] = 0;
-        res[2] = 0;
-        res[3] = 0;
-        res[4] = SIZE;
-        res[5] = 0;
-        res[6] = (int)(Math.Sin(Math.PI*2/SIDES_COUNT*1)*SIZE);
-        res[7] = (int)(Math.Cos(Math.PI*2/SIDES_COUNT*1)*SIZE);
-        res[8] = 0;
+		int[] res = new int[FLOAT_COUNT];
+		res[0] = 0;
+		res[1] = 0;
+		res[2] = 0;
+		res[3] = 0;
+		res[4] = SIZE;
+		res[5] = 0;
+		res[6] = (int)(Math.Sin(Math.PI*2/SIDES_COUNT*1)*SIZE);
+		res[7] = (int)(Math.Cos(Math.PI*2/SIDES_COUNT*1)*SIZE);
+		res[8] = 0;
 
-        for (int i = 9; i<SIDES_COUNT*9; i+=9) {
-            res[i] = res[0];
-            res[i+1] = res[1];
-            res[i+2] = 0;
-            res[i+3] = res[i-3];
-            res[i+4] = res[i-2];
-            res[i+5] = 0;
-            res[i+6] = (int)(Math.Sin(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
-            res[i+7] = (int)(Math.Cos(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
-            res[i+8] = 0;
-        }
+		for (int i = 9; i<SIDES_COUNT*9; i+=9) {
+			res[i] = res[0];
+			res[i+1] = res[1];
+			res[i+2] = 0;
+			res[i+3] = res[i-3];
+			res[i+4] = res[i-2];
+			res[i+5] = 0;
+			res[i+6] = (int)(Math.Sin(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
+			res[i+7] = (int)(Math.Cos(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
+			res[i+8] = 0;
+		}
 
-        return res;
-    }
+		return res;
+	}
 
-    public Player(Vector3d? newPos, int newHealth, Int64 UUID):base(FLOAT_COUNT) {
+	public Player(Vector3d? newPos, int newHealth, Int64 UUID):base(FLOAT_COUNT) {
 		Pos = newPos??new Vector3d(0, 0, 0);
 		dirty = true;
 		Health_ = newHealth;
@@ -89,10 +91,10 @@ public class Player : Drawable {
 			*ptr=(int)Pos.x+CIRCLE_OFFSETS[i];
 			ptr++;
 			*ptr=(int)Pos.y+CIRCLE_OFFSETS[i+1];
-            ptr++;
-            *ptr=0;
-            ptr++;
-        }
+			ptr++;
+			*ptr=0;
+			ptr++;
+		}
 	}
 
 	public unsafe void Move() {
@@ -206,58 +208,60 @@ public class Player : Drawable {
 		}
 	}
 
-    public static unsafe void SerializePlayer(byte[]* input, Player* player, int offset) {
-        //Console.WriteLine("serializing"+player->ToString());
-        int offset_ = offset;
-        if (player==null) {
-            BitConverter.GetBytes(-1).CopyTo(*input, offset_);
-            return;
-        }
-        BitConverter.GetBytes(player->Health_).CopyTo(*input, offset_);
-        offset_+=4;
-        BitConverter.GetBytes(player->Pos.x).CopyTo(*input, offset_);
-        offset_+=8;
-        BitConverter.GetBytes(player->Pos.y).CopyTo(*input, offset_);
-        offset_+=8;
-        BitConverter.GetBytes(player->Dir.x).CopyTo(*input, offset_);
-        offset_+=8;
-        BitConverter.GetBytes(player->Dir.y).CopyTo(*input, offset_);
-        offset_+=8;
-        BitConverter.GetBytes(player->Speed).CopyTo(*input, offset_);
-        offset_+=4;
-        BitConverter.GetBytes(player->PlayerUUID).CopyTo(*input, offset_);
-        //Console.WriteLine("finished serializing"+player->ToString());
-    }
+	public static unsafe void SerializePlayer(byte* buffer, Player player, int offset) {
+		byte* ptr = buffer;
+		ptr+=offset;
+		if (player==null) {
+			Unsafe.Write(ptr, -1);
+		} else {
+			Unsafe.Write(ptr, player.Health);
+			ptr += 4;
+			Unsafe.Write(ptr, player.Pos.x);
+			ptr += 8;
+			Unsafe.Write(ptr, player.Pos.y);
+			ptr += 8;
+			Unsafe.Write(ptr, player.Dir.x);
+			ptr += 8;
+			Unsafe.Write(ptr, player.Dir.y);
+			ptr += 8;
+			Unsafe.Write(ptr, player.Speed);
+			ptr += 4;
+			Unsafe.Write(ptr, player.PlayerUUID);
+		}
+	}
 
-    public static unsafe void DeserializePlayer(byte[]* input, Player* player, int offset) {
-        int offset_ = offset;
-        if (input==null)
-            return;
-        *player ??= new Player(null, 0, 0);
-        //Console.WriteLine("writing "+ *input + " at "+offset_);
-        player->Health_ = BitConverter.ToInt32(*input, offset_);
-        if (player->Health_ ==-1) {
-            player->Deactivate();
-            //offset_+=PLAYER_BYTE_LENGTH;
-        } else {
-            //Console.WriteLine("writing "+ *input + " at "+offset_);
-            offset_+=4;
-            player->Pos.x=BitConverter.ToDouble(*input, offset_);
-            //Console.WriteLine("writing "+ *input + " at "+offset_ );
-            offset_+=8;
-            player->Pos.y=BitConverter.ToDouble(*input, offset_);
-            //Console.WriteLine("writing "+ *input + " at "+offset_);
-            offset_+=8;
-            player->Dir.x=BitConverter.ToDouble(*input, offset_);
-            //Console.WriteLine("writing "+ *input + " at "+offset_);
-            offset_+=8;
-            player->Dir.y=BitConverter.ToDouble(*input, offset_);
-            //Console.WriteLine("writing "+ *input + " at "+offset_);
-            offset_+=8;
-            player->Speed=BitConverter.ToInt32(*input, offset_);
-            //Console.WriteLine("writing "+ *input + " at "+offset_);
-            offset_+=4;
-            player->PlayerUUID = BitConverter.ToInt64(*input, offset_);
-        }
-    }
+	/// <summary>
+	/// reads the next 17 bytes after the offset from a buffer and modifies a player 
+	/// dependent on the values of te buffer.
+	/// byte 1 to 4 are the health of the player,
+	/// byte 5 to 13 are converted to an int and are set as the new x position of the player
+	/// byte 6 to 9 are converted to an int and are set as the new y position of the player
+	/// byte 10 to 13 are converted to an int and are set as the new width of the player
+	/// byte 10 to 13 are converted to an int and are set as the new height of the player
+	/// byte 10 to 13 are converted to an int and are set as the new height of the player
+	/// </summary>
+	public static unsafe void DeserializePlayer(byte* buffer, Player player, int offset) {
+		Console.WriteLine("Deserializing"+player.ToString());
+		byte* ptr = buffer;
+		ptr+=offset;
+		player ??= new Player(null, 0, 0);
+		player.Health = Unsafe.Read<Int32>(ptr);
+		if (player.Health_ ==-1) {
+			player.Deactivate();
+		} else {
+			ptr += 4;
+			player.Pos.x = Unsafe.Read<Int32>(ptr);
+			ptr += 8;
+			player.Pos.y = Unsafe.Read<Int32>(ptr);
+			ptr += 8;
+			player.Dir.x = Unsafe.Read<Int32>(ptr);
+			ptr += 8;
+			player.Dir.y = Unsafe.Read<Int32>(ptr);
+			ptr += 8;
+			player.Speed = Unsafe.Read<Int32>(ptr);
+			ptr += 4;
+			player.PlayerUUID = Unsafe.Read<Int64>(ptr);
+			player.dirty=true;
+		}
+	}
 }
