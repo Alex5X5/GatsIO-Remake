@@ -2,6 +2,7 @@
 
 using ShGame.Game.Client;
 
+using System.Buffers;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -16,23 +17,26 @@ internal class GameServer:Socket {
 	private bool stop = false;
 	private readonly Logger logger;
 
+	private long serverTimer = 0;
+
 	//some constants
 	public const int TARGET_TPS = 50;
-	public const int MAP_WIDTH = 2100, MAP_HEIGHT = 1200;
+	public const int MAP_WIDTH = 2100, MAP_HEIGHT = 1400;
 	public const int OBSTACKLE_ROWS = 5, OBSTACKLE_LINES = 8;
 	public const int OBSTACLE_ROW_DISANCE = MAP_WIDTH / OBSTACKLE_ROWS;
 	public const int OBSTACLE_LINE_DISTANCE = MAP_HEIGHT / OBSTACKLE_LINES;
 	public const int MAX_PLAYER_COUNT = 20;
 	public const int OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES, BULLET_COUNT = 200;
 
-    internal readonly ServerConnection?[] clients = new ServerConnection[MAX_PLAYER_COUNT];
 	internal Player[] players = new Player[MAX_PLAYER_COUNT];
+	private readonly ServerConnection?[] clients = new ServerConnection[MAX_PLAYER_COUNT];
 	private unsafe readonly Obstacle[] obstacles = new Obstacle[OBSTACLE_COUNT];
+    private Bullet[] bullets;
 
-	#endregion fields
+    #endregion fields
 
-	#region constructors
-	public GameServer() : this(5000) { }
+    #region constructors
+    public GameServer() : this(5000) { }
 
 	public GameServer(int port) : this(GetLocalIP(), Math.Abs(port)) { }
 
@@ -40,9 +44,9 @@ internal class GameServer:Socket {
 		logger = new Logger(new LoggingLevel("GameServer"));
 		logger.Log(
 			"address port constructor",
-			new MessageParameter("address",address),
+			new MessageParameter("address", address),
 			new MessageParameter("addressFamily", AddressFamily.ToString()),
-			new MessageParameter("port",port)
+			new MessageParameter("port", port)
 		);
 		SpreadObstacles();
 		//fill the players with invalid players so the serializers don't face nullpointers
@@ -54,46 +58,45 @@ internal class GameServer:Socket {
 		logger.Log("binding, endPoint = "+point.ToString()+" endpint address = " + point.AddressFamily.ToString());
 		Bind(point);
 		logger.Log("bound endPoint="+point.ToString());
-		logger.Log(Convert.ToString(IsBound));
-		//start the main thread
-		Run();
+		//start the main threads
+		StartNewLoop(PlayerLoop);
+		//StartNewLoop(BulletLoop);
+		AcceptLoop();
 	}
 
-    private void OnAccept(Socket s) {
-        logger.Log("[Server]:OnAccept("+s.ToString()+")");
-        //search for a slot for the new connection
-        bool found = false;
-        for (int i = 0; i<clients.Length; i++) {
-            if (clients[i]==null) {
-                //close the newly created socket an create a ServerConnection from the socket's information so the ServerConnection is bound to the incoming connection
-                clients[i]=new ServerConnection(s, this, i);
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            byte[] buffer = Protocoll.PreparePacket(Headers.PAYER_LIMIT);
-            s.Send(buffer);
-            s.Close();
-            s.Dispose();
-        }
-    }
+	private void OnAccept(Socket s) {
+		logger.Log("[Server]:OnAccept("+s.ToString()+")");
+		//search for a slot for the new connection
+		bool found = false;
+		for (int i = 0; i<clients.Length; i++) {
+			if (clients[i]==null) {
+				//close the newly created socket an create a ServerConnection from the socket's information so the ServerConnection is bound to the incoming connection
+				clients[i]=new ServerConnection(s, this, i);
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			byte[] buffer = Protocoll.PreparePacket(Headers.PAYER_LIMIT);
+			s.Send(buffer);
+			s.Close();
+			s.Dispose();
+		}
+	}
 
-    #endregion constructors
+	#endregion constructors
 
-    #region request events
+	#region request events
 
-    internal unsafe byte[] OnMapRequest() {
+	internal unsafe byte[] OnMapRequest() {
 		//prepare a new Packet
 		byte[] result = Protocoll.PreparePacket(Headers.MAP);
 		int counter = 0;
 		//serialize all of the obstacles into the packet
-		for (int i = 0; i<OBSTACLE_COUNT; i++) {
-            fixed (Obstacle* ptr = &obstacles[i]) {
-				//logger.Log("serializing requested obstacle",new MessageParameter(" packet offset", (Protocoll.PAYLOAD_OFFSET+i*Obstacle.OBSTACLE_BYTE_LENGTH)),new MessageParameter(" Obstacle"+ptr->ToString()));
-				Obstacle.SerializeObstacle(&result, ptr, Protocoll.PAYLOAD_OFFSET+i*Obstacle.OBSTACLE_BYTE_LENGTH);
-			}
-		}
+		for (int i = 0; i<OBSTACLE_COUNT; i++)
+			//logger.Log("serializing requested obstacle",new MessageParameter(" packet offset", (Protocoll.PAYLOAD_OFFSET+i*Obstacle.OBSTACLE_BYTE_LENGTH)),new MessageParameter(" Obstacle"+ptr->ToString()));
+			fixed(byte* ptr = &result[i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET])
+				Obstacle.SerializeObstacle(ptr, obstacles[i], 0);
 		return result;
 	}
 
@@ -134,8 +137,8 @@ internal class GameServer:Socket {
 			}
 			return result;
 		} else {
-            logger.Log("wrong request");
-        }
+			logger.Log("wrong request");
+		}
 		return null;
 	}
 
@@ -151,28 +154,28 @@ internal class GameServer:Socket {
 				break;
 			}
 		}
-        return found;
+		return found;
 	}
-    private bool RegisterNewPlayer(Player player) {
-        //since the player isn't known, try to register it
-        logger.Log("registering new player", new MessageParameter("UUID", player.PlayerUUID));
-        //loop through the player array and search for an unused player
-        for (int i = 0; i<MAX_PLAYER_COUNT; i++) {
-            //the slot is considered empty if the player's health is -1
-            if (players[i].Health==-1) {
-                players[i].Health=100;
-                players[i].PlayerUUID = player.PlayerUUID;
+	private bool RegisterNewPlayer(Player player) {
+		//since the player isn't known, try to register it
+		logger.Log("registering new player", new MessageParameter("UUID", player.PlayerUUID));
+		//loop through the player array and search for an unused player
+		for (int i = 0; i<MAX_PLAYER_COUNT; i++) {
+			//the slot is considered empty if the player's health is -1
+			if (players[i].Health==-1) {
+				players[i].Health=100;
+				players[i].PlayerUUID = player.PlayerUUID;
 				unsafe {
 					players[i].Dir=player.Dir.Nor();
 				}
-                //logger.Log("sucessfully registred new player", new MessageParameter("UUID", player.PlayerUUID));
-                return true;
-            }
-        }
+				//logger.Log("sucessfully registred new player", new MessageParameter("UUID", player.PlayerUUID));
+				return true;
+			}
+		}
 		return false;
-    }
+	}
 
-    private void DisposeObjects() {
+	private void DisposeObjects() {
 		for (int i = 0; i<MAX_PLAYER_COUNT; i++) {
 			if (clients[i]!=null) {
 				if (clients[i].disposalCooldown<1000)
@@ -228,7 +231,7 @@ internal class GameServer:Socket {
 	}
 	public void Stop() {
 		logger.Log("stopping");
-		//the Run Thread only stops if stop is set to true
+		//the AcceptLoop Thread only stops if stop is set to true
 		stop = true;
 		//stopp all connections
 		foreach (ServerConnection? c in clients)
@@ -239,8 +242,14 @@ internal class GameServer:Socket {
 		Dispose();
 	}
 
-	private void Run() {
-		logger.Log("run");
+	private void ClockLoop() {
+		//a loop with as little load as possible, so the timer of the server increases steadily
+		serverTimer++;
+		Thread.Sleep(1/TARGET_TPS);
+	}
+
+	private void AcceptLoop() {
+		//logger.Log("accept loop");
 		//loop until the server is about to stop
 		while (!stop) {
 			Listen(1);
@@ -249,7 +258,8 @@ internal class GameServer:Socket {
 					//create a Task that starts to try to accept a socket and in case of success stops to listen
 					//the result of the listening is a  socket that is connected to a client
 					Socket clientConnection = Accept();
-					_=Task.Run(()=>OnAccept(clientConnection));
+					logger.Log("accepted!");
+					Task s = Task.Run(() => OnAccept(clientConnection));
 				} catch (Exception e) {
 					if (!stop) {
 						//if the Exception wasn't caught because the server is stopping and it's socket is therefore closing,
@@ -264,7 +274,35 @@ internal class GameServer:Socket {
 		}
 	}
 
-	public static IPAddress GetLocalIPv4() =>
+	private void StartNewLoop(Action loop) {
+		new Thread(
+			() => {
+				logger.Log("start loop");
+				long loopTime = serverTimer;
+				while (!stop) {
+					while (loopTime+TARGET_TPS<serverTimer && !stop)
+						Thread.Sleep(1);
+					loop();
+				}
+			}
+		).Start();
+	}
+
+	private void BulletLoop() {
+		//logger.Log("player loop");
+		foreach (Bullet b in bullets) {
+			b.Move();
+		}
+	}
+
+	private void PlayerLoop() {
+        //logger.Log("player loop")
+        foreach (Player p in players) {
+            p.Move();
+        }
+    }
+
+    public static IPAddress GetLocalIPv4() =>
 		NetworkInterface.GetAllNetworkInterfaces()[0].
 			GetIPProperties().UnicastAddresses[^1].
 				Address;

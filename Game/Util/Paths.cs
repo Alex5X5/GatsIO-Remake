@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Text;
 
@@ -45,6 +46,11 @@ public static class Paths {
         }
 	}
 
-	public static string AssetsPath(string filePath) => 
-		Path.Combine(Assembly.GetExecutingAssembly().Location, filePath);
+	public static string AssetsPath(string fileName) {
+		string assemplyName = Assembly.GetExecutingAssembly().GetName().Name+".dll";
+		string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+		string trimedName = assemblyLocation.Trim(assemplyName.ToCharArray());
+		trimedName = Path.Combine(trimedName+@"\ShGame\Assets\", fileName);
+		return trimedName;
+	} 
 }

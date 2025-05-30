@@ -25,7 +25,8 @@ public unsafe abstract class Drawable:IDisposable {
 	public Drawable(uint verticesCount) {
 		VertexDataPtr = (float*)NativeMemory.AllocZeroed((uint)verticesCount*3*sizeof(float));
 		VERTICES_COUNT = (uint)verticesCount;
-	}
+        dirty = true;
+    }
 
 	public virtual void Dispose() {
 		GC.SuppressFinalize(this);

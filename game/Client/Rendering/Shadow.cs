@@ -1,56 +1,58 @@
 ﻿namespace ShGame.Game.Client.Rendering;
 
+using ShGame.Game.Util;
+
 using System;
 
 public enum Dir : byte {
-    T, B, L, R,
+	T, B, L, R,
 }
 
 
-public class Shadow : Drawable {
+public class Shadow : TextureDrawable {
 
 	static Logger logger = new(new LoggingLevel("shadow"));
 	private ISupportsShadow attatch;
 
 	public unsafe override void UpdateVertices() {
 		GetShadow(out Vector3d shadowTarget1, out Vector3d shadowTarget2);
-		attatch.GetShadowOrigins(out Vector3d shadowOrigin1, out Vector3d shadowOrigin2);
+		attatch.GetShadowOrigins(out Vector3d shadowOrigin1, out Vector3d shadowOrigin2, out Dir dir);
 		float* ptr = VertexDataPtr;
 		*ptr=(float)shadowOrigin1.x;
 		ptr++;
 		*ptr=(float)shadowOrigin1.y;
-        ptr++;
+		ptr++;
 		*ptr=0;
-        ptr++;
-        *ptr=(float)shadowOrigin2.x;
-        ptr++;
-        *ptr=(float)shadowOrigin2.y;
-        ptr++;
-        *ptr=0;
-        ptr++;
-        *ptr=(float)shadowTarget2.x;
-        ptr++;
-        *ptr=(float)shadowTarget2.y;
-        ptr++;
-        *ptr=0;
+		ptr++;
+		*ptr=(float)shadowOrigin2.x;
+		ptr++;
+		*ptr=(float)shadowOrigin2.y;
+		ptr++;
+		*ptr=0;
+		ptr++;
+		*ptr=(float)shadowTarget2.x;
+		ptr++;
+		*ptr=(float)shadowTarget2.y;
+		ptr++;
+		*ptr=0;
 		ptr++;
 		*ptr=(float)shadowOrigin1.x;
-        ptr++;
-        *ptr=(float)shadowOrigin1.y;
-        ptr++;
-        *ptr=0;
-        ptr++;
-        *ptr=(float)shadowTarget1.x;
-        ptr++;
-        *ptr=(float)shadowTarget1.y;
-        ptr++;
-        *ptr=0;
-        ptr++;
-        *ptr=(float)shadowTarget2.x;
-        ptr++;
-        *ptr=(float)shadowTarget2.y;
-        ptr++;
-        *ptr=0;
+		ptr++;
+		*ptr=(float)shadowOrigin1.y;
+		ptr++;
+		*ptr=0;
+		ptr++;
+		*ptr=(float)shadowTarget1.x;
+		ptr++;
+		*ptr=(float)shadowTarget1.y;
+		ptr++;
+		*ptr=0;
+		ptr++;
+		*ptr=(float)shadowTarget2.x;
+		ptr++;
+		*ptr=(float)shadowTarget2.y;
+		ptr++;
+		*ptr=0;
 
 		//string s = "";
 		//foreach (float f in vertices)
@@ -58,7 +60,7 @@ public class Shadow : Drawable {
 		//logger.Log(s);
 	}
 
-	public Shadow(ISupportsShadow attatch_) : base(18) {
+	public Shadow(ISupportsShadow attatch_) : base(Paths.AssetsPath("shadow.png"), 18) {
 		attatch = attatch_;
 	}
 
@@ -85,55 +87,41 @@ public class Shadow : Drawable {
 		obstacle->boundB.point2.Set(obstacle->boundR.point2);
 	}
 
-	private static Dir RelativeDir(Vector3d dir) {
-		dir.Nor();
-		if (dir.y > 1.0 / Math.Sqrt(2)) {
-			return Dir.B;
-		} else if (dir.y <= -1.0 / Math.Sqrt(2)) {
-			return Dir.T;
-		} else if (dir.x >= 1.0 / Math.Sqrt(2)) {
-			return Dir.R;
-		} else {
-			return Dir.L;
-		}
-	}
-
-
 	private unsafe void GetShadow(out Vector3d shadowTarget1, out Vector3d shadowTarget2) {
-		attatch.GetShadowOrigins(out Vector3d shadowOrigin1, out Vector3d shadowOrigin2);
-        Vector3d pointOfView = attatch.GetPointOfView();
+		attatch.GetShadowOrigins(out Vector3d shadowOrigin1, out Vector3d shadowOrigin2, out Dir dir);
+		Vector3d pointOfView = attatch.GetPointOfView();
 		Vector3d ShadowPoint3 = new(0, 0, 0);
 		Vector3d ShadowPoint4 = new(0, 0, 0);
-		switch (RelativeDir(attatch.GetRelativeVector())) {
+		switch (dir) {
 			case Dir.T:
-				fixed (Line3d* line = &RendererGl.BORDER_TOP) {
-                    shadowTarget1 = ShadowHit(&pointOfView, &shadowOrigin1, line);
+				fixed (Line3d* line = &RendererGl.BORDER_BOTTOM) {
+					shadowTarget1 = ShadowHit(&pointOfView, &shadowOrigin1, line);
 					shadowTarget2 = ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.B:
-				fixed (Line3d* line = &RendererGl.BORDER_BOTTOM) {
-                    shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
-                    shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
+				fixed (Line3d* line = &RendererGl.BORDER_TOP) {
+					shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
+					shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.R:
-				fixed (Line3d* line = &RendererGl.BORDER_RIGHT) {
-                    shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
-                    shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
+				fixed (Line3d* line = &RendererGl.BORDER_LEFT) {
+					shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
+					shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.L:
-				fixed (Line3d* line = &RendererGl.BORDER_LEFT) {
-                    shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
-                    shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
+				fixed (Line3d* line = &RendererGl.BORDER_RIGHT) {
+					shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
+					shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			default:
 				shadowTarget1 = new(0, 0, 0);
 				shadowTarget2 = new(0, 0, 0);
-                //logger.warn("unexpected direction", new MessageParameter("direction", getRoundedVievDirection().toString()));
-                break;
+				//logger.warn("unexpected direction", new MessageParameter("direction", getRoundedVievDirection().toString()));
+				break;
 		}
 	}
 
@@ -151,20 +139,20 @@ public class Shadow : Drawable {
 		//calculate a magical factor
 		double u =
 			(
-				(oth1X - playerPosition->x) * (shadowPoint->y - playerPosition->y) -
-				(oth1Y - playerPosition->y) * (shadowPoint->x - playerPosition->x)
+				(oth1X - (playerPosition->x + Player.SIZE / 2)) * (shadowPoint->y - (playerPosition->y + Player.SIZE / 2)) -
+				(oth1Y - (playerPosition->y + Player.SIZE / 2)) * (shadowPoint->x - (playerPosition->x + Player.SIZE / 2))
 			) / (
-				(oth2Y - oth1Y) * (shadowPoint->x - playerPosition->x) -
-				(oth2X - oth1X) * (shadowPoint->y - playerPosition->y)
+				(oth2Y - oth1Y) * (shadowPoint->x - (playerPosition->x + Player.SIZE / 2)) -
+				(oth2X - oth1X) * (shadowPoint->y - (playerPosition->y + Player.SIZE / 2))
 			);
 		//magically merge the factor with the border
 		return border->
-			origin.
-				Cpy().
-					Add(
-						oth2.
-							Sub(border->origin).
-								Scl(u)
+			origin
+				.Cpy()
+					.Add(
+						oth2
+							.Sub(border->origin)
+								.Scl(u)
 					);
 
 		return new Vector3d(
@@ -179,7 +167,5 @@ public interface ISupportsShadow {
 
 	public Vector3d GetPointOfView();
 
-	public void GetShadowOrigins(out Vector3d point1, out Vector3d point2);
-
-	//public unsafe void GetScreenBorders(out Line3d* borderTop, out Line3d* borderBottom, out Line3d* borderLeft, out Line3d* borderRight);
+	public void GetShadowOrigins(out Vector3d point1, out Vector3d point2, out Dir dir);
 }

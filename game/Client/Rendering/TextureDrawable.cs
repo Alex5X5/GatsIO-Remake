@@ -4,63 +4,71 @@ using Silk.NET.OpenGL;
 
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using ShGame.Game.Util;
+using System.Runtime.InteropServices;
+using System.IO;
+using StbImageSharp;
 
 public unsafe abstract class TextureDrawable:Drawable {
 
-    Image<Rgba32> image;
-    private byte[] pixelData;
-    private uint texture;
+	Image<Rgba32> image;
+	private byte[] pixelData;
+	private uint texture;
 
-    private uint width;
-    private uint height;
+	private uint width;
+	private uint height;
 
-    public TextureDrawable(string path, uint verticesCount):base(verticesCount) {
-        image = Image.Load<Rgba32>(path);
-        width = (uint)image.Width;
-        height = (uint)image.Height;
-        pixelData = new byte[width * height * 4];
-        image.CopyPixelDataTo(pixelData);
-    }
+	public unsafe TextureDrawable(string path, uint verticesCount):base(verticesCount) {
+		//byte* ptr = (byte*)NativeMemory.AllocZeroed(3);
+		//new Span<byte>(ptr, (int)fileSize)
+		image = Image.Load<Rgba32>(path);
+		width = (uint)image.Width;
+		height = (uint)image.Height;
+		pixelData = new byte[width * height * 4];
+		image.CopyPixelDataTo(pixelData);
+	}
 
-    public unsafe void Setup(GL gl) {
-        base.Setup(gl);
-        gl.GenTextures(1, out texture);
-        BindTexture();
-        fixed(byte* ptr = &pixelData[0])
-            gl.TexImage2D(TextureTarget.Texture2D, 0, (int)InternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, ptr);
+	public unsafe void Setup(GL gl) {
+		base.Setup(gl);
 
-        // Texture settings
-        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-        UnbindTexture();
-    }
+        gl.EnableVertexAttribArray(1);
+	}
 
-    public unsafe void Draw(GL gl) {
-        if (dirty) {
-            UpdateVertices();
-            dirty = false;
-        }
-        BindVAO();
-        BindVBO();
-        BindTexture();
-        float* ptr = VertexDataPtr; 
-        for (nuint i = 0; i<VERTICES_COUNT; i+=9) {
-            gl.BufferSubData(GLEnum.ArrayBuffer, (nint)i*sizeof(float), (uint)9*sizeof(float), ptr);
-            ptr+=(uint)9;
-        }
-        for (nuint i = 0; i<VERTICES_COUNT; i+=9) {
-            gl.BufferSubData(GLEnum.ArrayBuffer, (nint)i*sizeof(float), (uint)9*sizeof(float), ptr);
-            ptr+=(uint)9;
-        }
-        gl.DrawArrays(PrimitiveType.Triangles, 0, (uint)VERTICES_COUNT);
-        UnbindVAO();
-        UnbindVBO();
-        UnbindTexture();
-    }
+	public static unsafe uint CreateGlTexture(GL? Gl, string path) {
+        uint tex = Gl.GenTexture();
+        Gl.ActiveTexture(TextureUnit.Texture0);
+        Gl.BindTexture(TextureTarget.Texture2D, tex);
 
-    public void BindTexture() => RendererGl.Gl?.BindTexture(TextureTarget.Texture2D, texture);
-    public static void UnbindTexture() => RendererGl.Gl?.BindTexture(TextureTarget.Texture2D, 0);
+
+        ImageResult result = ImageResult.FromMemory(File.ReadAllBytes(path), ColorComponents.RedGreenBlueAlpha);
+        
+		fixed (byte* ptr = result.Data)
+            Gl.TexImage2D(
+				TextureTarget.Texture2D,
+				0,
+				InternalFormat.Rgba,
+				(uint)result.Width,
+                (uint)result.Height,
+				0,
+				PixelFormat.Rgba,
+				PixelType.UnsignedByte,
+				ptr
+			);
+
+		Gl.GenerateMipmap(TextureTarget.Texture2D);
+
+		Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)GLEnum.Repeat);
+		Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)GLEnum.Repeat);
+		Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)GLEnum.Linear);
+		Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)GLEnum.Linear);
+
+        Gl.BindTexture(TextureTarget.Texture2D, 0);
+
+        return tex;
+	}
+
+	public void BindTexture() => RendererGl.Gl?.BindTexture(TextureTarget.Texture2D, texture);
+	public static void UnbindTexture() => RendererGl.Gl?.BindTexture(TextureTarget.Texture2D, 0);
 }
 

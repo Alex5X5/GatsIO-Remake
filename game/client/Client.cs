@@ -64,8 +64,6 @@ public class Client {
 			new MessageParameter("port", port)
 		);
 		renderer=new();
-		Thread.Sleep(500);
-		NetHandler=new NetHandler();
 		byte[] temp = new byte[8];
 		new Random().NextBytes(temp);
 		player=new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));

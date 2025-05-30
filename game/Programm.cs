@@ -15,6 +15,10 @@ public static class Programm {
 
 	[STAThread]
 	public static void Main(string[] args) {
+		int i = 0;
+		Console.WriteLine(i+=1);
+
+
 		Console.WriteLine(AppDomain.CurrentDomain.BaseDirectory);
 		Util.Paths.ExtractFiles();
         Logging.DisableColors();

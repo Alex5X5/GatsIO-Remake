@@ -20,34 +20,6 @@ public class Player : Drawable {
     public byte shooting = 0x0;
 	public byte default_shoot_speed = 0x10;
 
-	private static int[] CalcCircleOffsets() {
-
-		int[] res = new int[FLOAT_COUNT];
-		res[0] = 0;
-		res[1] = 0;
-		res[2] = 0;
-		res[3] = 0;
-		res[4] = SIZE;
-		res[5] = 0;
-		res[6] = (int)(Math.Sin(Math.PI*2/SIDES_COUNT*1)*SIZE);
-		res[7] = (int)(Math.Cos(Math.PI*2/SIDES_COUNT*1)*SIZE);
-		res[8] = 0;
-	   
-		for (int i=9; i<SIDES_COUNT*9; i+=9) {
-			res[i] = res[0];
-			res[i+1] = res[1];
-			res[i+2] = 0;
-			res[i+3] = res[i-3];
-			res[i+4] = res[i-2];
-			res[i+5] = 0;
-			res[i+6] = (int)(Math.Sin(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
-			res[i+7] = (int)(Math.Cos(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
-			res[i+8] = 0;
-		}
-
-		return res;
-	}
-
 	public Vector3d Pos;
 	public Vector3d Dir = new(0, 0, 0);
 
@@ -63,8 +35,35 @@ public class Player : Drawable {
 	public Int64 PlayerUUID = 0;
 	public bool Visible;
 
+    private static int[] CalcCircleOffsets() {
 
-	public Player(Vector3d? newPos, int newHealth, Int64 UUID):base(FLOAT_COUNT) {
+        int[] res = new int[FLOAT_COUNT];
+        res[0] = 0;
+        res[1] = 0;
+        res[2] = 0;
+        res[3] = 0;
+        res[4] = SIZE;
+        res[5] = 0;
+        res[6] = (int)(Math.Sin(Math.PI*2/SIDES_COUNT*1)*SIZE);
+        res[7] = (int)(Math.Cos(Math.PI*2/SIDES_COUNT*1)*SIZE);
+        res[8] = 0;
+
+        for (int i = 9; i<SIDES_COUNT*9; i+=9) {
+            res[i] = res[0];
+            res[i+1] = res[1];
+            res[i+2] = 0;
+            res[i+3] = res[i-3];
+            res[i+4] = res[i-2];
+            res[i+5] = 0;
+            res[i+6] = (int)(Math.Sin(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
+            res[i+7] = (int)(Math.Cos(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
+            res[i+8] = 0;
+        }
+
+        return res;
+    }
+
+    public Player(Vector3d? newPos, int newHealth, Int64 UUID):base(FLOAT_COUNT) {
 		Pos = newPos??new Vector3d(0, 0, 0);
 		dirty = true;
 		Health_ = newHealth;
@@ -82,7 +81,6 @@ public class Player : Drawable {
 	}
 
 	public override string ToString() => $"Game.graphics.client.Player2[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{Dir}, UUID:{PlayerUUID}, VAO:{vaoHandle}, VBO:{vboHandle}]";
-
 
 	public unsafe override void UpdateVertices() {
 		//vertices ??= new float[FLOAT_COUNT];

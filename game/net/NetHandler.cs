@@ -29,7 +29,7 @@ public class NetHandler : Socket {
     public NetHandler(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
         logger.Log("port addresss constructor");
         logger.Log(address.AddressFamily.ToString());
-        IP = address;
+        IP = IPAddress.Parse("192.168.2.112");
         PORT = port;
         //logger.Log(ToString());
         IPEndPoint point = new(address, port);
@@ -100,10 +100,10 @@ public class NetHandler : Socket {
         int counter = 0;
         if (packet!=null)
             for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
-                fixed (Obstacle* ptr = &obstacles[i])
-                    Obstacle.DeserializeObstacle(client_, &packet, ptr, i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
-        //foreach(Obstacle obstacle in obstacles)
-        //Console.WriteLine(obstacle.ToString());
+                fixed(byte* ptr = &packet[i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET])
+                Obstacle.DeserializeObstacle(client_, ptr, obstacles[i], 0);
+        foreach (Obstacle obstacle in obstacles)
+            Console.WriteLine(obstacle.ToString());
     }
 
     public unsafe void ExchangePlayers(Player p, ref Player[] players) {
@@ -114,7 +114,7 @@ public class NetHandler : Socket {
             Send(send);
             byte[] packet = RecievePacket();
             if (packet != null)
-                for (int i = 0; i<GameServer.MAX_PLAYER_COUNT-1; i++) {
+                for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++) {
                     //logger.Log("deserializing player", new MessageParameter("player", players[i].ToString()));
                     //Player2 temp = new();
                     //if (temp != null && temp.PlayerUUID != p.PlayerUUID)
