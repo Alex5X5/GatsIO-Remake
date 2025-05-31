@@ -147,12 +147,6 @@ class Game {
 			if (p.weaponCooldownTicksDone>0)
 				p.weaponCooldownTicksDone--;
 		}
-		if (player.shooting == 0x1 && player.weaponCooldownTicksDone==0) {
-			AllocBullet(player);
-			player.weaponCooldownTicksDone = player.weaponCooldownTicks;
-		}
-		if (player.weaponCooldownTicksDone>0)
-			player.weaponCooldownTicksDone--;
 	}
 
 	#endregion game loops
