@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ShGame.Game.Logic;
+namespace ShGame.Game.Logic.Math;
 #pragma warning disable IDE0130 // Der Namespace entspricht stimmt nicht der Ordnerstruktur.
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)] // Ensures no extra padding is added
@@ -78,10 +78,10 @@ public static class Vector3iOperations {
     }
 
     public static double Len(double x, double y, double z)
-        => Math.Sqrt(x*x+y*y+z*z);
+        => System.Math.Sqrt(x*x+y*y+z*z);
 
     public static double Len(ref Vector3i vector)
-        => Math.Sqrt(vector.X*vector.X+vector.Y*vector.Y+vector.Z*vector.Z);
+        => System.Math.Sqrt(vector.X*vector.X+vector.Y*vector.Y+vector.Z*vector.Z);
 
     public static double Len2(ref Vector3i vector)
         => vector.X*vector.X+vector.Y*vector.Y+vector.Z*vector.Z;
@@ -93,7 +93,7 @@ public static class Vector3iOperations {
         double a = x2-x1;
         double b = y2-y1;
         double c = z2-z1;
-        return (double)Math.Sqrt(a*a+b*b+c*c);
+        return (double)System.Math.Sqrt(a*a+b*b+c*c);
     }
 
     public static double Dst(ref Vector3i vector1, ref Vector3i vector2)

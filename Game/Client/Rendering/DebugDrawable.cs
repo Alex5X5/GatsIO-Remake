@@ -1,4 +1,6 @@
-﻿namespace ShGame.Game.Client.Rendering;
+﻿using ShGame.Game.Logic.Math;
+
+namespace ShGame.Game.Client.Rendering;
 public unsafe class DebugDrawable : Drawable {
 	Vector3d Point1, Point2;
 

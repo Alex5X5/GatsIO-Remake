@@ -93,7 +93,7 @@ public class NetHandler : Socket {
         }
     }
 
-    public unsafe void GetMap(Client client_, ref Obstacle[] obstacles) {
+    public unsafe void GetMap(Client client, ref Obstacle[] obstacles) {
         logger.Log("getting map");
         SendPacket(Protocoll.PreparePacket(Headers.MAP));
         byte[] packet = RecievePacket();
@@ -101,7 +101,7 @@ public class NetHandler : Socket {
         if (packet!=null)
             for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
                 fixed(byte* ptr = &packet[i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET])
-                Obstacle.DeserializeObstacle(client_, ptr, obstacles[i], 0);
+                Obstacle.DeserializeObstacle(client, ptr, obstacles[i], 0);
         foreach (Obstacle obstacle in obstacles)
             Console.WriteLine(obstacle.ToString());
     }
@@ -109,7 +109,7 @@ public class NetHandler : Socket {
     public unsafe void ExchangePlayers(Player p, ref Player[] players) {
         //logger.Log("exchanging players", [new MessageParameter("player",p.ToString())]);
         byte[] send = Protocoll.PreparePacket(Headers.PLAYER);
-        fixed(byte* ptr = &send[Protocoll.PAYLOAD_OFFSET])
+        fixed(byte* ptr = &send[0])
         Player.SerializePlayer(ptr, p, Protocoll.PAYLOAD_OFFSET);
         try {
             Send(send);
@@ -120,8 +120,8 @@ public class NetHandler : Socket {
                     //Player2 temp = new();
                     //if (temp != null && temp.PlayerUUID != p.PlayerUUID)
                     //players[i] = temp;
-                    fixed (byte* ptr = &packet[i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET])
-                        Player.DeserializePlayer(ptr, players[i], 0);
+                    fixed (byte* ptr = &packet[0])
+                        Player.DeserializePlayer(ptr, players[i], i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
                     logger.Log("deserialized player", new MessageParameter("player", players[i].ToString()));
                 }
         } catch (Exception e) {
@@ -129,7 +129,29 @@ public class NetHandler : Socket {
         }
     }
 
-    internal void Stop() {
+    public unsafe void GetBullets(Bullet[] bullets) {
+		//logger.Log("exchanging players", [new MessageParameter("player",p.ToString())]);
+		byte[] send = Protocoll.PreparePacket(Headers.BULLET);
+		try {
+			Send(send);
+			byte[] packet = RecievePacket();
+			if (packet != null)
+				for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++) {
+					logger.Log("deserializing player", new MessageParameter("player", bullets[i].ToString()));
+					//Player2 temp = new();
+					//if (temp != null && temp.PlayerUUID != p.PlayerUUID)
+					//players[i] = temp;
+					fixed (byte* ptr = &packet[0])
+						Bullet.DeserializeBullet(ptr, bullets[i], i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
+					logger.Log("deserialized player", new MessageParameter("player", bullets[i].ToString()));
+				}
+		} catch (Exception e) {
+			logger.Log(e.ToString());
+		}
+
+	}
+
+	internal void Stop() {
         logger.Log("stopping");
         stop = true;
         Close();

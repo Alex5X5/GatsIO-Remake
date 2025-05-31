@@ -1,7 +1,7 @@
 ﻿namespace ShGame.Game.Client;
 
 using ShGame.Game.Client.Rendering;
-using ShGame.Game.Logic;
+using ShGame.Game.Logic.Math;
 
 using System.Runtime.CompilerServices;
 

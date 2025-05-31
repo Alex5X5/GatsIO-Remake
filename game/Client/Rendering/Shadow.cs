@@ -1,5 +1,6 @@
 ﻿namespace ShGame.Game.Client.Rendering;
 
+using ShGame.Game.Logic.Math;
 using ShGame.Game.Util;
 
 using System;

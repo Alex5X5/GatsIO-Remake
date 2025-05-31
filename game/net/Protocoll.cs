@@ -38,5 +38,6 @@ public class Headers {
 	public const byte MAP = 5;
 	public const byte PLAYER = 6;
 	public const byte ABILITY = 7;
+	public const byte BULLET = 8;
 	public const byte PAYER_LIMIT = 11;
 }

@@ -4,6 +4,7 @@ using ShGame.Game.Client.Rendering;
 using System;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using ShGame.Game.Logic.Math;
 
 public class Obstacle:Drawable, ISupportsShadow {
 

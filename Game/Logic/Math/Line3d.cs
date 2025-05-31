@@ -1,4 +1,4 @@
-﻿namespace ShGame.Game.Logic;
+﻿namespace ShGame.Game.Logic.Math;
 
 public class Line3d {
 

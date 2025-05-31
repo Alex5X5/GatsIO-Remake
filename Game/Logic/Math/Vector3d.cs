@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace ShGame.Game.Logic;
+namespace ShGame.Game.Logic.Math;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)][Serializable]// Ensures no extra padding is added
 public unsafe struct Vector3d {
@@ -18,9 +18,9 @@ public unsafe struct Vector3d {
 
     public static implicit operator Vector3f(Vector3d? v) =>
         new(
-            (float)Math.Floor(v!=null ? v.Value.x : 0),
-            (float)Math.Floor(v!=null ? v.Value.y : 0),
-            (float)Math.Floor(v!=null ? v.Value.z : 0)
+            (float)System.Math.Floor(v!=null ? v.Value.x : 0),
+            (float)System.Math.Floor(v!=null ? v.Value.y : 0),
+            (float)System.Math.Floor(v!=null ? v.Value.z : 0)
         );
 
     public Vector3d():this(0,0,0) {
@@ -39,9 +39,9 @@ public unsafe struct Vector3d {
 	}
 
 	public unsafe Vector3d Set(double x_, double y_, double z_) {
-		this.x=x_;
-		this.y=y_;
-		this.z=z_;
+		x=x_;
+		y=y_;
+		z=z_;
 		return this;
 	}
 
@@ -104,11 +104,11 @@ public unsafe struct Vector3d {
 	}
 
 	public static double Len(double x, double y, double z) {
-		return Math.Sqrt(x*x+y*y+z*z);
+		return System.Math.Sqrt(x*x+y*y+z*z);
 	}
 
 	public readonly double Len() {
-		return Math.Sqrt(x*x+y*y+z*z);
+		return System.Math.Sqrt(x*x+y*y+z*z);
 	}
 
 	public static double Len2(double x, double y, double z) {
@@ -127,21 +127,21 @@ public unsafe struct Vector3d {
 		double a = x2-x1;
 		double b = y2-y1;
 		double c = z2-z1;
-		return (double)Math.Sqrt(a*a+b*b+c*c);
+		return (double)System.Math.Sqrt(a*a+b*b+c*c);
 	}
 
 	public readonly double Dst(Vector3d vector) {
 		double a = vector.x-x;
 		double b = vector.y-y;
 		double c = vector.z-z;
-		return (double)Math.Sqrt(a*a+b*b+c*c);
+		return (double)System.Math.Sqrt(a*a+b*b+c*c);
 	}
 
 	public readonly double Dst(double x, double y, double z) {
 		double a = x-this.x;
 		double b = y-this.y;
 		double c = z-this.z;
-		return (double)Math.Sqrt(a*a+b*b+c*c);
+		return (double)System.Math.Sqrt(a*a+b*b+c*c);
 	}
 
 	public static double Dst2(double x1, double y1, double z1, double x2, double y2, double z2) {
@@ -169,7 +169,7 @@ public unsafe struct Vector3d {
 		double len2 = Len2();
 		if(len2==0f||len2==1f)
 			return this;
-		return Scl(1f/(double)Math.Sqrt(len2));
+		return Scl(1f/(double)System.Math.Sqrt(len2));
 	}
 
 	public static double Dot(double x1, double y1, double z1, double x2, double y2, double z2) {
@@ -201,7 +201,7 @@ public unsafe struct Vector3d {
 	public Vector3d Limit2(double limit2) {
 		double len2 = Len2();
 		if(len2>limit2) {
-			Scl((double)Math.Sqrt(limit2/len2));
+			Scl((double)System.Math.Sqrt(limit2/len2));
 		}
 		return this;
 	}
@@ -212,7 +212,7 @@ public unsafe struct Vector3d {
 
 	public Vector3d SetLength2(double len2) {
 		double oldLen2 = Len2();
-		return oldLen2==0||oldLen2==len2 ? this : Scl((double)Math.Sqrt(len2/oldLen2));
+		return oldLen2==0||oldLen2==len2 ? this : Scl((double)System.Math.Sqrt(len2/oldLen2));
 	}
 
 	public Vector3d SetZero() {

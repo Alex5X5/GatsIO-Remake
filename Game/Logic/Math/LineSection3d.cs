@@ -1,4 +1,4 @@
-﻿namespace ShGame.Game.Logic;
+﻿namespace ShGame.Game.Logic.Math;
 
 [Serializable]
 public class LineSection3d {
@@ -25,18 +25,18 @@ public class LineSection3d {
 	}
 
 	public unsafe double Dst(Vector3d point) {
-		return point.Cpy().Sub(this.point1).Crs(point2.Cpy().Sub(point1)).Len()/point2.Cpy().Sub(point1).Len();
+		return point.Cpy().Sub(point1).Crs(point2.Cpy().Sub(point1)).Len()/point2.Cpy().Sub(point1).Len();
 	}
 
 	public bool Contains(Vector3d p) {
 		Line3d l = Line3d.FromPoints(point1, point2);
 		//		System.out.println("[LineSection3d]: (checking Contains): this:"+ToString()+", p:"+p.ToString());
-		return (l.Contains(p)&&Contains1(p));
+		return l.Contains(p)&&Contains1(p);
 	}
 
 	private bool Contains1(Vector3d p) {
 		unsafe {
-			return (point1.Dst(p)<=GetLength()&&point2.Dst(p)<=GetLength());
+			return point1.Dst(p)<=GetLength()&&point2.Dst(p)<=GetLength();
 		}
 	}
 
@@ -60,7 +60,7 @@ public class LineSection3d {
 			return null;
 	}
 
-	public override String ToString() {
+	public override string ToString() {
 		return "LineSection3d["+point1.ToString()+";"+point2.ToString()+";"+Convert.ToString(GetLength())+"]";
 	}
 }

@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace ShGame.Game.Logic;
+namespace ShGame.Game.Logic.Math;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)][Serializable]// Ensures no extra padding is added
 public unsafe struct Vector3f {
@@ -23,10 +23,10 @@ public unsafe struct Vector3f {
 	}
 
 	public unsafe Vector3f Set(float x_, float y_, float z_) {
-		this.x=x_;
-		this.y=y_;
-		this.z=z_;
-		fixed (float* ptr = &this.x)
+		x=x_;
+		y=y_;
+		z=z_;
+		fixed (float* ptr = &x)
 		return this;
 	}
 
@@ -89,11 +89,11 @@ public unsafe struct Vector3f {
 	}
 
 	public static float Len(float x, float y, float z) {
-		return (float)Math.Sqrt(x*x+y*y+z*z);
+		return (float)System.Math.Sqrt(x*x+y*y+z*z);
 	}
 
 	public readonly float Len() {
-		return (float)Math.Sqrt(x*x+y*y+z*z);
+		return (float)System.Math.Sqrt(x*x+y*y+z*z);
 	}
 
 	public static float Len2(float x, float y, float z) {
@@ -112,21 +112,21 @@ public unsafe struct Vector3f {
 		float a = x2-x1;
 		float b = y2-y1;
 		float c = z2-z1;
-		return (float)Math.Sqrt(a*a+b*b+c*c);
+		return (float)System.Math.Sqrt(a*a+b*b+c*c);
 	}
 
 	public readonly float Dst(Vector3f vector) {
 		float a = vector.x-x;
 		float b = vector.y-y;
 		float c = vector.z-z;
-		return (float)Math.Sqrt(a*a+b*b+c*c);
+		return (float)System.Math.Sqrt(a*a+b*b+c*c);
 	}
 
 	public readonly float Dst(float x, float y, float z) {
 		float a = x-this.x;
 		float b = y-this.y;
 		float c = z-this.z;
-		return (float)Math.Sqrt(a*a+b*b+c*c);
+		return (float)System.Math.Sqrt(a*a+b*b+c*c);
 	}
 
 	public static float Dst2(float x1, float y1, float z1, float x2, float y2, float z2) {
@@ -154,7 +154,7 @@ public unsafe struct Vector3f {
 		float len2 = Len2();
 		if(len2==0f||len2==1f)
 			return this;
-		return Scl(1f/(float)Math.Sqrt(len2));
+		return Scl(1f/(float)System.Math.Sqrt(len2));
 	}
 
 	public static float Dot(float x1, float y1, float z1, float x2, float y2, float z2) {
@@ -188,7 +188,7 @@ public unsafe struct Vector3f {
 	public Vector3f Limit2(float limit2) {
 		float len2 = Len2();
 		if(len2>limit2) {
-			Scl((float)Math.Sqrt(limit2/len2));
+			Scl((float)System.Math.Sqrt(limit2/len2));
 		}
 		return this;
 	}
@@ -199,7 +199,7 @@ public unsafe struct Vector3f {
 
 	public Vector3f SetLength2(float len2) {
 		float oldLen2 = Len2();
-		return oldLen2==0||oldLen2==len2 ? this : Scl((float)Math.Sqrt(len2/oldLen2));
+		return oldLen2==0||oldLen2==len2 ? this : Scl((float)System.Math.Sqrt(len2/oldLen2));
 	}
 
 	public Vector3f SetZero() {

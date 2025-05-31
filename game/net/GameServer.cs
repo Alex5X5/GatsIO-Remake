@@ -1,6 +1,7 @@
 ﻿namespace ShGame.Game.Net;
 
 using ShGame.Game.Client;
+using ShGame.Game.Logic.Math;
 
 using System.Buffers;
 using System.Net;
@@ -65,7 +66,7 @@ internal class GameServer:Socket {
 	}
 
 	private void OnAccept(Socket s) {
-		logger.Log("[Server]:OnAccept("+s.ToString()+")");
+		logger.Log("OnAccept("+s.ToString()+")");
 		//search for a slot for the new connection
 		bool found = false;
 		for (int i = 0; i<clients.Length; i++) {
