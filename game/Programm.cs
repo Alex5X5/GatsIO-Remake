@@ -5,7 +5,6 @@ using ShGame.Game.Net;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Threading;
 
 /// <summary>
@@ -15,13 +14,9 @@ public static class Programm {
 
 	[STAThread]
 	public static void Main(string[] args) {
-		int i = 0;
-		Console.WriteLine(i+=1);
-
-
-		Console.WriteLine(AppDomain.CurrentDomain.BaseDirectory);
 		Util.Paths.ExtractFiles();
         Logging.DisableColors();
+		//Logging.SetStartTime();
 
 		System.Collections.Generic.List<string> args_ = args.ToList<string>();
 		bool noGui = args_.Contains("-nogui");
@@ -31,7 +26,6 @@ public static class Programm {
 		if (args_.Contains("--server")) {
 			new Thread(
 				() => {
-					//Console.WriteLine("Initial Screen: ip="+address+" port="+port);
 					IPAddress? address = null;
 					int port = 1;
 					try {
@@ -45,7 +39,7 @@ public static class Programm {
 						port = 5000;
 					}
 
-					_ = new Net.GameServer(address, port);
+					_ = new Net.GameServer(address, (uint)port);
 
 				}
 			).Start();
@@ -69,15 +63,9 @@ public static class Programm {
 					Client.Client c = new(
 						address, port
 					);
-					Console.WriteLine("Initial Screen: ip="+address+" port="+port);
 				}
 			).Start();
 			return;
 		}
-
-		//Application.EnableVisualStyles();
-		//Application.SetCompatibleTextRenderingDefault(false);
-		//Console.WriteLine("start");
-		//Application.Run(new InitialScreen());
 	}
 }

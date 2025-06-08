@@ -2,7 +2,7 @@
 
 namespace ShGame.Game.Logic.Math;
 
-[StructLayout(LayoutKind.Sequential, Pack = 1)][Serializable]// Ensures no extra padding is added
+[StructLayout(LayoutKind.Sequential, Pack = 1)]// Ensures no extra padding is added
 public unsafe struct Vector3d {
 
 	public double x;

@@ -58,16 +58,22 @@ internal class ServerConnection {
                     continue;
 
                 switch (Protocoll.AnalyzePacket(buffer)) {
+					case Headers.BULLET:
+						SendPacket(gs.OnBulletRequest(buffer));
+                        break;
+                    case Headers.PLAYER:
+                        SendPacket(gs.OnExchangePlayerRequest(buffer));
+                        break;
                     case Headers.PING:
                         SendPacket(gs.OnPingRequest(buffer));
                         break;
-                    case Headers.PLAYER:
-                        SendPacket(gs.OnPlayerRequest(buffer));
-                        break;
                     case Headers.MAP:
                         SendPacket(gs.OnMapRequest());
+						break;
+                    case Headers.REGISTER_PLAYER:
+                        SendPacket(gs.OnRegisterPlayerRequest(buffer));
                         break;
-                    default:
+					default:
                         Console.WriteLine("[ServerConnection]: Unknown protocol type (protocol.type=" + Protocoll.AnalyzePacket(buffer) + ")");
                         break;
                 }

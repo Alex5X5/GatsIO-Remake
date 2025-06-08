@@ -177,7 +177,7 @@ public unsafe struct Vector3f {
 		return Set(this.y*z-this.z*y, this.z*x-this.x*z, this.x*y-this.y*x);
 	}
 
-	public override string ToString() {
+	public override readonly string ToString() {
 		return "("+x+","+y+","+z+")";
 	}
 

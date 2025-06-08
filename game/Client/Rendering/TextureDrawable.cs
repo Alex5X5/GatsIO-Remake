@@ -68,7 +68,7 @@ public unsafe abstract class TextureDrawable:Drawable {
         return tex;
 	}
 
-	public void BindTexture() => RendererGl.Gl?.BindTexture(TextureTarget.Texture2D, texture);
-	public static void UnbindTexture() => RendererGl.Gl?.BindTexture(TextureTarget.Texture2D, 0);
+	public void BindTexture(GL? gl) => gl?.BindTexture(TextureTarget.Texture2D, texture);
+	public static void UnbindTexture(GL? gl) => gl?.BindTexture(TextureTarget.Texture2D, 0);
 }
 

@@ -4,28 +4,28 @@ using ShGame.Game.Client.Rendering;
 using ShGame.Game.Logic.Math;
 
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 //#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
 
 public class Player : Drawable {
 
-	public const int PLAYER_BYTE_LENGTH = 54;
+	public const int PLAYER_BYTE_LENGTH = 56;
 
 	public const int SIZE = 20, SIDES_COUNT = 50, FLOAT_COUNT = 9*SIDES_COUNT;
 
 
 	public static readonly int[] CIRCLE_OFFSETS = CalcCircleOffsets();
 
-	public short weaponCooldownTicks = 10;
+	public short WeaponCooldownTicks = 10;
 	public short weaponCooldownTicksDone = 10;
 
-	public byte shooting = 0x0;
-	public byte default_shoot_speed = 0x10;
+	public byte IsShooting = 0x0;
+	public short InitialBulletSpeed = 0x30;
 
 	public Vector3d Pos;
 	public Vector3d Dir = new(0, 0, 0);
 
-	public byte type;
 	public double Speed = 2;
 	private int Health_;
 	public int Health {
@@ -34,7 +34,7 @@ public class Player : Drawable {
 	}
 
 	public const int Radius = 10;
-	public Int64 PlayerUUID = 0;
+	public short PlayerUUID = 0;
 	public bool Visible;
 
 	private static int[] CalcCircleOffsets() {
@@ -65,11 +65,11 @@ public class Player : Drawable {
 		return res;
 	}
 
-	public Player(Vector3d? newPos, int newHealth, Int64 UUID):base(FLOAT_COUNT) {
+	public Player(Vector3d? newPos, int newHealth, short UUID):base(FLOAT_COUNT) {
 		Pos = newPos??new Vector3d(0, 0, 0);
 		dirty = true;
 		Health_ = newHealth;
-		PlayerUUID = UUID!=0 ? UUID : new Random().Next();
+		PlayerUUID = UUID; //!=0 ? UUID : new Random().Next();
 		Visible=Health_ !=-1;
 	}
 
@@ -82,7 +82,7 @@ public class Player : Drawable {
 		Visible = false;
 	}
 
-	public override string ToString() => $"Game.graphics.client.Player2[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{Dir}, UUID:{PlayerUUID}, VAO:{vaoHandle}, VBO:{vboHandle}]";
+	public string ToString() => $"Game.graphics.client.Player2[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{Dir}, UUID:{PlayerUUID}, VAO:{vaoHandle}, VBO:{vboHandle}]";
 
 	public unsafe override void UpdateVertices() {
 		//vertices ??= new float[FLOAT_COUNT];
@@ -212,57 +212,68 @@ public class Player : Drawable {
 		byte* ptr = buffer;
 		ptr+=offset;
 		if (player==null) {
-			Unsafe.Write(ptr, -1);
+			Unsafe.Write<Int32>(ptr, -1);
 		} else {
-			Unsafe.Write(ptr, player.Health);
+			Unsafe.Write<Int32>(ptr, player.Health);
 			ptr += 4;
-			Unsafe.Write(ptr, player.Pos.x);
+			Unsafe.Write<Double>(ptr, player.Pos.x);
 			ptr += 8;
-			Unsafe.Write(ptr, player.Pos.y);
+			Unsafe.Write<Double>(ptr, player.Pos.y);
 			ptr += 8;
-			Unsafe.Write(ptr, player.Dir.x);
+			Unsafe.Write<Double>(ptr, player.Dir.x);
 			ptr += 8;
-			Unsafe.Write(ptr, player.Dir.y);
+			Unsafe.Write<Double>(ptr, player.Dir.y);
 			ptr += 8;
-			Unsafe.Write(ptr, player.Speed);
+			Unsafe.Write<Int32>(ptr, (Int32)player.Speed);
 			ptr += 4;
-			Unsafe.Write(ptr, player.PlayerUUID);
+			Unsafe.Write<Int16>(ptr, player.PlayerUUID);
+			ptr += 2;
+			Unsafe.Write<Int16>(ptr, player.WeaponCooldownTicks);
+			ptr += 2;
+			Unsafe.Write<Int16>(ptr, player.WeaponCooldownTicks);
+			ptr += 2;
+			Unsafe.Write<Int16>(ptr, player.InitialBulletSpeed);
+			ptr += 2;
+			*ptr = player.IsShooting;
 		}
 	}
 
-	/// <summary>
-	/// reads the next 17 bytes after the offset from a buffer and modifies a player 
-	/// dependent on the values of te buffer.
-	/// byte 1 to 4 are the health of the player,
-	/// byte 5 to 13 are converted to an int and are set as the new x position of the player
-	/// byte 6 to 9 are converted to an int and are set as the new y position of the player
-	/// byte 10 to 13 are converted to an int and are set as the new width of the player
-	/// byte 10 to 13 are converted to an int and are set as the new height of the player
-	/// byte 10 to 13 are converted to an int and are set as the new height of the player
-	/// </summary>
 	public static unsafe void DeserializePlayer(byte* buffer, Player player, int offset) {
-		//Console.WriteLine("Deserializing"+player.ToString());
 		byte* ptr = buffer;
 		ptr+=offset;
-		//Console.WriteLine("player was:"+player.ToString());
 		player ??= new Player(null, 0, 0);
 		player.Health = Unsafe.Read<Int32>(ptr);
-		if (player.Health_ ==-1) {
+		if (player.Health_ == -1) {
 			player.Deactivate();
 		} else {
 			ptr += 4;
-			player.Pos.x = Unsafe.Read<Int32>(ptr);
+			player.Pos.x = Unsafe.Read<Double>(ptr);
 			ptr += 8;
-			player.Pos.y = Unsafe.Read<Int32>(ptr);
+			player.Pos.y = Unsafe.Read<Double>(ptr);
 			ptr += 8;
-			player.Dir.x = Unsafe.Read<Int32>(ptr);
+			player.Dir.x = Unsafe.Read<Double>(ptr);
 			ptr += 8;
-			player.Dir.y = Unsafe.Read<Int32>(ptr);
+			player.Dir.y = Unsafe.Read<Double>(ptr);
 			ptr += 8;
 			player.Speed = Unsafe.Read<Int32>(ptr);
 			ptr += 4;
-			player.PlayerUUID = Unsafe.Read<Int64>(ptr);
+			player.PlayerUUID = Unsafe.Read<Int16>(ptr);
+			ptr += 2;
+			player.WeaponCooldownTicks = Unsafe.Read<Int16>(ptr);
+			ptr += 2;
+			player.weaponCooldownTicksDone = Unsafe.Read<Int16>(ptr);
+			ptr += 2;
+			player.IsShooting = *ptr;
 			player.dirty=true;
 		}
+		Thread.Sleep(5000);
+	}
+
+	public static unsafe short DeserializePlayerId(byte* buffer, int offset) {
+		byte* ptr = buffer;
+		ptr+=offset;
+		ptr+=40;
+		//new Logger(new LoggingLevel("Player")).Log("read player uuid ",new MessageParameter("id", Unsafe.Read<Int16>(ptr)));
+		return Unsafe.Read<Int16>(ptr);
 	}
 }

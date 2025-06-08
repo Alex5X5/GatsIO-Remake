@@ -8,14 +8,16 @@ using System.Runtime.CompilerServices;
 
 public class Bullet : Drawable {
 
-	public const int BULLET_BYTE_LENGTH = 20;
+	public const int BULLET_BYTE_LENGTH = 52;
 
 	public Vector3d Pos;
 	public Vector3d Dir;
 	private byte WIDTH, LENGHT;
 	public short Speed;
 	public short Lifetime;
-	public long OwnerUUID;
+	public short OwnerUUID;
+
+	public Bullet() : this(null, null, 0, 0) { }
 
 	public Bullet(Vector3d? _pos, Vector3d? _dir, int _width, int _length) : base(18) {
 		Pos = _pos??new Vector3d(10, 10, 0);
@@ -79,10 +81,9 @@ public class Bullet : Drawable {
 	public void Dealloc() {
 		Pos.Set(10, 10, 0);
 		Dir.Set(0, 1, 0);
-		//WIDTH=0;
-		//LENGHT=0;
 		Speed = 0;
-		Lifetime=-1;
+		Lifetime =- 1;
+		dirty = false;
 		Console.WriteLine("dealloc bullet");
 		Console.WriteLine(this);
 	}
@@ -104,61 +105,25 @@ public class Bullet : Drawable {
 		}
 	}
 
-	/// <summary>
-	/// updates the bound objects of an obstacle to match its width and height.
-	/// </summary>
-	public static unsafe void SerializeBullet(byte[]* input, Bullet* bullet, int offset) {
-		int offset_ = offset;
-		fixed (byte* ptr = *input)
-			if (bullet==null) {
-				*(ptr+offset_) = 0;
-			} else {
-				offset_ += 4;
-				BitConverter.GetBytes((int)bullet->Pos.x).CopyTo(*input, offset_);
-				offset_ += 4;
-				BitConverter.GetBytes((int)bullet->Pos.y).CopyTo(*input, offset_);
-			}
-	}
-
-	/// <summary>
-	/// reads the next 17 bytes after the offset from a bytearray. 
-	/// </summary>
-	public static unsafe void	DeserializeBullet(Client client, byte* input, Bullet* bullet) {
-		byte* _input = input;
-		int offset = *_input;
-		_input++;
-		client.bullets[offset].Pos.x = *_input;
-		_input+=4;
-		client.bullets[offset].Pos.x = *_input;
-		_input+=4;
-		client.bullets[offset].Dir.x = *_input;
-		_input+=4;
-		client.bullets[offset].Dir.x = *_input;
-		_input+=4;
-		client.bullets[offset].WIDTH = *_input;
-		_input++;
-		client.bullets[offset].LENGHT = *_input;
-	}
-
-	public static unsafe void SerializeBullet(byte* buffer, Player player, int offset) {
+	public static unsafe void SerializeBullet(byte* buffer, Bullet bullet, int offset) {
 		byte* ptr = buffer;
 		ptr+=offset;
-		if (player==null) {
-			Unsafe.Write(ptr, -1);
+		if (bullet==null) {
+			Unsafe.Write<Int16>(ptr, -1);
 		} else {
-			Unsafe.Write(ptr, player.Health);
-			ptr += 4;
-			Unsafe.Write(ptr, player.Pos.x);
+			Unsafe.Write<Int16>(ptr, bullet.Lifetime);
+			ptr += 2;
+			Unsafe.Write<Int32>(ptr, (int)bullet.Pos.x);
 			ptr += 8;
-			Unsafe.Write(ptr, player.Pos.y);
+			Unsafe.Write<Int32>(ptr, (int)bullet.Pos.y);
 			ptr += 8;
-			Unsafe.Write(ptr, player.Dir.x);
+			Unsafe.Write<Int32>(ptr, (int)bullet.Dir.x);
 			ptr += 8;
-			Unsafe.Write(ptr, player.Dir.y);
+			Unsafe.Write<Int32>(ptr, (int)bullet.Dir.y);
 			ptr += 8;
-			Unsafe.Write(ptr, player.Speed);
-			ptr += 4;
-			Unsafe.Write(ptr, player.PlayerUUID);
+			Unsafe.Write<Int16>(ptr, bullet.Speed);
+			ptr += 2;
+			Unsafe.Write<Int16>(ptr, bullet.OwnerUUID);
 		}
 	}
 
@@ -180,22 +145,21 @@ public class Bullet : Drawable {
 		if (bullet.Lifetime ==-1) {
 			bullet.Dealloc();
 		} else {
-			ptr += 4;
+			ptr += 2;
 			bullet.Pos.x = Unsafe.Read<Int32>(ptr);
-			ptr += 8;
-			bullet.Pos.y = Unsafe.Read<Int32>(ptr);
-			ptr += 8;
-			bullet.Dir.x = Unsafe.Read<Int32>(ptr);
-			ptr += 8;
-			bullet.Dir.y = Unsafe.Read<Int32>(ptr);
-			ptr += 8;
-			bullet.Speed = Unsafe.Read<Int16>(ptr);
 			ptr += 4;
-			bullet.OwnerUUID = Unsafe.Read<Int64>(ptr);
+			bullet.Pos.y = Unsafe.Read<Int32>(ptr);
+			ptr += 4;
+			bullet.Dir.x = Unsafe.Read<Int32>(ptr);
+			ptr += 4;
+			bullet.Dir.y = Unsafe.Read<Int32>(ptr);
+			ptr += 4;
+			bullet.Speed = Unsafe.Read<Int16>(ptr);
+			ptr += 2;
+			bullet.OwnerUUID = Unsafe.Read<Int16>(ptr);
 			bullet.dirty=true;
 		}
 	}
-
 
 	public override string ToString() => "ShGame.Game.Client.Bullet[Pos:"+Pos.ToString()+", Dir:"+Dir.ToString()+"]";
 }

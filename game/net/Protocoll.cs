@@ -2,13 +2,9 @@
 
 public static class Protocoll {
 
-	public const byte PING_HEADER = 1, PLAYER_HEADER = 11, MAP_HEADER = 3;
 	public const short PACKET_BYTE_LENGTH = 2000, PAYLOAD_OFFSET = 1;
-	
 
-	public static byte AnalyzePacket(byte[] packet) {
-		return packet[0];
-	}
+	public static byte AnalyzePacket(byte[] packet) =>packet[0];
 
 	public static byte[] PreparePacket(byte typeID) {
 		byte[] packet = new byte[PACKET_BYTE_LENGTH];
@@ -37,7 +33,8 @@ public class Headers {
 	public const byte ABORT_CONNECTION = 2;
 	public const byte MAP = 5;
 	public const byte PLAYER = 6;
-	public const byte ABILITY = 7;
-	public const byte BULLET = 8;
+	public const byte REGISTER_PLAYER = 7;
+	public const byte ABILITY = 8;
+	public const byte BULLET = 9;
 	public const byte PAYER_LIMIT = 11;
 }

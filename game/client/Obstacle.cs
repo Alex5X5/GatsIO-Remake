@@ -2,7 +2,6 @@
 
 using ShGame.Game.Client.Rendering;
 using System;
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using ShGame.Game.Logic.Math;
 
@@ -18,6 +17,10 @@ public class Obstacle:Drawable, ISupportsShadow {
 	public Shadow? shadow;
 
 	private Client? client;
+
+	public Obstacle() : this(null, null, 0){
+	
+	}
 
 	public Obstacle(Client? client_, Vector3d? pos_, byte type_):base(18) {
 		client = client_;
@@ -116,8 +119,8 @@ public class Obstacle:Drawable, ISupportsShadow {
 		};
         obstacle.boundL.point1.Set(obstacle.Pos.x, obstacle.Pos.y, 0); //bottom left corner
         obstacle.boundL.point2.Set(obstacle.Pos.x, obstacle.Pos.y+obstacle.HEIGHT, 0);//top left corner
-        obstacle.boundR.point1.Set(obstacle.Pos.x+obstacle.WIDTH, obstacle.Pos.y, 0);//bottom right corner
-        obstacle.boundR.point2.Set(obstacle.Pos.x+obstacle.WIDTH, obstacle.Pos.y+obstacle.HEIGHT, 0);//top right corner
+        obstacle.boundR.point1.Set(obstacle.Pos.x + obstacle.WIDTH, obstacle.Pos.y, 0);//bottom right corner
+        obstacle.boundR.point2.Set(obstacle.Pos.x + obstacle.WIDTH, obstacle.Pos.y+obstacle.HEIGHT, 0);//top right corner
         obstacle.boundT.point1.Set(obstacle.boundL.point1);//bottom left corner
         obstacle.boundT.point2.Set(obstacle.boundR.point1);//bottom right corner
         obstacle.boundB.point1.Set(obstacle.boundL.point2);//top left corner
@@ -140,7 +143,6 @@ public class Obstacle:Drawable, ISupportsShadow {
             ptr += 4;
             Unsafe.Write(ptr, obstacle.HEIGHT);
         }
-        obstacle.dirty = true;
     }
 
     /// <summary>
@@ -151,7 +153,7 @@ public class Obstacle:Drawable, ISupportsShadow {
     /// byte 10 to 13 are converted to an int and are set as the new width of the obstacle
     /// byte 10 to 13 are converted to an int and are set as the new height of the obstacle
     /// </summary>
-    public static unsafe void DeserializeObstacle(Client? client_, byte* buffer, Obstacle obstacle, int offset) {
+    public static unsafe void DeserializeObstacle(Client? client_, byte* buffer, ref Obstacle obstacle, int offset) {
 		Console.WriteLine("Deserializing"+obstacle.ToString());
 		byte* ptr = buffer;
         obstacle ??= new Obstacle(client_, null, 0);
@@ -190,7 +192,7 @@ public class Obstacle:Drawable, ISupportsShadow {
             return 2;
     }
 
-    public Vector3d GetPointOfView() => client!=null ? client.player.Pos.Cpy().Sub(Player.SIZE/2.0, Player.SIZE/2.0, 0.0):new Vector3d(0,0,0);
+    public Vector3d GetPointOfView() => (client!=null && client.ControlledPlayer!=null) ? client.ControlledPlayer.Pos.Cpy().Sub(Player.SIZE/2.0, Player.SIZE/2.0, 0.0):new Vector3d(0,0,0);
 
 	public Vector3d GetRelativeVector() =>
 		Pos.Cpy().Add(new Vector3d(WIDTH/2, HEIGHT/2, 0)).Sub(GetPointOfView()).Nor();
@@ -201,7 +203,9 @@ public class Obstacle:Drawable, ISupportsShadow {
 		dir=Dir.B;
 		if (client==null) 
 			return;
-		fixed (Vector3d* pos = &client.player.Pos) {
+		if (client.ControlledPlayer==null)
+			return;
+		fixed (Vector3d* pos = &client.ControlledPlayer.Pos) {
 			//relative is to the left and to the top
 			if (RelativeX(pos)==1&&RelativeY(pos)==1) {
 				point1.x=boundR.point1.x;
@@ -254,6 +258,7 @@ public class Obstacle:Drawable, ISupportsShadow {
                 dir = Dir.B;
             }
         }
+
 	}
 
 	public override string ToString() => "ShGame.Game.Client.Obstacle[Pos:"+Pos.ToString()+", Type:"+Convert.ToString(type)+"]";
