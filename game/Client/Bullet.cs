@@ -15,7 +15,7 @@ public class Bullet : Drawable {
 	private byte WIDTH, LENGHT;
 	public short Speed;
 	public short Lifetime;
-	public short OwnerUUID;
+	public short OwnerHandle;
 
 	public Bullet() : this(null, null, 0, 0) { }
 
@@ -123,7 +123,7 @@ public class Bullet : Drawable {
 			ptr += 8;
 			Unsafe.Write<Int16>(ptr, bullet.Speed);
 			ptr += 2;
-			Unsafe.Write<Int16>(ptr, bullet.OwnerUUID);
+			Unsafe.Write<Int16>(ptr, bullet.OwnerHandle);
 		}
 	}
 
@@ -156,7 +156,7 @@ public class Bullet : Drawable {
 			ptr += 4;
 			bullet.Speed = Unsafe.Read<Int16>(ptr);
 			ptr += 2;
-			bullet.OwnerUUID = Unsafe.Read<Int16>(ptr);
+			bullet.OwnerHandle = Unsafe.Read<Int16>(ptr);
 			bullet.dirty=true;
 		}
 	}

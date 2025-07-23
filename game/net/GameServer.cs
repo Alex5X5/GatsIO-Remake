@@ -109,6 +109,7 @@ internal class GameServer:Socket {
 	}
 
 	internal unsafe byte[]? OnExchangePlayerRequest(byte[] packet) {
+		logger.Log("on exchange player request");
 		//check if the packet is actually a player request
 		if (Protocoll.AnalyzePacket(packet)==Headers.PLAYER) {
 			//create a temporary player and read it's properties from the packet

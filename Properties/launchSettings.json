@@ -2,19 +2,18 @@
   "profiles": {
     "ShGame": {
       "commandName": "Executable",
-      "commandLineArgs": "",
       "executablePath": ".\\ShGame.exe"
     },
     "Server": {
       "commandName": "Executable",
-      "commandLineArgs": "--server -ip 192.168.56.1",
-      "executablePath": ".\\ShGame.exe"
+      "executablePath": ".\\ShGame.exe",
+      "commandLineArgs": "--server -ip 10.29.96.143"
     },
     "Client": {
-      "targetProject": "ShGame.csproj",
       "commandName": "Executable",
-      "commandLineArgs": "--client -ip 192.168.56.1",
-      "executablePath": ".\\ShGame.exe"
+      "executablePath": ".\\ShGame.exe",
+      "commandLineArgs": "--client -ip 10.29.96.143",
+      "targetProject": "ShGame.csproj"
     }
   }
 }

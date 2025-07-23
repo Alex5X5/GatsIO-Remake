@@ -4,7 +4,7 @@ using ShGame.Game.Client.Rendering;
 using ShGame.Game.Logic.Math;
 
 using System.Runtime.CompilerServices;
-using System.Threading;
+
 
 //#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
 
@@ -100,11 +100,6 @@ public class Player : Drawable {
 	public unsafe void Move() {
 		Pos.Add(Dir.Cpy().Nor().Scl(Speed));
 		dirty = true;
-	}
-
-	public void Damage(int damage) {
-		if (damage>Health)
-			Health=0;
 	}
 
 	public void Deactivate() {
@@ -266,7 +261,6 @@ public class Player : Drawable {
 			player.IsShooting = *ptr;
 			player.dirty=true;
 		}
-		Thread.Sleep(5000);
 	}
 
 	public static unsafe short DeserializePlayerId(byte* buffer, int offset) {

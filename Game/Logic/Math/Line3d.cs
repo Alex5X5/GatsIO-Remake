@@ -102,10 +102,4 @@ public class Line3d {
 	public override string ToString() {
 		return "Game.client.logic.vector.Line3d[origin:"+origin.ToString()+",direction:"+direction.ToString()+"]";
 	}
-
-	//	public static void main(String[] args) {
-	//		Line3d l = Line3d.fromDirection(new Vector3d(0,0,0), new Vector3d(1,5,2).Nor());
-	//		Line3d l2 = Line3d.FromPoints(new Vector3d(0,0,0), new Vector3d(2,5,7).Nor());
-	//		System.out.println(l.intercept(l2));
-	//	}
 }

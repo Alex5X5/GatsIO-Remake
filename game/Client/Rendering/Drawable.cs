@@ -3,9 +3,6 @@
 using Silk.NET.OpenGL;
 
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-
-using Windows.Media.AppBroadcasting;
 
 /// <summary>
 /// This is a Base class for objects that have to be drawn.

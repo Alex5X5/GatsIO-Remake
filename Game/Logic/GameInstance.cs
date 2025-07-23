@@ -75,14 +75,6 @@ public class GameInstance {
 		).Start();
 	}
 
-	//public void StartClock() {
-	//	if (!Run) {
-	//		Run = true;
-	//		new Thread(ClockLoop).Start();
-	//		//StartNewLoop(ClockLoop);
-	//	}
-	//}
-
 	public void StartAllLoops() {
 		//StartClock();
 		Run=true;
@@ -204,7 +196,7 @@ public class GameInstance {
 				Bullets[i].Pos.Set(p.Pos.Cpy().Add(new Vector3d(Player.SIZE/2, Player.SIZE/2, 0)));
 				Bullets[i].Dir.Set(p.Dir);
 				Bullets[i].Speed = p.InitialBulletSpeed;
-				Bullets[i].OwnerUUID = p.PlayerUUID;
+				Bullets[i].OwnerHandle = p.PlayerUUID;
 				break;
 			}
 		}
