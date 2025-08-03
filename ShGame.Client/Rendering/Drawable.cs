@@ -1,4 +1,4 @@
-﻿namespace ShGame.Game.Client.Rendering;
+﻿namespace ShGame.Client.Rendering;
 //using Silk.NET.OpenGL
 using Silk.NET.OpenGL;
 
@@ -23,8 +23,8 @@ public unsafe abstract class Drawable : IDisposable {
 	private static readonly Logger logger = new(new LoggingLevel("Drawable"));
 
 	public Drawable(uint verticesCount) {
-		VertexDataPtr = (float*)NativeMemory.AllocZeroed((uint)verticesCount*3*sizeof(float));
-		VERTICES_COUNT = (uint)verticesCount;
+		VertexDataPtr = (float*)NativeMemory.AllocZeroed(verticesCount*3*sizeof(float));
+		VERTICES_COUNT = verticesCount;
 		dirty = true;
 	}
 
@@ -42,7 +42,7 @@ public unsafe abstract class Drawable : IDisposable {
 		BindVBO(gl);
 		gl.EnableVertexAttribArray(0);
 		gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 12, null);
-		gl.BufferData(BufferTargetARB.ArrayBuffer, (uint)VERTICES_COUNT * sizeof(float), in IntPtr.Zero, BufferUsageARB.StaticDraw);
+		gl.BufferData(BufferTargetARB.ArrayBuffer, (uint)VERTICES_COUNT * sizeof(float), in nint.Zero, BufferUsageARB.StaticDraw);
 		UnbindVBO(gl);
 		UnbindVAO(gl);
 		DidSetup = true;

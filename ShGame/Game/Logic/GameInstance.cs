@@ -1,5 +1,7 @@
 ﻿namespace ShGame.Game.Logic;
 
+using ShGame.Game;
+
 using SimpleLogging.logging;
 
 using System;
@@ -39,7 +41,7 @@ public class GameInstance {
 	public Obstacle[] Obstacles;
 	public Bullet[] Bullets;
 
-	public GameInstance(Client.Client? client) {
+	public GameInstance(Game.Client? client) {
 		logger = new(new LoggingLevel("Game"));
 		Players = new Player[PLAYER_COUNT];
 		for (int i = 0; i<PLAYER_COUNT; i++)

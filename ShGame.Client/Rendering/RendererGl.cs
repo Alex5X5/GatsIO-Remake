@@ -1,4 +1,4 @@
-﻿namespace ShGame.Game.Client.Rendering;
+﻿namespace ShGame.Client.Rendering;
 
 using ShGame.Game.Net;
 
@@ -8,6 +8,7 @@ using Silk.NET.Windowing;
 using ShGame.Game.Util;
 using System.Collections.Generic;
 using ShGame.Game.Logic.Math;
+using ShGame.Client;
 
 public class RendererGl {
 

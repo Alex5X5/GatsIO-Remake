@@ -1,4 +1,4 @@
-﻿namespace ShGame.Game.Client;
+﻿namespace ShGame.Game;
 
 using ShGame.Game.Client.Rendering;
 using ShGame.Game.Logic.Math;
@@ -139,7 +139,7 @@ public class Player : Drawable {
 						Dir.x=0; //wad
 						Dir.y=1;
 					} else {
-						Dir.x=(-1)/Math.Sqrt(2); //wa
+						Dir.x=-1/Math.Sqrt(2); //wa
 						Dir.y=1/Math.Sqrt(2);
 					}
 				}
@@ -155,7 +155,7 @@ public class Player : Drawable {
 				} else {
 					if (c.keyRight) {
 						Dir.x=1/Math.Sqrt(2); //wd
-						Dir.y=(1)/Math.Sqrt(2);
+						Dir.y=1/Math.Sqrt(2);
 					} else {
 						Dir.x=0; //w
 						Dir.y=1;
@@ -169,15 +169,15 @@ public class Player : Drawable {
 						Dir.x=0; //asd
 						Dir.y=-1;
 					} else {
-						Dir.x=(-1)/Math.Sqrt(2); //as
-						Dir.y=(-1)/Math.Sqrt(2);
+						Dir.x=-1/Math.Sqrt(2); //as
+						Dir.y=-1/Math.Sqrt(2);
 					}
 				} else {
 					if (c.keyRight) {
 						Dir.x=0; //ad
 						Dir.y=0;
 					} else {
-						Dir.x=(-1); //a
+						Dir.x=-1; //a
 						Dir.y=0;
 					}
 				}
@@ -185,7 +185,7 @@ public class Player : Drawable {
 				if (c.keyDown) {
 					if (c.keyRight) {
 						Dir.x=1/Math.Sqrt(2); //sd
-						Dir.y=(-1)/Math.Sqrt(2);
+						Dir.y=-1/Math.Sqrt(2);
 					} else {
 						Dir.x=0; //s
 						Dir.y=-1;
@@ -207,27 +207,27 @@ public class Player : Drawable {
 		byte* ptr = buffer;
 		ptr+=offset;
 		if (player==null) {
-			Unsafe.Write<Int32>(ptr, -1);
+			Unsafe.Write(ptr, -1);
 		} else {
-			Unsafe.Write<Int32>(ptr, player.Health);
+			Unsafe.Write(ptr, player.Health);
 			ptr += 4;
-			Unsafe.Write<Double>(ptr, player.Pos.x);
+			Unsafe.Write(ptr, player.Pos.x);
 			ptr += 8;
-			Unsafe.Write<Double>(ptr, player.Pos.y);
+			Unsafe.Write(ptr, player.Pos.y);
 			ptr += 8;
-			Unsafe.Write<Double>(ptr, player.Dir.x);
+			Unsafe.Write(ptr, player.Dir.x);
 			ptr += 8;
-			Unsafe.Write<Double>(ptr, player.Dir.y);
+			Unsafe.Write(ptr, player.Dir.y);
 			ptr += 8;
-			Unsafe.Write<Int32>(ptr, (Int32)player.Speed);
+			Unsafe.Write(ptr, (int)player.Speed);
 			ptr += 4;
-			Unsafe.Write<Int16>(ptr, player.PlayerUUID);
+			Unsafe.Write(ptr, player.PlayerUUID);
 			ptr += 2;
-			Unsafe.Write<Int16>(ptr, player.WeaponCooldownTicks);
+			Unsafe.Write(ptr, player.WeaponCooldownTicks);
 			ptr += 2;
-			Unsafe.Write<Int16>(ptr, player.WeaponCooldownTicks);
+			Unsafe.Write(ptr, player.WeaponCooldownTicks);
 			ptr += 2;
-			Unsafe.Write<Int16>(ptr, player.InitialBulletSpeed);
+			Unsafe.Write(ptr, player.InitialBulletSpeed);
 			ptr += 2;
 			*ptr = player.IsShooting;
 		}
@@ -237,26 +237,26 @@ public class Player : Drawable {
 		byte* ptr = buffer;
 		ptr+=offset;
 		player ??= new Player(null, 0, 0);
-		player.Health = Unsafe.Read<Int32>(ptr);
+		player.Health = Unsafe.Read<int>(ptr);
 		if (player.Health_ == -1) {
 			player.Deactivate();
 		} else {
 			ptr += 4;
-			player.Pos.x = Unsafe.Read<Double>(ptr);
+			player.Pos.x = Unsafe.Read<double>(ptr);
 			ptr += 8;
-			player.Pos.y = Unsafe.Read<Double>(ptr);
+			player.Pos.y = Unsafe.Read<double>(ptr);
 			ptr += 8;
-			player.Dir.x = Unsafe.Read<Double>(ptr);
+			player.Dir.x = Unsafe.Read<double>(ptr);
 			ptr += 8;
-			player.Dir.y = Unsafe.Read<Double>(ptr);
+			player.Dir.y = Unsafe.Read<double>(ptr);
 			ptr += 8;
-			player.Speed = Unsafe.Read<Int32>(ptr);
+			player.Speed = Unsafe.Read<int>(ptr);
 			ptr += 4;
-			player.PlayerUUID = Unsafe.Read<Int16>(ptr);
+			player.PlayerUUID = Unsafe.Read<short>(ptr);
 			ptr += 2;
-			player.WeaponCooldownTicks = Unsafe.Read<Int16>(ptr);
+			player.WeaponCooldownTicks = Unsafe.Read<short>(ptr);
 			ptr += 2;
-			player.weaponCooldownTicksDone = Unsafe.Read<Int16>(ptr);
+			player.weaponCooldownTicksDone = Unsafe.Read<short>(ptr);
 			ptr += 2;
 			player.IsShooting = *ptr;
 			player.dirty=true;
@@ -268,6 +268,6 @@ public class Player : Drawable {
 		ptr+=offset;
 		ptr+=40;
 		//new Logger(new LoggingLevel("Player")).Log("read player uuid ",new MessageParameter("id", Unsafe.Read<Int16>(ptr)));
-		return Unsafe.Read<Int16>(ptr);
+		return Unsafe.Read<short>(ptr);
 	}
 }

@@ -1,14 +1,14 @@
-﻿namespace ShGame.Game.Client;
+﻿namespace ShGame.Client;
 
 using ShGame.Game.Net;
 using System.Threading;
 using System.Net;
-using ShGame.Game.Client.Rendering;
 using Silk.NET.Windowing;
 using Silk.NET.Input;
 using System.Numerics;
 using ShGame.Game.Logic.Math;
 using System.Linq;
+using ShGame.Client.Rendering;
 
 //using Silk.NET.GLFW;
 //using Silk.NET.Windowing;
@@ -84,8 +84,8 @@ public class Client {
 
 	public Vector3d WindowRelativePosition(Vector2 pos) =>
 		new Vector3d(
-			pos.X = window.Size.X-pos.X*((window!=null ? window.Size.X : 0)/(GameServer.MAP_WIDTH)),
-			pos.Y = window.Size.Y-pos.Y*((window!=null ? window.Size.Y : 0)/(GameServer.MAP_HEIGHT)),
+			pos.X = window.Size.X-pos.X*((window!=null ? window.Size.X : 0)/GameServer.MAP_WIDTH),
+			pos.Y = window.Size.Y-pos.Y*((window!=null ? window.Size.Y : 0)/GameServer.MAP_HEIGHT),
 			0
 		);
 

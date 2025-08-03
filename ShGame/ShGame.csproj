@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<PublishSingleFile>true</PublishSingleFile>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<SelfContained>true</SelfContained>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<!-- or linux-x64, etc. -->
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<StartupObject>ShGame.Game.Programm</StartupObject>
+		<PackAsTool>True</PackAsTool>
+		<SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+		<NoWin32Manifest>true</NoWin32Manifest>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<WarningLevel>1</WarningLevel>
+		<NoWarn>1701;1702;IDE0055,CS8602,CS8500</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<WarningLevel>1</WarningLevel>
+		<NoWarn>1701;1702;IDE0055</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="push_sh.bat" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Silk.NET" Version="2.22.0" />
+		<PackageReference Include="Silk.NET.Input.Extensions" Version="2.22.0" />
+		<PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.22.0" />
+		<PackageReference Include="Silk.NET.Windowing" Version="2.22.0" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.8" />
+		<PackageReference Include="StbImageSharp" Version="2.30.15" />
+		<PackageReference Include="Ultz.Native.GLFW" Version="3.4.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="libs\Simplelogging.dll" />
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Assets\**\*" />
+	</ItemGroup>
+</Project>

@@ -1,4 +1,5 @@
-﻿namespace ShGame.Game.Client;
+﻿namespace ShGame.Game;
+using ShGame.Game.Client;
 using ShGame.Game.Client.Rendering;
 using ShGame.Game.Logic.Math;
 using ShGame.Game.Net;
@@ -109,21 +110,21 @@ public class Bullet : Drawable {
 		byte* ptr = buffer;
 		ptr+=offset;
 		if (bullet==null) {
-			Unsafe.Write<Int16>(ptr, -1);
+			Unsafe.Write<short>(ptr, -1);
 		} else {
-			Unsafe.Write<Int16>(ptr, bullet.Lifetime);
+			Unsafe.Write(ptr, bullet.Lifetime);
 			ptr += 2;
-			Unsafe.Write<Int32>(ptr, (int)bullet.Pos.x);
+			Unsafe.Write(ptr, (int)bullet.Pos.x);
 			ptr += 8;
-			Unsafe.Write<Int32>(ptr, (int)bullet.Pos.y);
+			Unsafe.Write(ptr, (int)bullet.Pos.y);
 			ptr += 8;
-			Unsafe.Write<Int32>(ptr, (int)bullet.Dir.x);
+			Unsafe.Write(ptr, (int)bullet.Dir.x);
 			ptr += 8;
-			Unsafe.Write<Int32>(ptr, (int)bullet.Dir.y);
+			Unsafe.Write(ptr, (int)bullet.Dir.y);
 			ptr += 8;
-			Unsafe.Write<Int16>(ptr, bullet.Speed);
+			Unsafe.Write(ptr, bullet.Speed);
 			ptr += 2;
-			Unsafe.Write<Int16>(ptr, bullet.OwnerHandle);
+			Unsafe.Write(ptr, bullet.OwnerHandle);
 		}
 	}
 
@@ -141,22 +142,22 @@ public class Bullet : Drawable {
 		byte* ptr = buffer;
 		ptr+=offset;
 		bullet ??= new Bullet(null, null, 0, 0);
-		bullet.Lifetime = Unsafe.Read<Int16>(ptr);
+		bullet.Lifetime = Unsafe.Read<short>(ptr);
 		if (bullet.Lifetime ==-1) {
 			bullet.Dealloc();
 		} else {
 			ptr += 2;
-			bullet.Pos.x = Unsafe.Read<Int32>(ptr);
+			bullet.Pos.x = Unsafe.Read<int>(ptr);
 			ptr += 4;
-			bullet.Pos.y = Unsafe.Read<Int32>(ptr);
+			bullet.Pos.y = Unsafe.Read<int>(ptr);
 			ptr += 4;
-			bullet.Dir.x = Unsafe.Read<Int32>(ptr);
+			bullet.Dir.x = Unsafe.Read<int>(ptr);
 			ptr += 4;
-			bullet.Dir.y = Unsafe.Read<Int32>(ptr);
+			bullet.Dir.y = Unsafe.Read<int>(ptr);
 			ptr += 4;
-			bullet.Speed = Unsafe.Read<Int16>(ptr);
+			bullet.Speed = Unsafe.Read<short>(ptr);
 			ptr += 2;
-			bullet.OwnerHandle = Unsafe.Read<Int16>(ptr);
+			bullet.OwnerHandle = Unsafe.Read<short>(ptr);
 			bullet.dirty=true;
 		}
 	}

@@ -60,7 +60,7 @@ public static class Programm {
 						port = 5000;
 					}
 
-					Client.Client c = new(
+					Game.Client c = new(
 						address, port
 					);
 				}

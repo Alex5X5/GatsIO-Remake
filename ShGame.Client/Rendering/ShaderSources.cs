@@ -1,6 +1,6 @@
 ﻿using ShGame.Game.Net;
 
-namespace ShGame.Game.Client.Rendering;
+namespace ShGame.Client.Rendering;
 
 public static class ShaderSources {
 
@@ -35,7 +35,11 @@ uniform sampler2D uTexture;
 
 void main()
 {
-    out_color = texture(uTexture, frag_texCoords);
+	vec2 ndc = vec2(
+		frag_texCoords.x / ("+GameServer.MAP_WIDTH+@"/2) - 1.0,
+		frag_texCoords.y / ("+GameServer.MAP_HEIGHT+@"/2) - 1.0
+	);
+    out_color = texture(uTexture, ndc);
 }
 ";
 

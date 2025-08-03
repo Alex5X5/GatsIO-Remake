@@ -1,4 +1,4 @@
-﻿namespace ShGame.Game.Client;
+﻿namespace ShGame.Game;
 
 using ShGame.Game.Client.Rendering;
 using System;
@@ -162,13 +162,13 @@ public class Obstacle:Drawable, ISupportsShadow {
 			return;
 		} else {
             buffer += 1;//change to 1 because of type len = 1
-            obstacle.Pos.x = Unsafe.Read<Int32>(buffer);
+            obstacle.Pos.x = Unsafe.Read<int>(buffer);
             buffer += 4;
-            obstacle.Pos.y = Unsafe.Read<Int32>(buffer);
+            obstacle.Pos.y = Unsafe.Read<int>(buffer);
             buffer += 4;
-            obstacle.WIDTH = Unsafe.Read<Int32>(buffer);
+            obstacle.WIDTH = Unsafe.Read<int>(buffer);
             buffer += 4;
-            obstacle.HEIGHT = Unsafe.Read<Int32>(buffer);
+            obstacle.HEIGHT = Unsafe.Read<int>(buffer);
             UpdateBounds(obstacle);
 		}
 		obstacle.dirty = true;
@@ -192,7 +192,7 @@ public class Obstacle:Drawable, ISupportsShadow {
             return 2;
     }
 
-    public Vector3d GetPointOfView() => (client!=null && client.ControlledPlayer!=null) ? client.ControlledPlayer.Pos.Cpy().Sub(Player.SIZE/2.0, Player.SIZE/2.0, 0.0):new Vector3d(0,0,0);
+    public Vector3d GetPointOfView() => client!=null && client.ControlledPlayer!=null ? client.ControlledPlayer.Pos.Cpy().Sub(Player.SIZE/2.0, Player.SIZE/2.0, 0.0):new Vector3d(0,0,0);
 
 	public Vector3d GetRelativeVector() =>
 		Pos.Cpy().Add(new Vector3d(WIDTH/2, HEIGHT/2, 0)).Sub(GetPointOfView()).Nor();
