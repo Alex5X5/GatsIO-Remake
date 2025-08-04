@@ -1,4 +1,4 @@
-﻿namespace ShGame.Game.Net;
+﻿namespace ShGame.Net;
 
 public static class Protocoll {
 

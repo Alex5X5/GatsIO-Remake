@@ -1,24 +1,20 @@
 ﻿namespace ShGame.Client.Rendering;
 
-using ShGame.Game.Net;
-
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
-using ShGame.Game.Util;
 using System.Collections.Generic;
-using ShGame.Game.Logic.Math;
 using ShGame.Client;
+using SimpleLogging.logging;
+using ShGame.Net;
+using ShGame.Math;
+using ShGame.Drawing;
+using ShGame.Util;
 
 public class RendererGl {
 
 	//private readonly IWindow window;
 	private static readonly Logger logger = new(new LoggingLevel("RendererGL"));
-
-	public static readonly Line3d BORDER_TOP = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(GameServer.MAP_WIDTH, 0, 0));
-	public static readonly Line3d BORDER_BOTTOM = Line3d.FromPoints(new Vector3d(0, GameServer.MAP_HEIGHT, 0), new Vector3d(GameServer.MAP_WIDTH, GameServer.MAP_HEIGHT, 0));
-	public static readonly Line3d BORDER_LEFT = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(0, GameServer.MAP_HEIGHT, 0));
-	public static readonly Line3d BORDER_RIGHT = Line3d.FromPoints(new Vector3d(GameServer.MAP_WIDTH, 0, 0), new Vector3d(GameServer.MAP_WIDTH, GameServer.MAP_HEIGHT, 0));
 
 	private List<DebugDrawable> DebugDrawables = [];
 
@@ -89,14 +85,14 @@ public class RendererGl {
 
 
 		//client.ControlledPlayer.Setup(_Gl);
-		for (int i = 0; i<GameInstance.PLAYER_COUNT; i++)
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
 			client.Game.Players[i].Setup(_Gl);
 
-		for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++) {
+		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
 			client.Game.Obstacles[i].Setup(_Gl);
 			client.Game.Obstacles[i]?.shadow?.Setup(_Gl);
 		}
-		for (int i = 0; i<GameServer.BULLET_COUNT; i++)
+		for (int i = 0; i<Constants.BULLET_COUNT; i++)
 			client.Game.Bullets[i].Setup(_Gl);
 	}
 
@@ -120,7 +116,7 @@ public class RendererGl {
 
 		_Gl.Uniform1(colorModeLocation, 1);
 		client.ControlledPlayer?.Draw(_Gl);
-		for (int i = 0; i<GameInstance.PLAYER_COUNT; i++) {
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			if (client.ControlledPlayer!=null) {
 				if (client.Game.Players[i].Health!=-1&&client.Game.Players[i].PlayerUUID!=client.ControlledPlayer.PlayerUUID)
 					client.Game.Players[i].Draw(_Gl);
@@ -134,7 +130,7 @@ public class RendererGl {
 		_Gl.UseProgram(textureShaderProgram);
 		_Gl.BindTexture(TextureTarget.Texture2D, shadowTexture);
 		//Gl.Uniform1(colorModeLocation, 0);
-		for (int i = 0; i<GameInstance.OBSTACLE_COUNT; i++) {
+		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
 			if (client.Game.Obstacles[i]!=null && client.Game.Obstacles[i].shadow!=null) {
 				client.Game.Obstacles[i].shadow.dirty = true;
 				client.Game.Obstacles[i].shadow.Draw(_Gl);
@@ -145,7 +141,7 @@ public class RendererGl {
 		colorModeLocation = _Gl.GetUniformLocation(staticShaderProgram, "colorMode");
 
 		_Gl.Uniform1(colorModeLocation, 2);
-		for (int i = 0; i<GameInstance.OBSTACLE_COUNT; i++) {
+		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
 			//client.Game.Obstacles[i].dirty=true;
 			client.Game.Obstacles[i]?.Draw(_Gl);
 		}
@@ -155,7 +151,7 @@ public class RendererGl {
 			client.ControlledPlayer.dirty=true;
 			client.ControlledPlayer.Draw(_Gl);
 		}
-		for (int i = 0; i<GameInstance.BULLET_COUNT; i++) {
+		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
 			client.Game.Bullets[i].dirty = true;
 			client.Game.Bullets[i].Draw(_Gl);
 		}

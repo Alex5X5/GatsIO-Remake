@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ShGame.Drawing\ShGame.Drawing.csproj" />
+		<ProjectReference Include="..\ShGame.Math\ShGame.Math.csproj" />
+		<ProjectReference Include="..\ShGame.Util\ShGame.Util.csproj" />
+	</ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Assets\shadow.png" />
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Include="SimpleLogging">
+        <HintPath>..\libs\Simplelogging.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+</Project>

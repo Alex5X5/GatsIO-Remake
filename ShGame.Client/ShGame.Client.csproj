@@ -7,11 +7,11 @@
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<!-- or linux-x64, etc. -->
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<StartupObject>ShGame.Game.Programm</StartupObject>
+		<StartupObject>ShGame.Client.ClientMain</StartupObject>
 		<PackAsTool>True</PackAsTool>
 		<SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
@@ -40,9 +40,14 @@
 		<PackageReference Include="Ultz.Native.GLFW" Version="3.4.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<Reference Include="libs\Simplelogging.dll" />
+		<Reference Include="..\libs\Simplelogging.dll" />
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="Assets\**\*" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\ShGame.Math\ShGame.Math.csproj" />
+		<ProjectReference Include="..\ShGame.Net\ShGame.Net.csproj" />
+		<ProjectReference Include="..\ShGame.Game\ShGame.Game.csproj" />
 	</ItemGroup>
 </Project>

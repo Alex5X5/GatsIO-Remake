@@ -1,21 +1,19 @@
 ﻿namespace ShGame.Client;
 
-using ShGame.Game.Net;
 using System.Threading;
 using System.Net;
 using Silk.NET.Windowing;
 using Silk.NET.Input;
 using System.Numerics;
-using ShGame.Game.Logic.Math;
-using System.Linq;
 using ShGame.Client.Rendering;
-
-//using Silk.NET.GLFW;
-//using Silk.NET.Windowing;
+using ShGame.Math;
+using ShGame.Net;
+using ShGame.Game.GameObjects;
+using ShGame.Game;
 
 //#pragma warning disable CS8500 //insert spaces instead of tabs
 
-public class Client {
+public class Client : IKeySupplier{
 
 	public static readonly int SCREEN_PIXEL_WIDTH = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size.Y;
 	public static readonly int SCREEN_PIXEL_HEIGHT = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size.X;
@@ -29,16 +27,12 @@ public class Client {
 	public Vector2 mousePos = new(0, 0);
 
 	private bool stop = false;
-	internal bool keyUp = false;
-	internal bool keyDown = false;
-	internal bool keyLeft = false;
-	internal bool keyRight = false;
 	internal bool mouseLeftDown = false;
 	internal bool mouseRightDown = false;
 
 	private readonly Logger logger;
 
-	internal Player ControlledPlayer;
+	public Player ControlledPlayer;
 
 
 	private Thread renderThread = new(() => { });
@@ -47,12 +41,17 @@ public class Client {
 	private Thread bulletThread = new(() => { });
 	private Thread abilityThread = new(() => { });
 
+	public bool keyUp { get; set; }
+	public bool keyDown { get; set; }
+	public bool keyLeft { get; set; }
+	public bool keyRight { get; set; }
+
 	//public Vector2 GetCursorPosition() => inputContext.Mice[0].Position;
 
 	public Client() : this(5000) { }
 
 
-	public Client(int port) : this(GameServer.GetLocalIP(), port) { }
+	public Client(int port) : this(NetUtil.GetLocalIP(), port) { }
 
 
 	public Client(IPAddress address, int port) {
@@ -73,7 +72,7 @@ public class Client {
 		//for (int i = 0; i<GameServer.BULLET_COUNT; i++)
 		//	bullets[i] = new Bullet(null, null, 10, 20);
 		
-		Game = new(this);
+		Game = new(ControlledPlayer);
 		//ControlledPlayer=new(new(100,100,0),100,1);
 		//ControlledPlayer = Game.Players[0];
 		//ControlledPlayer = new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
@@ -84,8 +83,8 @@ public class Client {
 
 	public Vector3d WindowRelativePosition(Vector2 pos) =>
 		new Vector3d(
-			pos.X = window.Size.X-pos.X*((window!=null ? window.Size.X : 0)/GameServer.MAP_WIDTH),
-			pos.Y = window.Size.Y-pos.Y*((window!=null ? window.Size.Y : 0)/GameServer.MAP_HEIGHT),
+			pos.X = window.Size.X-pos.X*((window!=null ? window.Size.X : 0)/Constants.MAP_GRID_WIDTH),
+			pos.Y = window.Size.Y-pos.Y*((window!=null ? window.Size.Y : 0)/Constants.MAP_GRID_HEIGHT),
 			0
 		);
 
@@ -94,7 +93,7 @@ public class Client {
 		logger.Log("setting vivible");
 
 		var options = WindowOptions.Default;
-		options.Size = new Silk.NET.Maths.Vector2D<int>(GameServer.MAP_WIDTH, GameServer.MAP_HEIGHT);
+		options.Size = new Silk.NET.Maths.Vector2D<int>(Constants.MAP_GRID_WIDTH, Constants.MAP_GRID_HEIGHT);
 		options.Title = "ShGame";
 
 		window = Window.Create(options);
@@ -146,7 +145,7 @@ public class Client {
 				NetHandler = new(address, port);
 				if (NetHandlerConnected()) {
 					//get the positions of the obstacles from the server
-					NetHandler.GetMap(this, ref Game.Obstacles);
+					NetHandler.GetMap(ControlledPlayer, ref Game.Obstacles);
 					NetHandler.RegisterToServer(ref ControlledPlayer, ref Game.Players);
 				}
 				//Console.WriteLine(ControlledPlayer);
@@ -300,8 +299,8 @@ public class Client {
 	}
 
 	private void OnMouseMove(IMouse cursor, Vector2 pos) {
-		mousePos.X = pos.X*(GameServer.MAP_WIDTH/window.Size.X);
-		mousePos.Y = GameServer.MAP_HEIGHT-pos.Y*(GameServer.MAP_HEIGHT/window.Size.Y);
+		mousePos.X = pos.X*(Constants.MAP_GRID_WIDTH/window.Size.X);
+		mousePos.Y = Constants.MAP_GRID_HEIGHT-pos.Y*(Constants.MAP_GRID_HEIGHT/window.Size.Y);
 		//mousePos = pos-new Vector2(window.Position.X,window.Size.Y-window.Position.Y);
 		//Console.WriteLine("I Moved! "+mousePos);
 	}

@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>true</SelfContained>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net9.0</TargetFramework>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<StartupObject>ShGame.Start.Programm</StartupObject>
+		<PackAsTool>True</PackAsTool>
+		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+		<NoWin32Manifest>true</NoWin32Manifest>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<WarningLevel>1</WarningLevel>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<WarningLevel>1</WarningLevel>
+	</PropertyGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\ShGame.Client\ShGame.Client.csproj" />
+	  <ProjectReference Include="..\ShGame.Server\ShGame.Net.Server.csproj" />
+	  <ProjectReference Include="..\ShGame.Util\ShGame.Util.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="SimpleLogging">
+			<HintPath>..\libs\Simplelogging.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+</Project>

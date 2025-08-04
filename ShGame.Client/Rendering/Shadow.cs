@@ -1,14 +1,14 @@
 ﻿namespace ShGame.Client.Rendering;
 
-using ShGame.Game.Logic.Math;
-using ShGame.Game.Util;
+using ShGame.Drawing;
+using ShGame.Game;
+using ShGame.Game.GameObjects;
+using ShGame.Math;
+using ShGame.Util;
+
+using SimpleLogging.logging;
 
 using System;
-
-public enum Dir : byte {
-	T, B, L, R,
-}
-
 
 public class Shadow : TextureDrawable {
 
@@ -95,25 +95,25 @@ public class Shadow : TextureDrawable {
 		Vector3d ShadowPoint4 = new(0, 0, 0);
 		switch (dir) {
 			case Dir.T:
-				fixed (Line3d* line = &RendererGl.BORDER_BOTTOM) {
+				fixed (Line3d* line = &Constants.BORDER_BOTTOM) {
 					shadowTarget1 = ShadowHit(&pointOfView, &shadowOrigin1, line);
 					shadowTarget2 = ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.B:
-				fixed (Line3d* line = &RendererGl.BORDER_TOP) {
+				fixed (Line3d* line = &Constants.BORDER_TOP) {
 					shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
 					shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.R:
-				fixed (Line3d* line = &RendererGl.BORDER_LEFT) {
+				fixed (Line3d* line = &Constants.BORDER_LEFT) {
 					shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
 					shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.L:
-				fixed (Line3d* line = &RendererGl.BORDER_RIGHT) {
+				fixed (Line3d* line = &Constants.BORDER_RIGHT) {
 					shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
 					shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
@@ -161,12 +161,4 @@ public class Shadow : TextureDrawable {
 			oth1Y + u * (oth2Y - oth1Y),
 			oth1Z + u * (oth2Z - oth1Z));
 	}
-}
-public interface ISupportsShadow {
-
-	public Vector3d GetRelativeVector();
-
-	public Vector3d GetPointOfView();
-
-	public void GetShadowOrigins(out Vector3d point1, out Vector3d point2, out Dir dir);
 }

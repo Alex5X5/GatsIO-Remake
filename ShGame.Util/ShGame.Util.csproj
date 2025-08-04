@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>true</SelfContained>
+		<OutputType>library</OutputType>
+		<TargetFramework>net9.0</TargetFramework>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<WarningLevel>1</WarningLevel>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<WarningLevel>1</WarningLevel>
+	</PropertyGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\ShGame.Math\ShGame.Math.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Reference Include="SimpleLogging">
+	    <HintPath>..\libs\Simplelogging.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+</Project>

@@ -1,6 +1,6 @@
-﻿namespace ShGame.Game.Net;
+﻿namespace ShGame.Net;
 
-using ShGame.Game.Client;
+using ShGame.Game.GameObjects;
 
 using System.Linq;
 using System.Net;
@@ -21,7 +21,7 @@ public class NetHandler : Socket {
         logger.Log("enpty constructor");
     }
 
-    internal NetHandler(int port) : this(GameServer.GetLocalIP(), port) {
+    internal NetHandler(int port) : this(NetUtil.GetLocalIP(), port) {
         logger.Log("port constructor");
     }
 
@@ -91,15 +91,15 @@ public class NetHandler : Socket {
         }
     }
 
-    public unsafe void GetMap(Client client, ref Obstacle[] obstacles) {
+    public unsafe void GetMap(Player contorlledPlayer, ref Obstacle[] obstacles) {
         logger.Log("getting map");
         SendPacket(Protocoll.PreparePacket(Headers.MAP));
         byte[] packet = RecievePacket();
         int counter = 0;
         if (packet!=null)
-            for (int i = 0; i<GameServer.OBSTACLE_COUNT; i++)
+            for (int i = 0; i<Constants.OBSTACLE_COUNT; i++)
                 fixed(byte* ptr = &packet[i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET])
-                    Obstacle.DeserializeObstacle(client, ptr, ref obstacles[i], 0);
+                    Obstacle.DeserializeObstacle(contorlledPlayer, ptr, ref obstacles[i], 0);
         foreach (Obstacle obstacle in obstacles)
             Console.WriteLine(obstacle.ToString());
     }
@@ -128,7 +128,7 @@ public class NetHandler : Socket {
             Send(send);
             byte[] packet = RecievePacket();
             if (packet != null)
-                for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++) {
+                for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
                     //logger.Log("deserializing player", new MessageParameter("player", players[i].ToString()));
                     fixed (byte* ptr = &packet[0])
                         if (Player.DeserializePlayerId(ptr, i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET)!=controlledPlayer.PlayerUUID|includeControlledPlayer)
@@ -147,7 +147,7 @@ public class NetHandler : Socket {
 			Send(send);
 			byte[] packet = RecievePacket();
 			if (packet != null)
-				for (int i = 0; i<GameServer.MAX_PLAYER_COUNT; i++) {
+				for (int i = 0; i<Constants.BULLET_COUNT; i++) {
 					//logger.Log("deserializing player", new MessageParameter("player", bullets[i].ToString()));
 					fixed (byte* ptr = &packet[0])
 						Bullet.DeserializeBullet(ptr, bullets[i], i*Player.PLAYER_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
@@ -159,7 +159,7 @@ public class NetHandler : Socket {
 
 	}
 
-	internal void Stop() {
+	public void Stop() {
         logger.Log("stopping");
         stop = true;
         Close();

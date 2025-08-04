@@ -1,9 +1,13 @@
-﻿using System;
+﻿namespace ShGame.Net.Server;
+
+using SimpleLogging.logging;
+
+using System;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace ShGame.Game.Net;
+
+
 
 internal class ServerConnection {
     private readonly Socket socket;
@@ -23,7 +27,7 @@ internal class ServerConnection {
     private bool ReceivePacket(ref byte[] buffer) {
         if (!socket.Connected)
             return false;
-
+        
         Array.Resize(ref buffer, Protocoll.PACKET_BYTE_LENGTH);
         buffer.Initialize();
 

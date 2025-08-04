@@ -1,18 +1,14 @@
-﻿namespace ShGame.Game.Net;
+﻿namespace ShGame.Net.Server;
 
-using ShGame.Game.Client;
-using ShGame.Game.Logic.Math;
-using ShGame.Game.Logic;
+using ShGame.Game;
+using ShGame.Game.GameObjects;
 
-using System.Buffers;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
 
-internal class GameServer:Socket {
+public class GameServer:Socket {
 
 	#region fields
 
@@ -25,23 +21,23 @@ internal class GameServer:Socket {
 
 	//some constants
 	//public const int TARGET_TPS = 50;
-	public const int MAP_WIDTH = 2100, MAP_HEIGHT = 1400;
-	public const int OBSTACKLE_ROWS = 5, OBSTACKLE_LINES = 8;
-	public const int OBSTACLE_ROW_DISANCE = MAP_WIDTH / OBSTACKLE_ROWS;
-	public const int OBSTACLE_LINE_DISTANCE = MAP_HEIGHT / OBSTACKLE_LINES;
-	public const int MAX_PLAYER_COUNT = 20;
-	public const int OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES, BULLET_COUNT = 35;
+	//public const int MAP_WIDTH = 2100, MAP_HEIGHT = 1400;
+	//public const int OBSTACKLE_ROWS = 5, OBSTACKLE_LINES = 8;
+	//public const int OBSTACLE_ROW_DISANCE = MAP_WIDTH / OBSTACKLE_ROWS;
+	//public const int OBSTACLE_LINE_DISTANCE = MAP_HEIGHT / OBSTACKLE_LINES;
+	//public const int MAX_PLAYER_COUNT = 20;
+	//public const int OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES, BULLET_COUNT = 35;
 
 	private readonly GameInstance Game;
 
-	private readonly ServerConnection?[] clients = new ServerConnection[MAX_PLAYER_COUNT];
+	private readonly ServerConnection?[] clients = new ServerConnection[Constants.PLAYER_COUNT];
 
     #endregion fields
 
     #region constructors
     public GameServer() : this(5000) { }
 
-	public GameServer(int port) : this(GetLocalIP(), (uint)Math.Abs(port)) { }
+	public GameServer(int port) : this(NetUtil.GetLocalIP(), (uint)System.Math.Abs(port)) { }
 
 	public GameServer(IPAddress address, uint port) : base(address.AddressFamily == AddressFamily.InterNetwork ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp){
 		logger = new Logger(new LoggingLevel("GameServer"));
@@ -93,7 +89,7 @@ internal class GameServer:Socket {
 		int counter = 0;
 		//serialize all of the obstacles into the packet
 		fixed(byte* ptr = &result[0])
-		for (int i = 0; i<OBSTACLE_COUNT; i++)
+		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++)
 			//logger.Log("serializing requested obstacle",new MessageParameter(" packet offset", (Protocoll.PAYLOAD_OFFSET+i*Obstacle.OBSTACLE_BYTE_LENGTH)),new MessageParameter(" Obstacle"+ptr->ToString()));
 			Obstacle.SerializeObstacle(ptr, Game.Obstacles[i], i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
 		return result;
@@ -125,7 +121,7 @@ internal class GameServer:Socket {
 
 			//add all of the players to the packet
 			fixed (byte* ptr = &result[0])
-				for (int i = 0; i<GameInstance.PLAYER_COUNT; i++) {
+				for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 					if (Game.Players[i]==null)
 						continue;
 					if (Game.Players[i].PlayerUUID == temp.PlayerUUID) {
@@ -147,8 +143,8 @@ internal class GameServer:Socket {
 		if (Protocoll.AnalyzePacket(packet)==Headers.REGISTER_PLAYER) {
 			PlayerIdCounter++;
 			Player temp = new(null, 100, PlayerIdCounter);
-			for (int i = 0; i<GameInstance.PLAYER_COUNT; i++) {
-				if (i==GameInstance.PLAYER_COUNT && Game.Players[i].Health!=-1)
+			for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
+				if (i==Constants.PLAYER_COUNT && Game.Players[i].Health!=-1)
 					return Protocoll.PreparePacket(Headers.PAYER_LIMIT);
 				if (Game.Players[i].Health==-1) {
 					Game.Players[i]=temp;
@@ -172,7 +168,7 @@ internal class GameServer:Socket {
 			byte[] result = Protocoll.PreparePacket(Headers.BULLET);
 			//add all of the bullets to the packet
 			fixed (byte* ptr = &result[0])
-			for (int i = 0; i<BULLET_COUNT-1; i++) {
+			for (int i = 0; i<Constants.BULLET_COUNT-1; i++) {
 				if (Game.Bullets[i]==null)
 					continue;
 				Bullet.SerializeBullet(ptr, Game.Bullets[i], i*Bullet.BULLET_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET);
@@ -189,7 +185,7 @@ internal class GameServer:Socket {
 
 	private bool IsPlayerRegistered(Player player) {
 		bool found = false;
-		for (int i = 0; i<MAX_PLAYER_COUNT-1; i++) {
+		for (int i = 0; i<Constants.PLAYER_COUNT-1; i++) {
 			if (Game.Players[i]==null)
 				continue;
 			if (Game.Players[i].PlayerUUID == player.PlayerUUID) {
@@ -204,7 +200,7 @@ internal class GameServer:Socket {
 		//since the player isn't known, try to register it
 		logger.Log("registering new player", new MessageParameter("UUID", player.PlayerUUID));
 		//loop through the player array and search for an unused player
-		for (int i = 0; i<GameInstance.PLAYER_COUNT; i++) {
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			//the slot is considered empty if the player's health is -1
 			if (Game.Players[i].Health==-1) {
 				Game.Players[i].Health=100;
@@ -219,7 +215,7 @@ internal class GameServer:Socket {
 	}
 
 	private void DisposeObjects() {
-		for (int i = 0; i<MAX_PLAYER_COUNT; i++) {
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			if (clients[i]!=null) {
 				if (clients[i].disposalCooldown<1000)
 					clients[i].disposalCooldown--;
@@ -270,20 +266,5 @@ internal class GameServer:Socket {
 			}
 		}
 	}
-
-    public static IPAddress GetLocalIPv4() =>
-		NetworkInterface.GetAllNetworkInterfaces()[0].
-			GetIPProperties().UnicastAddresses[^1].
-				Address;
-
-	public static IPAddress GetLocalIPv6() =>
-		NetworkInterface.GetAllNetworkInterfaces()[0].
-			GetIPProperties().UnicastAddresses[^1].
-				Address;
-
-	public static IPAddress GetLocalIP()=>
-		NetworkInterface.GetAllNetworkInterfaces()[1].
-			GetIPProperties().UnicastAddresses[^1].
-				Address;
 }
 
