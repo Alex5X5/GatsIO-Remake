@@ -10,21 +10,28 @@ using System.Text;
 public static class Paths {
 
 	public static void ExtractFiles() {
-		string resourceNamespacePrefix = "ShGame.Drawing.Assets";
+		string resourceNamespacePrefix = "ShGame.Util.Assets";
 
 		// Get executing assembly
 		var assembly = Assembly.GetExecutingAssembly();
+		
 		var resourceNames = assembly.GetManifestResourceNames();
 
 		// Determine output path next to the running .exe
 		string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+		int dots = 0;
+		string name = assembly.GetName().FullName;
+		foreach (char c in name.ToCharArray())
+			if (c=='.')
+				dots++;
 
 		for(int i=0; i<resourceNames.Length; i++) {
 			// Filter resources inside the specified namespace
 			if (!resourceNames[i].StartsWith(resourceNamespacePrefix))
 				continue;
 			string resourceName = resourceNames[i];
-			while (resourceName.Split('.').Length>2) {
+			while (resourceName.Split('.').Length-dots>2) {
 				resourceName = new StringBuilder(resourceName)
 					.Insert(resourceName.IndexOf('.')+1, '\\')
 						.Remove(resourceName.IndexOf('.'), 1)
@@ -49,7 +56,7 @@ public static class Paths {
 
 	public static string AssetsPath(string fileName) {
 		string assemplyName = Assembly.GetExecutingAssembly().GetName().Name+".dll";
-		string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+		string assemblyLocation = Assembly.	GetExecutingAssembly().Location;
 		string trimedName = assemblyLocation.Trim(assemplyName.ToCharArray());
 		trimedName = Path.Combine(trimedName+@"\ShGame\Assets\", fileName);
 		return trimedName;

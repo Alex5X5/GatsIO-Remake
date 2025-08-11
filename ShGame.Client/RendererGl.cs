@@ -4,12 +4,11 @@ using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System.Collections.Generic;
-using ShGame.Client;
 using SimpleLogging.logging;
-using ShGame.Net;
-using ShGame.Math;
 using ShGame.Drawing;
 using ShGame.Util;
+using ShGame.Game.GameObjects;
+using ShGame.Game;
 
 public class RendererGl {
 
@@ -43,7 +42,7 @@ public class RendererGl {
 		textures = [];
 	}
 
-	public unsafe void OnLoad(IWindow window, Client client) {
+	public unsafe void OnLoad(IWindow window, GameInstance game) {
 		loaded = true;
 
 		_Gl = GL.GetApi(window);
@@ -86,17 +85,17 @@ public class RendererGl {
 
 		//client.ControlledPlayer.Setup(_Gl);
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
-			client.Game.Players[i].Setup(_Gl);
+			game.Players[i].Setup(_Gl);
 
 		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
-			client.Game.Obstacles[i].Setup(_Gl);
-			client.Game.Obstacles[i]?.shadow?.Setup(_Gl);
+			game.Obstacles[i].Setup(_Gl);
+			game.Obstacles[i]?.shadow?.Setup(_Gl);
 		}
 		for (int i = 0; i<Constants.BULLET_COUNT; i++)
-			client.Game.Bullets[i].Setup(_Gl);
+			game.Bullets[i].Setup(_Gl);
 	}
 
-	public unsafe void OnRender(double deltaTime, IWindow window, Client client) {
+	public unsafe void OnRender(double deltaTime, IWindow window, Player player, GameInstance game) {
 		//Time+=deltaTime;
 		//if (Time-LastFrame>=1/GameServer.TARGET_TPS) {
 		//	LastFrame = Time;
@@ -115,15 +114,15 @@ public class RendererGl {
 		int colorModeLocation = _Gl.GetUniformLocation(staticShaderProgram, "colorMode");
 
 		_Gl.Uniform1(colorModeLocation, 1);
-		client.ControlledPlayer?.Draw(_Gl);
+		player?.Draw(_Gl);
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			if (client.ControlledPlayer!=null) {
-				if (client.Game.Players[i].Health!=-1&&client.Game.Players[i].PlayerUUID!=client.ControlledPlayer.PlayerUUID)
-					client.Game.Players[i].Draw(_Gl);
+			if (player!=null) {
+				if (game.Players[i].Health!=-1&&game.Players[i].PlayerUUID!=player.PlayerUUID)
+					game.Players[i].Draw(_Gl);
 			} else {
 			
 			}
-				client.Game.Players[i]?.Draw(_Gl);
+			//player.Draw(_Gl);
 		}
 		_Gl.Uniform1(colorModeLocation, 1);
 
@@ -131,9 +130,9 @@ public class RendererGl {
 		_Gl.BindTexture(TextureTarget.Texture2D, shadowTexture);
 		//Gl.Uniform1(colorModeLocation, 0);
 		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
-			if (client.Game.Obstacles[i]!=null && client.Game.Obstacles[i].shadow!=null) {
-				client.Game.Obstacles[i].shadow.dirty = true;
-				client.Game.Obstacles[i].shadow.Draw(_Gl);
+			if (game.Obstacles[i]!=null && game.Obstacles[i].shadow!=null) {
+				game.Obstacles[i].shadow.dirty = true;
+				game.Obstacles[i].shadow.Draw(_Gl);
 			}
 		}
 		_Gl.BindTexture(TextureTarget.Texture2D, 0);
@@ -143,17 +142,17 @@ public class RendererGl {
 		_Gl.Uniform1(colorModeLocation, 2);
 		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
 			//client.Game.Obstacles[i].dirty=true;
-			client.Game.Obstacles[i]?.Draw(_Gl);
+			game.Obstacles[i]?.Draw(_Gl);
 		}
 
 		_Gl.Uniform1(colorModeLocation, 3);
-		if (client.ControlledPlayer!=null) {
-			client.ControlledPlayer.dirty=true;
-			client.ControlledPlayer.Draw(_Gl);
+		if (player!=null) {
+			player.dirty=true;
+			player.Draw(_Gl);
 		}
 		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
-			client.Game.Bullets[i].dirty = true;
-			client.Game.Bullets[i].Draw(_Gl);
+			game.Bullets[i].dirty = true;
+			game.Bullets[i].Draw(_Gl);
 		}
 
 		_Gl.UseProgram(staticShaderProgram);

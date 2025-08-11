@@ -3,14 +3,13 @@
 	<PropertyGroup>
 		<PublishSingleFile>true</PublishSingleFile>
 		<SelfContained>true</SelfContained>
-		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<PackAsTool>True</PackAsTool>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net9.0</TargetFramework>
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<StartupObject>ShGame.Start.Programm</StartupObject>
-		<PackAsTool>True</PackAsTool>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 		<NoWin32Manifest>true</NoWin32Manifest>
 	</PropertyGroup>
@@ -27,9 +26,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="SimpleLogging">
-			<HintPath>..\libs\Simplelogging.dll</HintPath>
-		</Reference>
+		<Reference Include="..\libs\Simplelogging.dll" />
 	</ItemGroup>
 
 </Project>

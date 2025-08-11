@@ -46,6 +46,7 @@
 		<EmbeddedResource Include="Assets\**\*" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\ShGame.Drawing\ShGame.Drawing.csproj" />
 		<ProjectReference Include="..\ShGame.Math\ShGame.Math.csproj" />
 		<ProjectReference Include="..\ShGame.Net\ShGame.Net.csproj" />
 		<ProjectReference Include="..\ShGame.Game\ShGame.Game.csproj" />

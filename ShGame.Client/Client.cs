@@ -98,7 +98,7 @@ public class Client : IKeySupplier{
 
 		window = Window.Create(options);
 		window.Load += 
-			() => renderer.OnLoad(window, this);
+			() => renderer.OnLoad(window, Game);
 		window.Load += 
 			() => {
 				inputContext = window.CreateInput();
@@ -116,7 +116,7 @@ public class Client : IKeySupplier{
 		window.Closing+=Stop;
 
 		window.Render += (double deltaTime) =>
-			renderer.OnRender(deltaTime, window, this);
+			renderer.OnRender(deltaTime, window, ControlledPlayer, Game);
 		window.Closing += OnClosing;
 
 		window.Run();

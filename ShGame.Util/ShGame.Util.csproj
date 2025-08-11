@@ -19,6 +19,9 @@
 	  <ProjectReference Include="..\ShGame.Math\ShGame.Math.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+		<EmbeddedResource Include="Assets\shadow.png" />
+	</ItemGroup>
+	<ItemGroup>
 	  <Reference Include="SimpleLogging">
 	    <HintPath>..\libs\Simplelogging.dll</HintPath>
 	  </Reference>
