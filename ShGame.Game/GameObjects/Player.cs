@@ -82,7 +82,8 @@ public class Player : Drawable {
 		Visible = false;
 	}
 
-	public string ToString() => $"Game.graphics.client.Player2[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{Dir}, UUID:{PlayerUUID}, VAO:{vaoHandle}, VBO:{vboHandle}]";
+	public override string ToString() =>
+		$"Game.graphics.client.Player[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{Dir}, UUID:{PlayerUUID}, VAO:{vaoHandle}, VBO:{vboHandle}]";
 
 	public unsafe override void UpdateVertices() {
 		//vertices ??= new float[FLOAT_COUNT];
@@ -124,6 +125,7 @@ public class Player : Drawable {
 	//	}
 
 	public void OnKeyEvent(IKeySupplier c) {
+		Console.WriteLine(Pos.ToString());
 		if (c.keyUp) {
 			if (c.keyLeft) {
 				if (c.keyDown) {
@@ -201,7 +203,9 @@ public class Player : Drawable {
 				}
 			}
 		}
-	}
+		Console.WriteLine(Dir.ToString());
+		Console.WriteLine(Pos.ToString());
+    }
 
 	public static unsafe void SerializePlayer(byte* buffer, Player player, int offset) {
 		byte* ptr = buffer;

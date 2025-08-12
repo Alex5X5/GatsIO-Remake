@@ -54,7 +54,8 @@ public class GameServer:Socket {
 		logger.Log("bound endPoint="+point.ToString());
 		//start the main threads
 		Game = new(null);
-		Game.StartAllLoops();
+        logger.Log("starting game loops");
+        Game.StartAllLoops();
 		Game.SpreadObstacles();
 		AcceptLoop();
 	}
@@ -144,7 +145,7 @@ public class GameServer:Socket {
 			PlayerIdCounter++;
 			Player temp = new(null, 100, PlayerIdCounter);
 			for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-				if (i==Constants.PLAYER_COUNT && Game.Players[i].Health!=-1)
+				if (i==Constants.PLAYER_COUNT-1 && Game.Players[i].Health!=-1)
 					return Protocoll.PreparePacket(Headers.PAYER_LIMIT);
 				if (Game.Players[i].Health==-1) {
 					Game.Players[i]=temp;

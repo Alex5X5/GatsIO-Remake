@@ -114,7 +114,7 @@ public class RendererGl {
 		int colorModeLocation = _Gl.GetUniformLocation(staticShaderProgram, "colorMode");
 
 		_Gl.Uniform1(colorModeLocation, 1);
-		player?.Draw(_Gl);
+		//player?.Draw(_Gl);
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			if (player!=null) {
 				if (game.Players[i].Health!=-1&&game.Players[i].PlayerUUID!=player.PlayerUUID)
@@ -140,16 +140,16 @@ public class RendererGl {
 		colorModeLocation = _Gl.GetUniformLocation(staticShaderProgram, "colorMode");
 
 		_Gl.Uniform1(colorModeLocation, 2);
+		if (player!=null) {
+			player.dirty=true;
+			player.Draw(_Gl);
+		}
+		_Gl.Uniform1(colorModeLocation, 3);
 		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
 			//client.Game.Obstacles[i].dirty=true;
 			game.Obstacles[i]?.Draw(_Gl);
 		}
 
-		_Gl.Uniform1(colorModeLocation, 3);
-		if (player!=null) {
-			player.dirty=true;
-			player.Draw(_Gl);
-		}
 		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
 			game.Bullets[i].dirty = true;
 			game.Bullets[i].Draw(_Gl);

@@ -5,43 +5,47 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-
-
 public static class Paths {
+
+	public static Assembly AssetAssembly; 
 
 	public static void ExtractFiles() {
 		string resourceNamespacePrefix = "ShGame.Util.Assets";
 
 		// Get executing assembly
-		var assembly = Assembly.GetExecutingAssembly();
+		AssetAssembly = Assembly.GetExecutingAssembly();
 		
-		var resourceNames = assembly.GetManifestResourceNames();
+		var resourceNames = AssetAssembly.GetManifestResourceNames();
 
 		// Determine output path next to the running .exe
 		string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
 		int dots = 0;
-		string name = assembly.GetName().FullName;
-		foreach (char c in name.ToCharArray())
+		string name = AssetAssembly.GetName().FullName;
+		foreach (char c in name.ToCharArray()) { 
+			if(c==' ')
+				break;
 			if (c=='.')
 				dots++;
+		}
 
 		for(int i=0; i<resourceNames.Length; i++) {
 			// Filter resources inside the specified namespace
 			if (!resourceNames[i].StartsWith(resourceNamespacePrefix))
 				continue;
 			string resourceName = resourceNames[i];
-			while (resourceName.Split('.').Length-dots>2) {
+			resourceName = resourceName.Replace(resourceNamespacePrefix+".", "");
+			while (resourceName.Split('.').Length-dots>1) {
 				resourceName = new StringBuilder(resourceName)
 					.Insert(resourceName.IndexOf('.')+1, '\\')
 						.Remove(resourceName.IndexOf('.'), 1)
 							.ToString();
 			}
-			resourceName=exeDirectory+resourceName;
+			resourceName=exeDirectory+"ShGame\\Assets\\"+resourceName;
 			if (File.Exists(resourceName))
 				continue;
             Directory.CreateDirectory(Path.GetDirectoryName(resourceName)!);
-            using Stream? resourceStream = assembly.GetManifestResourceStream(resourceNames[i]);
+            using Stream? resourceStream = AssetAssembly.GetManifestResourceStream(resourceNames[i]);
             if (resourceStream == null) {
                 Console.WriteLine($"Failed to load resource: {resourceName}");
                 continue;
@@ -55,10 +59,10 @@ public static class Paths {
 	}
 
 	public static string AssetsPath(string fileName) {
-		string assemplyName = Assembly.GetExecutingAssembly().GetName().Name+".dll";
-		string assemblyLocation = Assembly.	GetExecutingAssembly().Location;
+		string assemplyName = AssetAssembly.GetName().Name+".dll";
+		string assemblyLocation = AssetAssembly.Location;
 		string trimedName = assemblyLocation.Trim(assemplyName.ToCharArray());
-		trimedName = Path.Combine(trimedName+@"\ShGame\Assets\", fileName);
+		trimedName = Path.Combine(trimedName+@"ShGame\Assets\", fileName);
 		return trimedName;
 	} 
 }

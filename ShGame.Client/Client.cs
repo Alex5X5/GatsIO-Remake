@@ -55,6 +55,7 @@ public class Client : IKeySupplier{
 
 
 	public Client(IPAddress address, int port) {
+		Thread.Sleep(5000);
 		logger=new Logger(new LoggingLevel("Client"));
 		logger.Log(
 			"address port constructor",

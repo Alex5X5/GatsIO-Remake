@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<OutputType>Exe</OutputType>
+	<StartupObject>ShGame.Net.Server.ServerMain</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

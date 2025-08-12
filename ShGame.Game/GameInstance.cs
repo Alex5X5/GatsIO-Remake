@@ -7,6 +7,7 @@ using ShGame.Util;
 using SimpleLogging.logging;
 
 using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -99,6 +100,9 @@ public class GameInstance {
 					//logger.Log("moved player ", new MessageParameter("player ", p.ToString()));
 				}
 		}
+		Assembly ass = Assembly.GetEntryAssembly();
+        if (ass.FullName.Contains(".Server")) 
+			Console.Write("");
 		PastPlayerMoveLoop?.Invoke();
 	}
 

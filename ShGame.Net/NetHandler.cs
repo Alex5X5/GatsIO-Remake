@@ -59,7 +59,6 @@ public class NetHandler : Socket {
             Close();
             throw new SocketException(0, "Connect Timeout");
         }
-        return success;
     }
 
     private byte[] RecievePacket() {
@@ -108,10 +107,11 @@ public class NetHandler : Socket {
 		SendPacket(Protocoll.PreparePacket(Headers.REGISTER_PLAYER));
 		//ask the server to add a new player to its list and create a new Player with the recieved id
 		byte[] packet = RecievePacket();
-        short id = 0;
-        fixed (byte* ptr = &packet[0])
-            id = Player.DeserializePlayerId(ptr, Protocoll.PAYLOAD_OFFSET);
-        controlledPlayer = allPlayers.First(p => p.Health==-1);
+        //short id = Player.DeserializePlayerId((byte*)&packet, Protocoll.PAYLOAD_OFFSET);
+        controlledPlayer = new();
+        fixed(byte* ptr = &packet[0])
+            Player.DeserializePlayer(ptr, controlledPlayer, Protocoll.PAYLOAD_OFFSET);
+        //controlledPlayer = allPlayers.First(p => p.PlayerUUID==id);
 		//exchange all players with the client's player beeing the newly created one
 
 		ExchangePlayers(controlledPlayer, allPlayers, true);
