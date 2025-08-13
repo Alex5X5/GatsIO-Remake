@@ -34,6 +34,8 @@ public class GameInstance {
 		Players = new Player[Constants.PLAYER_COUNT];
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
 			Players[i]=new();
+		if (pov!=null)
+			Players[0]=pov;
 		Bullets = new Bullet[Constants.BULLET_COUNT];
 		for (int i = 0; i<Constants.BULLET_COUNT; i++)
 			Bullets[i]=new();
@@ -100,9 +102,9 @@ public class GameInstance {
 					//logger.Log("moved player ", new MessageParameter("player ", p.ToString()));
 				}
 		}
-		Assembly ass = Assembly.GetEntryAssembly();
-        if (ass.FullName.Contains(".Server")) 
-			Console.Write("");
+		//Assembly ass = Assembly.GetEntryAssembly();
+  //      if (ass.FullName.Contains(".Server")) 
+		//	Console.Write("");
 		PastPlayerMoveLoop?.Invoke();
 	}
 

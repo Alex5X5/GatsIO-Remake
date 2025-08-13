@@ -72,9 +72,9 @@ public class Client : IKeySupplier{
 		//	obstacles[i] = new Obstacle(this, new Vector3d(100, 100, 0), 1);
 		//for (int i = 0; i<GameServer.BULLET_COUNT; i++)
 		//	bullets[i] = new Bullet(null, null, 10, 20);
-		
+
+		ControlledPlayer=new(new(100,100,0),100,1);
 		Game = new(ControlledPlayer);
-		//ControlledPlayer=new(new(100,100,0),100,1);
 		//ControlledPlayer = Game.Players[0];
 		//ControlledPlayer = new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
 		Game.StartAllLoops();

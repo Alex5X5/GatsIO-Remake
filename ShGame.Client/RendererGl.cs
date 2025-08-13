@@ -117,8 +117,11 @@ public class RendererGl {
 		//player?.Draw(_Gl);
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			if (player!=null) {
-				if (game.Players[i].Health!=-1&&game.Players[i].PlayerUUID!=player.PlayerUUID)
+				logger.Debug("players:");
+				logger.Debug(game.Players[i].ToString());
+				if (game.Players[i].Health!=-1&&game.Players[i].PlayerUUID!=player.PlayerUUID){
 					game.Players[i].Draw(_Gl);
+				}
 			} else {
 			
 			}

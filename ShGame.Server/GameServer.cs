@@ -143,7 +143,7 @@ public class GameServer:Socket {
 		logger.Log("processing player register request");
 		if (Protocoll.AnalyzePacket(packet)==Headers.REGISTER_PLAYER) {
 			PlayerIdCounter++;
-			Player temp = new(null, 100, PlayerIdCounter);
+			Player temp = new(new(100,100,0), 100, PlayerIdCounter);
 			for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 				if (i==Constants.PLAYER_COUNT-1 && Game.Players[i].Health!=-1)
 					return Protocoll.PreparePacket(Headers.PAYER_LIMIT);

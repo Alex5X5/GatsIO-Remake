@@ -108,7 +108,6 @@ public class NetHandler : Socket {
 		//ask the server to add a new player to its list and create a new Player with the recieved id
 		byte[] packet = RecievePacket();
         //short id = Player.DeserializePlayerId((byte*)&packet, Protocoll.PAYLOAD_OFFSET);
-        controlledPlayer = new();
         fixed(byte* ptr = &packet[0])
             Player.DeserializePlayer(ptr, controlledPlayer, Protocoll.PAYLOAD_OFFSET);
         //controlledPlayer = allPlayers.First(p => p.PlayerUUID==id);
