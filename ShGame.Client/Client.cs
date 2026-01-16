@@ -7,10 +7,10 @@ using Silk.NET.Input;
 using System.Numerics;
 using ShGame.Client.Rendering;
 using ShGame.Math;
-using ShGame.Net;
 using ShGame.Game;
 using ShGame.Game.Models;
 using ShGame.Game.Services;
+using ShGame.Net.Services;
 
 //#pragma warning disable CS8500 //insert spaces instead of tabs
 
@@ -20,7 +20,7 @@ public class Client : IKeySupplier{
 	public static readonly int SCREEN_PIXEL_HEIGHT = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size.X;
 
 	private readonly RendererGl renderer;
-	private NetHandler? NetHandler;
+	private ClientNetworkService? NetHandler;
 	public GameService Game;
 	
 	private IWindow? window;

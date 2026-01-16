@@ -3,5 +3,9 @@
 using ShGame.Rendering.ViewModels;
 
 public class BulletViewModel : ViewModelBase {
+    
 
+    public BulletViewModel() {
+
+    }
 }

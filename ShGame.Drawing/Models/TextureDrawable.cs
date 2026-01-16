@@ -7,7 +7,7 @@ using SixLabors.ImageSharp;
 using System.IO;
 using StbImageSharp;
 
-public unsafe abstract class TextureDrawable:Drawable {
+public unsafe abstract class TextureDrawable<ModelT> : Drawable<ModelT> {
 
 	Image<Rgba32> image;
 	private byte[] pixelData;
@@ -16,7 +16,7 @@ public unsafe abstract class TextureDrawable:Drawable {
 	private uint width;
 	private uint height;
 
-	public unsafe TextureDrawable(string path, uint verticesCount):base(verticesCount) {
+	public unsafe TextureDrawable(string path, ModelT viewModel, uint verticesCount) :base(viewModel, verticesCount) {
 		//byte* ptr = (byte*)NativeMemory.AllocZeroed(3);
 		//new Span<byte>(ptr, (int)fileSize)
 		image = Image.Load<Rgba32>(path);

@@ -2,11 +2,9 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using ShGame.Drawing.Interfaces;
-using ShGame.Drawing.Models;
 using ShGame.Math;
 
-public class Obstacle:Drawable, ISupportsShadow {
+public class Obstacle {
 
 	public const int OBSTACLE_BYTE_LENGTH = 17;
 	public int WIDTH, HEIGHT;
@@ -15,90 +13,11 @@ public class Obstacle:Drawable, ISupportsShadow {
 	public readonly LineSection3d boundL, boundT, boundR, boundB;
 	public Vector3d Pos;
 
-	public Shadow? shadow;
-	Player? camera;
-
-	public Obstacle() : this(null, null, 0){
+	public Obstacle() : this(null, 0){
 	
 	}
 
-	public Obstacle(Player? _camera, Vector3d? pos_, byte type_):base(18) {
-		camera = _camera;
-		shadow = new Shadow(this);
-		Pos = pos_??new Vector3d(0, 0, 0);
-		type = type_;
-		switch (type) {
-			case 1:
-				//logger.log("setting bounds", new MessageParameter("type", type));
-				WIDTH = 150;
-				HEIGHT = 150;
-				break;
-			case 2:
-				//logger.log("setting bounds", new MessageParameter("type", type));
-				WIDTH = 150;
-				HEIGHT = 75;
-				break;
-			case 3:
-				//logger.log("setting bounds", new MessageParameter("type", type));
-				WIDTH = 75;
-				HEIGHT = 150;
-				break;
-			default:
-				//logger.error("illegal type", new MessageParameter("type", type));
-				WIDTH = 0;
-				HEIGHT = 0;
-				break;
-		}
-		boundL = new LineSection3d(Pos, Pos.Cpy().Add(0, HEIGHT, 0));
-		boundT = new LineSection3d(Pos, Pos.Cpy().Add(WIDTH, 0, 0));
-		boundB = new LineSection3d(boundL.point2, boundL.point2.Cpy().Add(WIDTH, 0, 0));
-		boundR = new LineSection3d(boundT.point2, boundB.point2);
-		//Console.WriteLine(vertices);
-	}
-
-	public override void Dispose() {
-		GC.SuppressFinalize(this);
-		base.Dispose();
-		shadow?.Dispose();
-	}
-
-	public unsafe override void UpdateVertices() {
-		float* ptr = VertexDataPtr;
-		*ptr=(float)Pos.x;
-		ptr++;
-        *ptr=(float)Pos.y;
-        ptr++;
-        *ptr=0;
-        ptr++;
-        *ptr=(float)Pos.x+WIDTH;
-        ptr++;
-        *ptr=(float)Pos.y;
-        ptr++;
-        *ptr=0;
-        ptr++;
-        *ptr=(float)Pos.x+WIDTH;
-        ptr++;
-        *ptr=(float)Pos.y+HEIGHT;
-        ptr++;
-        *ptr=0;
-        ptr++;
-        *ptr=(float)Pos.x;
-        ptr++;
-        *ptr=(float)Pos.y;
-        ptr++;
-        *ptr=0;
-        ptr++;
-        *ptr=(float)Pos.x;
-        ptr++;
-        *ptr=(float)Pos.y+HEIGHT;
-        ptr++;
-        *ptr=0;
-        ptr++;
-        *ptr=(float)Pos.x+WIDTH;
-        ptr++;
-        *ptr=(float)Pos.y+HEIGHT;
-        ptr++;
-        *ptr=0;
+	public Obstacle(Vector3d? pos_, byte type_) {
 	}
 
 	/// <summary>
@@ -153,10 +72,10 @@ public class Obstacle:Drawable, ISupportsShadow {
     /// byte 10 to 13 are converted to an int and are set as the new width of the obstacle
     /// byte 10 to 13 are converted to an int and are set as the new height of the obstacle
     /// </summary>
-    public static unsafe void DeserializeObstacle(Player? _camera, byte* buffer, ref Obstacle obstacle, int offset) {
+    public static unsafe void DeserializeObstacle(byte* buffer, ref Obstacle obstacle, int offset) {
 		Console.WriteLine("Deserializing"+obstacle.ToString());
 		byte* ptr = buffer;
-        obstacle ??= new Obstacle(_camera, null, 0);
+        obstacle ??= new Obstacle(null, 0);
 		obstacle.type = *buffer;
 		if (obstacle.type ==0) {
 			return;
@@ -171,7 +90,6 @@ public class Obstacle:Drawable, ISupportsShadow {
             obstacle.HEIGHT = Unsafe.Read<int>(buffer);
             UpdateBounds(obstacle);
 		}
-		obstacle.dirty = true;
 	}
 
 	private unsafe int RelativeX(Vector3d* v) {
@@ -191,73 +109,6 @@ public class Obstacle:Drawable, ISupportsShadow {
         else
             return 2;
     }
-
-    public Vector3d GetPointOfView() => camera!=null ? camera.Pos.Cpy().Sub(Player.SIZE/2.0, Player.SIZE/2.0, 0.0):new Vector3d(0,0,0);
-
-	public Vector3d GetRelativeVector() =>
-		Pos.Cpy().Add(new Vector3d(WIDTH/2, HEIGHT/2, 0)).Sub(GetPointOfView()).Nor();
-
-	public unsafe void GetShadowOrigins(out Vector3d point1, out Vector3d point2, out Dir dir) {
-		point1 = new(0, 0, 0);
-		point2 = new(0, 0, 0);
-		dir=Dir.B;
-		if (camera==null)
-			return;
-		fixed (Vector3d* pos = &camera.Pos) {
-			//relative is to the left and to the top
-			if (RelativeX(pos)==1&&RelativeY(pos)==1) {
-				point1.x=boundR.point1.x;
-				point1.y=boundR.point1.y;
-				point2.x=boundL.point2.x;
-				point2.y=boundL.point2.y;
-				dir = Dir.T;
-			//relative is in the middle on x and to the top
-			} else if (RelativeX(pos)==2&&RelativeY(pos)==1) {
-				point1.x=boundL.point1.x;
-				point1.y=boundL.point1.y;
-				point2.x=boundR.point1.x;
-				point2.y=boundR.point1.y;
-				dir = Dir.T;
-            } else if (RelativeX(pos)==3&&RelativeY(pos)==1) {
-				point1.x=boundL.point1.x;
-				point1.y=boundL.point1.y;
-				point2.x=boundR.point2.x;
-				point2.y=boundR.point2.y;
-				dir = Dir.T;
-            } else if (RelativeX(pos)==1&&RelativeY(pos)==2) {
-				point1.x=boundL.point1.x;
-				point1.y=boundL.point1.y;
-				point2.x=boundL.point2.x;
-				point2.y=boundL.point2.y;
-				dir = Dir.L;
-            } else if (RelativeX(pos)==3&&RelativeY(pos)==2) {
-				point1.x=boundR.point1.x;
-				point1.y=boundR.point1.y;
-				point2.x=boundR.point2.x;
-				point2.y=boundR.point2.y;
-                dir = Dir.R;
-            } else if (RelativeX(pos)==1&&RelativeY(pos)==3) {
-				point1.x=boundL.point1.x;
-				point1.y=boundL.point1.y;
-				point2.x=boundR.point2.x;
-				point2.y=boundR.point2.y;
-                dir = Dir.B;
-            } else if (RelativeX(pos)==2&&RelativeY(pos)==3) {
-				point1.x=boundL.point2.x;
-				point1.y=boundL.point2.y;
-				point2.x=boundR.point2.x;
-				point2.y=boundR.point2.y;
-				dir = Dir.B;
-			} else if (RelativeX(pos)==3&&RelativeY(pos)==3) {
-				point1.x=boundR.point1.x;
-				point1.y=boundR.point1.y;
-				point2.x=boundL.point2.x;
-				point2.y=boundL.point2.y;
-                dir = Dir.B;
-            }
-        }
-
-	}
 
 	public override string ToString() => "ShGame.Game.Client.Obstacle[Pos:"+Pos.ToString()+", Type:"+Convert.ToString(type)+"]";
 }

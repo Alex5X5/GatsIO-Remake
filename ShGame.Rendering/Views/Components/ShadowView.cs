@@ -7,12 +7,17 @@ using ShGame.Util;
 
 using SimpleLogging.logging;
 
-public class Shadow : TextureDrawable {
+public class ShadowView : TextureDrawable<ShadowViewModel> {
 
 	static Logger logger = new(new LoggingLevel("shadow"));
 	private ISupportsShadow attatch;
 
-	public unsafe override void UpdateVertices() {
+
+    public ShadowView(ShadowViewModel viewModel) : base(Paths.AssetsPath("shadow.png"), viewModel, 18) {
+
+    }
+
+    public unsafe override void UpdateVertices() {
 		GetShadow(out Vector3d shadowTarget1, out Vector3d shadowTarget2);
 		attatch.GetShadowOrigins(out Vector3d shadowOrigin1, out Vector3d shadowOrigin2, out Dir dir);
 		float* ptr = VertexDataPtr;
@@ -58,32 +63,28 @@ public class Shadow : TextureDrawable {
 		//logger.Log(s);
 	}
 
-	public Shadow(ISupportsShadow attatch_) : base(Paths.AssetsPath("shadow.png"), 18) {
-		attatch = attatch_;
-	}
-
-	private static unsafe void CalculatePoints(ObstacleViewModel* obstacle) {
-		obstacle->WIDTH = obstacle->type switch {
-			1 => 35,
-			2 => 70,
-			3 => 70,
-			_ => 0,
-		};
-		obstacle->HEIGHT = obstacle->type switch {
-			1 => 70,
-			2 => 35,
-			3 => 70,
-			_ => 0,
-		};
-		obstacle->boundL.point1.Set(obstacle->Pos.x, obstacle->Pos.y, 0);
-		obstacle->boundL.point2.Set(obstacle->Pos.x, obstacle->Pos.y+obstacle->HEIGHT, 0);
-		obstacle->boundR.point1.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y, 0);
-		obstacle->boundR.point2.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y+obstacle->HEIGHT, 0);
-		obstacle->boundT.point1.Set(obstacle->boundT.point1);
-		obstacle->boundT.point2.Set(obstacle->boundR.point1);
-		obstacle->boundB.point1.Set(obstacle->boundL.point2);
-		obstacle->boundB.point2.Set(obstacle->boundR.point2);
-	}
+	//private static unsafe void CalculatePoints(ObstacleViewModel* obstacle) {
+	//	obstacle->WIDTH = obstacle->type switch {
+	//		1 => 35,
+	//		2 => 70,
+	//		3 => 70,
+	//		_ => 0,
+	//	};
+	//	obstacle->HEIGHT = obstacle->type switch {
+	//		1 => 70,
+	//		2 => 35,
+	//		3 => 70,
+	//		_ => 0,
+	//	};
+	//	obstacle->boundL.point1.Set(obstacle->Pos.x, obstacle->Pos.y, 0);
+	//	obstacle->boundL.point2.Set(obstacle->Pos.x, obstacle->Pos.y+obstacle->HEIGHT, 0);
+	//	obstacle->boundR.point1.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y, 0);
+	//	obstacle->boundR.point2.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y+obstacle->HEIGHT, 0);
+	//	obstacle->boundT.point1.Set(obstacle->boundT.point1);
+	//	obstacle->boundT.point2.Set(obstacle->boundR.point1);
+	//	obstacle->boundB.point1.Set(obstacle->boundL.point2);
+	//	obstacle->boundB.point2.Set(obstacle->boundR.point2);
+	//}
 
 	private unsafe void GetShadow(out Vector3d shadowTarget1, out Vector3d shadowTarget2) {
 		attatch.GetShadowOrigins(out Vector3d shadowOrigin1, out Vector3d shadowOrigin2, out Dir dir);

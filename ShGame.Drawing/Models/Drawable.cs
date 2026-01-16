@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 /// <summary>
 /// This is a Base class for objects that have to be drawn.
 /// </summary>
-public unsafe abstract class Drawable : IDisposable {
+public unsafe abstract class Drawable<ModelT> : IDisposable {
 
 	protected uint vaoHandle = 0;
 	protected uint vboHandle = 0;
@@ -24,7 +24,10 @@ public unsafe abstract class Drawable : IDisposable {
 
 	private static readonly Logger logger = new(new LoggingLevel("Drawable"));
 
-	public Drawable(uint verticesCount) {
+	protected ModelT viewModel;
+
+	public Drawable(ModelT viewModel, uint verticesCount) {
+		this.viewModel = viewModel;
 		VertexDataPtr = (float*)NativeMemory.AllocZeroed(verticesCount*3*sizeof(float));
 		VERTICES_COUNT = verticesCount;
 		dirty = true;

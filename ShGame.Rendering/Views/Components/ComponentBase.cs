@@ -2,9 +2,10 @@
 
 using ShGame.Drawing.Models;
 
-public abstract class Componentbase : Drawable {
+public abstract class Componentbase<ModelT> : Drawable<ModelT> {
 
-	public Componentbase(uint verticesCount) : base(verticesCount) {
+	public Componentbase(ModelT viewModel, uint verticesCount) : base(viewModel, verticesCount) {
+		
 	}
 
 }

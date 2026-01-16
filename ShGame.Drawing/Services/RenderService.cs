@@ -6,7 +6,6 @@ using Silk.NET.Windowing;
 using System.Collections.Generic;
 using SimpleLogging.logging;
 using ShGame.Util;
-using System;
 using ShGame.Drawing.Models;
 using ShGame.Drawing.Services;
 

@@ -6,7 +6,7 @@ using ShGame.Drawing.Interfaces;
 using ShGame.Drawing.Models;
 using ShGame.Math;
 
-public class Obstacle:Drawable, ISupportsShadow {
+public class ObstacleView:Drawable, ISupportsShadow {
 
 	public const int OBSTACLE_BYTE_LENGTH = 17;
 	public int WIDTH, HEIGHT;
@@ -18,11 +18,11 @@ public class Obstacle:Drawable, ISupportsShadow {
 	public ShadowViewModel? shadow;
 	PlayerViewModel? camera;
 
-	public Obstacle() : this(null, null, 0){
+	public ObstacleView() : this(null, null, 0){
 	
 	}
 
-	public Obstacle(PlayerViewModel? _camera, Vector3d? pos_, byte type_):base(18) {
+	public ObstacleView(PlayerViewModel? _camera, Vector3d? pos_, byte type_):base(18) {
 		camera = _camera;
 		shadow = new Shadow(this);
 		Pos = pos_??new Vector3d(0, 0, 0);
@@ -104,7 +104,7 @@ public class Obstacle:Drawable, ISupportsShadow {
 	/// <summary>
 	/// updates the bound objects of an obstacle to match its width and height.
 	/// </summary>
-	private static unsafe void UpdateBounds(Obstacle obstacle) {
+	private static unsafe void UpdateBounds(ObstacleView obstacle) {
 		obstacle.WIDTH = obstacle.type switch {
 			1 => 35,
 			2 => 70,
@@ -127,7 +127,7 @@ public class Obstacle:Drawable, ISupportsShadow {
         obstacle.boundB.point2.Set(obstacle.boundR.point2);//top right corner
     }
 
-	public static unsafe void SerializeObstacle(byte* buffer, Obstacle obstacle, int offset) {
+	public static unsafe void SerializeObstacle(byte* buffer, ObstacleView obstacle, int offset) {
         byte* ptr = buffer;
 		ptr+=offset;
 		if (obstacle==null) {
@@ -153,10 +153,10 @@ public class Obstacle:Drawable, ISupportsShadow {
     /// byte 10 to 13 are converted to an int and are set as the new width of the obstacle
     /// byte 10 to 13 are converted to an int and are set as the new height of the obstacle
     /// </summary>
-    public static unsafe void DeserializeObstacle(PlayerViewModel? _camera, byte* buffer, ref Obstacle obstacle, int offset) {
+    public static unsafe void DeserializeObstacle(PlayerViewModel? _camera, byte* buffer, ref ObstacleView obstacle, int offset) {
 		Console.WriteLine("Deserializing"+obstacle.ToString());
 		byte* ptr = buffer;
-        obstacle ??= new Obstacle(_camera, null, 0);
+        obstacle ??= new ObstacleView(_camera, null, 0);
 		obstacle.type = *buffer;
 		if (obstacle.type ==0) {
 			return;

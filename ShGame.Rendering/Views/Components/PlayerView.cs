@@ -6,9 +6,7 @@ using ShGame.Math;
 using System.Runtime.CompilerServices;
 
 
-//#pragma warning disable CS8500 //a pointer is created to a variable of an unmanaged type
-
-public class Player : Drawable {
+public class PlayerView : Drawable<PlayerViewModel> {
 
 	public const int PLAYER_BYTE_LENGTH = 56;
 
@@ -37,35 +35,7 @@ public class Player : Drawable {
 	public short PlayerUUID = 0;
 	public bool Visible;
 
-	private static int[] CalcCircleOffsets() {
-
-		int[] res = new int[FLOAT_COUNT];
-		res[0] = 0;
-		res[1] = 0;
-		res[2] = 0;
-		res[3] = 0;
-		res[4] = SIZE;
-		res[5] = 0;
-		res[6] = (int)(Math.Sin(Math.PI*2/SIDES_COUNT*1)*SIZE);
-		res[7] = (int)(Math.Cos(Math.PI*2/SIDES_COUNT*1)*SIZE);
-		res[8] = 0;
-
-		for (int i = 9; i<SIDES_COUNT*9; i+=9) {
-			res[i] = res[0];
-			res[i+1] = res[1];
-			res[i+2] = 0;
-			res[i+3] = res[i-3];
-			res[i+4] = res[i-2];
-			res[i+5] = 0;
-			res[i+6] = (int)(Math.Sin(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
-			res[i+7] = (int)(Math.Cos(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
-			res[i+8] = 0;
-		}
-
-		return res;
-	}
-
-	public Player(Vector3d? newPos, int newHealth, short UUID):base(FLOAT_COUNT) {
+	public PlayerView(Vector3d? newPos, int newHealth, short UUID):base(FLOAT_COUNT) {
 		Pos = newPos??new Vector3d(0, 0, 0);
 		dirty = true;
 		Health_ = newHealth;
@@ -74,7 +44,7 @@ public class Player : Drawable {
 	}
 
 	//the constructor for invalid players
-	public Player():base(FLOAT_COUNT) {
+	public PlayerView(PlayerViewModel viewModel):base(viewModel, FLOAT_COUNT) {
 		Pos = new(0, 0, 0);
 		//if the health of a player is -1 it is considered invalid and won't be processed
 		Health_ = -1;
@@ -82,7 +52,35 @@ public class Player : Drawable {
 		Visible = false;
 	}
 
-	public override string ToString() =>
+    private static int[] CalcCircleOffsets() {
+
+        int[] res = new int[FLOAT_COUNT];
+        res[0] = 0;
+        res[1] = 0;
+        res[2] = 0;
+        res[3] = 0;
+        res[4] = SIZE;
+        res[5] = 0;
+        res[6] = (int)(System.Math.Sin(System.Math.PI*2/SIDES_COUNT*1)*SIZE);
+        res[7] = (int)(System.Math.Cos(System.Math.PI*2/SIDES_COUNT*1)*SIZE);
+        res[8] = 0;
+
+        for (int i = 9; i<SIDES_COUNT*9; i+=9) {
+            res[i] = res[0];
+            res[i+1] = res[1];
+            res[i+2] = 0;
+            res[i+3] = res[i-3];
+            res[i+4] = res[i-2];
+            res[i+5] = 0;
+            res[i+6] = (int)(System.Math.Sin(System.Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
+            res[i+7] = (int)(System.Math.Cos(System.Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
+            res[i+8] = 0;
+        }
+
+        return res;
+    }
+
+    public override string ToString() =>
 		$"Game.graphics.client.Player[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{Dir}, UUID:{PlayerUUID}, VAO:{vaoHandle}, VBO:{vboHandle}]";
 
 	public unsafe override void UpdateVertices() {
@@ -207,7 +205,7 @@ public class Player : Drawable {
 		Console.WriteLine(Pos.ToString());
     }
 
-	public static unsafe void SerializePlayer(byte* buffer, Player player, int offset) {
+	public static unsafe void SerializePlayer(byte* buffer, PlayerView player, int offset) {
 		byte* ptr = buffer;
 		ptr+=offset;
 		if (player==null) {
@@ -237,10 +235,10 @@ public class Player : Drawable {
 		}
 	}
 
-	public static unsafe void DeserializePlayer(byte* buffer, Player player, int offset) {
+	public static unsafe void DeserializePlayer(byte* buffer, PlayerView player, int offset) {
 		byte* ptr = buffer;
 		ptr+=offset;
-		player ??= new Player(null, 0, 0);
+		player ??= new PlayerView(null, 0, 0);
 		player.Health = Unsafe.Read<int>(ptr);
 		if (player.Health_ == -1) {
 			player.Deactivate();

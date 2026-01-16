@@ -1,4 +1,4 @@
-﻿namespace ShGame.Net;
+﻿namespace ShGame.Net.Services;
 
 using ShGame.Game.Models;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 
 
-public class NetHandler : Socket {
+public class ClientNetworkService : Socket {
 
     private readonly Logger logger = new(new LoggingLevel("NetHandler"));
     
@@ -16,15 +16,15 @@ public class NetHandler : Socket {
 
     private bool stop = false;
 
-    internal NetHandler() : this(5000) {
+    internal ClientNetworkService() : this(5000) {
         logger.Log("enpty constructor");
     }
 
-    internal NetHandler(int port) : this(NetUtil.GetLocalIP(), port) {
+    internal ClientNetworkService(int port) : this(NetUtil.GetLocalIP(), port) {
         logger.Log("port constructor");
     }
 
-    public NetHandler(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
+    public ClientNetworkService(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
         logger.Log("port addresss constructor");
         logger.Log(address.AddressFamily.ToString());
         IP = IPAddress.Parse("192.168.2.112");
