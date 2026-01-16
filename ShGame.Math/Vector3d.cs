@@ -28,6 +28,16 @@ public unsafe struct Vector3d {
 
 	public static implicit operator Vector256<double>(Vector3d v) =>
 		Vector256.Create(v.x, v.y, v.z, 0.0);
+	
+	public static Vector3d operator +(Vector3d vector1, Vector3d vector2) =>
+		vector1.Add(vector2);
+	
+	public static Vector3d operator -(Vector3d vector1, Vector3d vector2) =>
+		vector1.Sub(vector2);
+	
+	public static Vector3d operator *(Vector3d vector1, double scalar) =>
+		vector1.Scl(scalar);
+
 
 	public Vector3d():this(0,0,0) {
 	}
@@ -132,14 +142,19 @@ public unsafe struct Vector3d {
 	}
 
 	public static double Len(double x, double y, double z) {
-		return System.Math.Sqrt(x*x+y*y+z*z);
+        if (Vector256.IsHardwareAccelerated) {
+            Vector256<double> vec = Vector256.Create(x, y, z, 0.0); ;
+            vec=Vector256.Multiply(vec, vec);
+            return System.Math.Sqrt(Vector256.Sum(vec));
+        }
+        return System.Math.Sqrt(x*x+y*y+z*z);
 	}
 
 	public readonly double Len() {
 		if (Vector256.IsHardwareAccelerated) {
-			Vector256<double> vecA = this;
-			vecA=Vector256.Multiply(vecA, vecA);
-			return System.Math.Sqrt(Vector256.Sum(vecA));
+			Vector256<double> vec = this;
+			vec=Vector256.Multiply(vec, vec);
+			return System.Math.Sqrt(Vector256.Sum(vec));
 		}
 		return System.Math.Sqrt(x*x+y*y+z*z);
 	}
@@ -159,7 +174,7 @@ public unsafe struct Vector3d {
 	public unsafe Vector3d Limit2(double limit2) {
 		double len2 = Len2();
 		if (len2>limit2) {
-			Scl((double)System.Math.Sqrt(limit2/len2));
+			Scl(System.Math.Sqrt(limit2/len2));
 		}
 		return this;
 	}

@@ -6,15 +6,14 @@ using Silk.NET.Windowing;
 using System.Collections.Generic;
 using SimpleLogging.logging;
 using ShGame.Util;
-using ShGame.Game.Models;
-using ShGame.Game.Services;
+using System;
 using ShGame.Drawing.Models;
 using ShGame.Drawing.Services;
 
-public class RendererGl {
+public class RenderService {
 
 	//private readonly IWindow window;
-	private static readonly Logger logger = new(new LoggingLevel("RendererGL"));
+	private static readonly Logger logger = new(new LoggingLevel("RenderService"));
 
 	private List<DebugDrawable> DebugDrawables = [];
 
@@ -39,11 +38,13 @@ public class RendererGl {
 	private static readonly uint obstackleShaderProgram;
 
 
-	public RendererGl() {
-		textures = [];
+	public RenderService(IWindow window) {
+		window.Render += (double deltaTime)=>OnRender(deltaTime, window);
+		window.Load += ()=>OnLoad(window);
+        textures = [];
 	}
 
-	public unsafe void OnLoad(IWindow window, GameService game) {
+    protected virtual unsafe void OnLoad(IWindow window) {
 		loaded = true;
 
 		_Gl = GL.GetApi(window);
@@ -82,91 +83,9 @@ public class RendererGl {
 			_Gl.Uniform1(screenWidthLocation, (float)size.X);
 			_Gl.Uniform1(screenWidthLocation, (float)size.Y);
 		};
-
-
-		//client.ControlledPlayer.Setup(_Gl);
-		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
-			game.Players[i].Setup(_Gl);
-
-		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
-			game.Obstacles[i].Setup(_Gl);
-			game.Obstacles[i]?.shadow?.Setup(_Gl);
-		}
-		for (int i = 0; i<Constants.BULLET_COUNT; i++)
-			game.Bullets[i].Setup(_Gl);
 	}
 
-	public unsafe void OnRender(double deltaTime, IWindow window, Player player, GameService game) {
-		//Time+=deltaTime;
-		//if (Time-LastFrame>=1/GameServer.TARGET_TPS) {
-		//	LastFrame = Time;
-
-		//}
-		if (!loaded)
-			return;
-		//logger.Log("on render");
-		_Gl.ClearColor(0.5f, 0.5f, 0.6f, 1f);
-		_Gl.Clear((uint)ClearBufferMask.ColorBufferBit);
-
-		//if (textures.Keys.Contains(""))
-		//	return;
-
-		_Gl.UseProgram(staticShaderProgram);
-		int colorModeLocation = _Gl.GetUniformLocation(staticShaderProgram, "colorMode");
-
-		_Gl.Uniform1(colorModeLocation, 1);
-		//player?.Draw(_Gl);
-		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			if (player!=null) {
-				logger.Debug("players:");
-				logger.Debug(game.Players[i].ToString());
-				if (game.Players[i].Health!=-1&&game.Players[i].PlayerUUID!=player.PlayerUUID){
-					game.Players[i].Draw(_Gl);
-				}
-			} else {
-			
-			}
-			//player.Draw(_Gl);
-		}
-		_Gl.Uniform1(colorModeLocation, 1);
-
-		_Gl.UseProgram(textureShaderProgram);
-		_Gl.BindTexture(TextureTarget.Texture2D, shadowTexture);
-		//Gl.Uniform1(colorModeLocation, 0);
-		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
-			if (game.Obstacles[i]!=null && game.Obstacles[i].shadow!=null) {
-				game.Obstacles[i].shadow.dirty = true;
-				game.Obstacles[i].shadow.Draw(_Gl);
-			}
-		}
-		_Gl.BindTexture(TextureTarget.Texture2D, 0);
-		_Gl.UseProgram(staticShaderProgram);
-		colorModeLocation = _Gl.GetUniformLocation(staticShaderProgram, "colorMode");
-
-		_Gl.Uniform1(colorModeLocation, 2);
-		if (player!=null) {
-			player.dirty=true;
-			player.Draw(_Gl);
-		}
-		_Gl.Uniform1(colorModeLocation, 3);
-		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
-			//client.Game.Obstacles[i].dirty=true;
-			game.Obstacles[i]?.Draw(_Gl);
-		}
-
-		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
-			game.Bullets[i].dirty = true;
-			game.Bullets[i].Draw(_Gl);
-		}
-
-		_Gl.UseProgram(staticShaderProgram);
-		colorModeLocation = _Gl.GetUniformLocation(staticShaderProgram, "colorMode");
-
-		_Gl.Uniform1(colorModeLocation, 1);
-		foreach (DebugDrawable drawable in DebugDrawables) {
-			drawable.dirty = true;
-			drawable.Draw(_Gl);
-		}
+	protected unsafe void OnRender(double deltaTime, IWindow window) {
 	}
 
 	private static uint CreateShaderProgram(GL gl, IWindow window, string vertexShaderSource, string fragmentShaderSource) {

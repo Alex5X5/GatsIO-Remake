@@ -1,6 +1,6 @@
 ﻿using ShGame.Math;
 
-namespace ShGame.Drawing;
+namespace ShGame.Drawing.Models;
 public unsafe class DebugDrawable : Drawable {
 	Vector3d Point1, Point2;
 

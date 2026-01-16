@@ -1,7 +1,6 @@
 ﻿namespace ShGame.Net;
 
-using ShGame.Game.GameObjects;
-
+using ShGame.Game.Models;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;

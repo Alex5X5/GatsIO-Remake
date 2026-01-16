@@ -1,8 +1,9 @@
-﻿namespace ShGame.Game.GameObjects;
+﻿namespace ShGame.Game.Models;
 
 using System;
 using System.Runtime.CompilerServices;
-using ShGame.Drawing;
+using ShGame.Drawing.Interfaces;
+using ShGame.Drawing.Models;
 using ShGame.Math;
 
 public class Obstacle:Drawable, ISupportsShadow {

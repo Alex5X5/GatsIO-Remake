@@ -1,6 +1,6 @@
-﻿namespace ShGame.Game;
+﻿namespace ShGame.Game.Services;
 
-using ShGame.Game.GameObjects;
+using ShGame.Game.Models;
 using ShGame.Math;
 using ShGame.Util;
 
@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class GameInstance {
+public class GameService {
 
 	private bool Idle = true;
 	private bool Run = false;
@@ -29,7 +29,7 @@ public class GameInstance {
 	public Obstacle[] Obstacles;
 	public Bullet[] Bullets;
 
-	public GameInstance(Player? pov) {
+	public GameService(Player? pov) {
 		logger = new(new LoggingLevel("Game"));
 		Players = new Player[Constants.PLAYER_COUNT];
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++)

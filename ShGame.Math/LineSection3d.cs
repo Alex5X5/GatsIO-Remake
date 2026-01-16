@@ -44,7 +44,7 @@ public class LineSection3d {
 
 	public Vector3d? Intercept(Line3d l2) {
 		Line3d l = Line3d.FromPoints(point1, point2);
-		Vector3d v = l.Intercept(ref l2);
+		Vector3d v = l.Intercept(l2);
 		//		System.out.println("[LineSection3d]: (getting Intercept): this:"+v+" result:"+Contains(v));
 		if(Contains1(v))
 			return v;
@@ -54,7 +54,7 @@ public class LineSection3d {
 
 	public Vector3d? Intercept(LineSection3d l2) {
 		Line3d l = Line3d.FromPoints(point1, point2);
-		Vector3d v = l.Intercept(ref l);
+		Vector3d v = l.Intercept(l);
 		//		System.out.println("[LineSection3d]: (getting Intercept): this:"+v+" result:"+Contains(v));
 		if(Contains1(v))
 			return v;

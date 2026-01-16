@@ -8,8 +8,9 @@ using System.Numerics;
 using ShGame.Client.Rendering;
 using ShGame.Math;
 using ShGame.Net;
-using ShGame.Game.GameObjects;
 using ShGame.Game;
+using ShGame.Game.Models;
+using ShGame.Game.Services;
 
 //#pragma warning disable CS8500 //insert spaces instead of tabs
 
@@ -20,7 +21,7 @@ public class Client : IKeySupplier{
 
 	private readonly RendererGl renderer;
 	private NetHandler? NetHandler;
-	public GameInstance Game;
+	public GameService Game;
 	
 	private IWindow? window;
 	private IInputContext? inputContext;

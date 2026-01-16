@@ -1,4 +1,4 @@
-﻿namespace ShGame.Drawing;
+﻿namespace ShGame.Drawing.Models;
 
 using Silk.NET.OpenGL;
 

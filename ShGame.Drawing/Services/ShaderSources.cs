@@ -1,6 +1,4 @@
-﻿namespace ShGame.Drawing;
-
-using ShGame.Util;
+﻿namespace ShGame.Drawing.Services;
 
 public static class ShaderSources {
 

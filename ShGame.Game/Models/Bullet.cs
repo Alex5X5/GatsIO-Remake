@@ -1,9 +1,10 @@
-﻿namespace ShGame.Game.GameObjects;
+﻿namespace ShGame.Game.Models;
 
 using System;
 using System.Runtime.CompilerServices;
 using ShGame.Math;
-using ShGame.Drawing;
+using ShGame;
+using ShGame.Drawing.Models;
 
 public class Bullet : Drawable {
 
@@ -23,11 +24,6 @@ public class Bullet : Drawable {
 		Dir = _dir??new Vector3d(0, 1, 0);
 		WIDTH = (byte)(_width>0 ? _width : 5);
 		LENGHT = (byte)(_length>0 ? _length : 5);
-	}
-
-	public override void Dispose() {
-		GC.SuppressFinalize(this);
-		base.Dispose();
 	}
 
 	public unsafe override void UpdateVertices() {

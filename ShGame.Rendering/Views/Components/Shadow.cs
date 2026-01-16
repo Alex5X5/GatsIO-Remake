@@ -1,13 +1,11 @@
-﻿namespace ShGame.Game.GameObjects;
+﻿namespace ShGame.Rendering.Views.Components;
 
-using ShGame.Drawing;
-using ShGame.Game;
+using ShGame.Drawing.Interfaces;
+using ShGame.Drawing.Models;
 using ShGame.Math;
 using ShGame.Util;
 
 using SimpleLogging.logging;
-
-using System;
 
 public class Shadow : TextureDrawable {
 
@@ -64,7 +62,7 @@ public class Shadow : TextureDrawable {
 		attatch = attatch_;
 	}
 
-	private static unsafe void CalculatePoints(Obstacle* obstacle) {
+	private static unsafe void CalculatePoints(ObstacleViewModel* obstacle) {
 		obstacle->WIDTH = obstacle->type switch {
 			1 => 35,
 			2 => 70,
@@ -139,11 +137,11 @@ public class Shadow : TextureDrawable {
 		//calculate a magical factor
 		double u =
 			(
-				(oth1X - (playerPosition->x + Player.SIZE / 2)) * (shadowPoint->y - (playerPosition->y + Player.SIZE / 2)) -
-				(oth1Y - (playerPosition->y + Player.SIZE / 2)) * (shadowPoint->x - (playerPosition->x + Player.SIZE / 2))
+				(oth1X - (playerPosition->x + PlayerViewModel.SIZE / 2)) * (shadowPoint->y - (playerPosition->y + PlayerViewModel.SIZE / 2)) -
+				(oth1Y - (playerPosition->y + PlayerViewModel.SIZE / 2)) * (shadowPoint->x - (playerPosition->x + PlayerViewModel.SIZE / 2))
 			) / (
-				(oth2Y - oth1Y) * (shadowPoint->x - (playerPosition->x + Player.SIZE / 2)) -
-				(oth2X - oth1X) * (shadowPoint->y - (playerPosition->y + Player.SIZE / 2))
+				(oth2Y - oth1Y) * (shadowPoint->x - (playerPosition->x + PlayerViewModel.SIZE / 2)) -
+				(oth2X - oth1X) * (shadowPoint->y - (playerPosition->y + PlayerViewModel.SIZE / 2))
 			);
 		//magically merge the factor with the border
 		return border->

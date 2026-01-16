@@ -1,6 +1,6 @@
-﻿namespace ShGame.Game.GameObjects;
+﻿namespace ShGame.Rendering.Views.Components;
 
-using ShGame.Drawing;
+using ShGame.Drawing.Models;
 using ShGame.Math;
 
 using System.Runtime.CompilerServices;
@@ -46,8 +46,8 @@ public class Player : Drawable {
 		res[3] = 0;
 		res[4] = SIZE;
 		res[5] = 0;
-		res[6] = (int)(System.Math.Sin(System.Math.PI*2/SIDES_COUNT*1)*SIZE);
-		res[7] = (int)(System.Math.Cos(System.Math.PI*2/SIDES_COUNT*1)*SIZE);
+		res[6] = (int)(Math.Sin(Math.PI*2/SIDES_COUNT*1)*SIZE);
+		res[7] = (int)(Math.Cos(Math.PI*2/SIDES_COUNT*1)*SIZE);
 		res[8] = 0;
 
 		for (int i = 9; i<SIDES_COUNT*9; i+=9) {
@@ -57,8 +57,8 @@ public class Player : Drawable {
 			res[i+3] = res[i-3];
 			res[i+4] = res[i-2];
 			res[i+5] = 0;
-			res[i+6] = (int)(System.Math.Sin(System.Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
-			res[i+7] = (int)(System.Math.Cos(System.Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
+			res[i+6] = (int)(Math.Sin(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
+			res[i+7] = (int)(Math.Cos(Math.PI*2/(SIDES_COUNT-1)*i/9)*SIZE);
 			res[i+8] = 0;
 		}
 
@@ -141,8 +141,8 @@ public class Player : Drawable {
 						Dir.x=0; //wad
 						Dir.y=1;
 					} else {
-						Dir.x=-1/System.Math.Sqrt(2); //wa
-						Dir.y=1/System.Math.Sqrt(2);
+						Dir.x=-1/Math.Sqrt(2); //wa
+						Dir.y=1/Math.Sqrt(2);
 					}
 				}
 			} else {
@@ -156,8 +156,8 @@ public class Player : Drawable {
 					}
 				} else {
 					if (c.keyRight) {
-						Dir.x=1/System.Math.Sqrt(2); //wd
-						Dir.y=1/System.Math.Sqrt(2);
+						Dir.x=1/Math.Sqrt(2); //wd
+						Dir.y=1/Math.Sqrt(2);
 					} else {
 						Dir.x=0; //w
 						Dir.y=1;
@@ -171,8 +171,8 @@ public class Player : Drawable {
 						Dir.x=0; //asd
 						Dir.y=-1;
 					} else {
-						Dir.x=-1/System.Math.Sqrt(2); //as
-						Dir.y=-1/System.Math.Sqrt(2);
+						Dir.x=-1/Math.Sqrt(2); //as
+						Dir.y=-1/Math.Sqrt(2);
 					}
 				} else {
 					if (c.keyRight) {
@@ -186,8 +186,8 @@ public class Player : Drawable {
 			} else {
 				if (c.keyDown) {
 					if (c.keyRight) {
-						Dir.x=1/System.Math.Sqrt(2); //sd
-						Dir.y=-1/System.Math.Sqrt(2);
+						Dir.x=1/Math.Sqrt(2); //sd
+						Dir.y=-1/Math.Sqrt(2);
 					} else {
 						Dir.x=0; //s
 						Dir.y=-1;

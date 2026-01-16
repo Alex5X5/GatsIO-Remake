@@ -1,8 +1,7 @@
 ﻿namespace ShGame.Net.Server;
 
-using ShGame.Game;
-using ShGame.Game.GameObjects;
-
+using ShGame.Game.Models;
+using ShGame.Game.Services;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -28,7 +27,7 @@ public class GameServer:Socket {
 	//public const int MAX_PLAYER_COUNT = 20;
 	//public const int OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES, BULLET_COUNT = 35;
 
-	private readonly GameInstance Game;
+	private readonly GameService Game;
 
 	private readonly ServerConnection?[] clients = new ServerConnection[Constants.PLAYER_COUNT];
 
