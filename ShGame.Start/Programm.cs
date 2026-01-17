@@ -1,12 +1,18 @@
 ﻿namespace ShGame.Start;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using ShGame.Client;
+using ShGame.Client.Rendering;
+using ShGame.Game.Services;
 using ShGame.Net.Server;
 using ShGame.Util;
+using ShGame.Util.Services;
 
 using SimpleLogging.logging;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -18,58 +24,22 @@ public static class Programm {
 
 	[STAThread]
 	public static void Main(string[] args) {
+
 		Paths.ExtractFiles();
 		Logging.DisableColors();
-		//Logging.SetStartTime();
 
-		System.Collections.Generic.List<string> args_ = args.ToList();
-		bool noGui = args_.Contains("-nogui");
 
-		//start a server if the --server argument is provided
-		//otherwise start a client
-		if (args_.Contains("--server")) {
-			new Thread(
-				() => {
-					IPAddress? address = null;
-					int port = 1;
-					try {
-						address = IPAddress.Parse(args_.Contains("-ip") ? args_[args_.IndexOf("-ip")+1] : "");
-					} catch {
-						address = NetUtil.GetLocalIP().MapToIPv4();
-					}
-					try {
-						port = args_.Contains("-port") ? Convert.ToInt32(args_[args_.IndexOf("-port")+1]) : 5000;
-					} catch {
-						port = 5000;
-					}
+		IServiceCollection serviceCollection = new ServiceCollection();
 
-					_ = new GameServer(address, (uint)port);
+		ConfigurationService configurationService = new(args);
+		serviceCollection.AddSingleton(configurationService);
+		serviceCollection.AddTransient<GameService, GameService>();
 
-				}
-			).Start();
-			return;
-		} else {
-			new Thread(
-				() => {
-					IPAddress? address = null;
-					int port = 1;
-					try {
-						address = IPAddress.Parse(args_.Contains("-ip") ? args_[args_.IndexOf("-ip")+1] : "");
-					} catch {
-						address = NetUtil.GetLocalIP().MapToIPv4();
-					}
-					try {
-						port = args_.Contains("-port") ? Convert.ToInt32(args_[args_.IndexOf("-port")+1]) : 5000;
-					} catch {
-						port = 5000;
-					}
-
-					Client c = new(
-						address, port
-					);
-				}
-			).Start();
-			return;
+		if (configurationService.StartServer) {
+			serviceCollection.AddTransient<GameServer, GameServer>();
+		}
+		if (configurationService.StartClient) {
+			serviceCollection.AddTransient<RendererGl, RendererGl>();
 		}
 	}
 }

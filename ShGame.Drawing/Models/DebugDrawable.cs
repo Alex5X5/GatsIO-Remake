@@ -1,13 +1,13 @@
 ﻿using ShGame.Math;
 
 namespace ShGame.Drawing.Models;
-public unsafe class DebugDrawable : Drawable {
+public unsafe class DebugDrawable : Drawable<object?> {
 	Vector3d Point1, Point2;
 
 	public DebugDrawable(Vector3d _Point1) : this(null, _Point1) {
 	}
 
-	public DebugDrawable(Vector3d? _Point1, Vector3d _Point2) : base(18) {
+	public DebugDrawable(Vector3d? _Point1, Vector3d _Point2) : base(null, 18) {
 		Point1 = _Point1 ?? new Vector3d(0, 0, 0);
 		Point2 = _Point2;
 	}

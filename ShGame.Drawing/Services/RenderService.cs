@@ -5,13 +5,12 @@ using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System.Collections.Generic;
 using SimpleLogging.logging;
-using ShGame.Util;
 using ShGame.Drawing.Models;
 using ShGame.Drawing.Services;
 
 public class RenderService {
 
-	//private readonly IWindow window;
+	private IWindow? window;
 	private static readonly Logger logger = new(new LoggingLevel("RenderService"));
 
 	private List<DebugDrawable> DebugDrawables = [];
@@ -37,13 +36,13 @@ public class RenderService {
 	private static readonly uint obstackleShaderProgram;
 
 
-	public RenderService(IWindow window) {
+	public RenderService() {
 		window.Render += (double deltaTime)=>OnRender(deltaTime, window);
-		window.Load += ()=>OnLoad(window);
+		window.Load += OnLoad;
         textures = [];
 	}
 
-    protected virtual unsafe void OnLoad(IWindow window) {
+    protected virtual unsafe void OnLoad() {
 		loaded = true;
 
 		_Gl = GL.GetApi(window);
@@ -54,8 +53,6 @@ public class RenderService {
 			ShaderSources.STATIC_VERTEXT_SHADER_SOURCE,
 			ShaderSources.STATIC_FRAGMENT_SHADER_SOURCE
 		);
-
-		shadowTexture = TextureDrawable.CreateGlTexture(_Gl, Paths.AssetsPath("shadow.png"));
 
 		textureShaderProgram = CreateShaderProgram(
 			_Gl,
@@ -85,6 +82,7 @@ public class RenderService {
 	}
 
 	protected unsafe void OnRender(double deltaTime, IWindow window) {
+		
 	}
 
 	private static uint CreateShaderProgram(GL gl, IWindow window, string vertexShaderSource, string fragmentShaderSource) {
@@ -131,5 +129,18 @@ public class RenderService {
 		}
 
 		return shader;
+	}
+
+	public void SetVisible(WindowOptions options) {
+
+		logger.Log("setting vivible");
+
+		window = Window.Create(options);
+		window.Load +=
+			() => OnLoad(window);
+
+		window.Run();
+
+		return;
 	}
 }

@@ -1,6 +1,5 @@
 ﻿namespace ShGame.Game.Models;
 
-using ShGame.Drawing.Models;
 using ShGame.Game;
 using ShGame.Math;
 
@@ -66,16 +65,13 @@ public class Player {
 			if (c.keyLeft) {
 				if (c.keyDown) {
 					if (c.keyRight) {
-						Dir.x=0; //wasd
-						Dir.y=0;
+						Dir.Set(0, 0, 0);
 					} else {
-						Dir.x=-1; //was
-						Dir.y=0;
+						Dir.Set(-1, 0, 0);
 					}
 				} else {
 					if (c.keyRight) {
-						Dir.x=0; //wad
-						Dir.y=1;
+						Dir.Set(0, 1, 0);
 					} else {
 						Dir.x=-1/System.Math.Sqrt(2); //wa
 						Dir.y=1/System.Math.Sqrt(2);
@@ -84,19 +80,16 @@ public class Player {
 			} else {
 				if (c.keyDown) {
 					if (c.keyRight) {
-						Dir.x=1; //wsd
-						Dir.y=0;
+						Dir.Set(1, 0, 0);
 					} else {
-						Dir.x=0; //ws
-						Dir.y=0;
+						Dir.Set(0, 0, 0);
 					}
 				} else {
 					if (c.keyRight) {
 						Dir.x=1/System.Math.Sqrt(2); //wd
 						Dir.y=1/System.Math.Sqrt(2);
 					} else {
-						Dir.x=0; //w
-						Dir.y=1;
+						Dir.Set(0, 1, 0);
 					}
 				}
 			}
@@ -104,19 +97,16 @@ public class Player {
 			if (c.keyLeft) {
 				if (c.keyDown) {
 					if (c.keyRight) {
-						Dir.x=0; //asd
-						Dir.y=-1;
+						Dir.Set(0, -1, 0);
 					} else {
 						Dir.x=-1/System.Math.Sqrt(2); //as
 						Dir.y=-1/System.Math.Sqrt(2);
 					}
 				} else {
 					if (c.keyRight) {
-						Dir.x=0; //ad
-						Dir.y=0;
+						Dir.Set(0, 0, 0);
 					} else {
-						Dir.x=-1; //a
-						Dir.y=0;
+						Dir.Set(-1, 0, 0);
 					}
 				}
 			} else {
@@ -125,16 +115,13 @@ public class Player {
 						Dir.x=1/System.Math.Sqrt(2); //sd
 						Dir.y=-1/System.Math.Sqrt(2);
 					} else {
-						Dir.x=0; //s
-						Dir.y=-1;
+						Dir.Set(0, -1, 0);
 					}
 				} else {
 					if (c.keyRight) {
-						Dir.x=1; //d
-						Dir.y=0;
+						Dir.Set(1, 0, 0);
 					} else {
-						Dir.x=0; //
-						Dir.y=0;
+						Dir.Set(0, 0, 0);
 					}
 				}
 			}

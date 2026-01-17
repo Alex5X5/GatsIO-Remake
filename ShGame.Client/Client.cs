@@ -19,9 +19,9 @@ public class Client : IKeySupplier{
 	public static readonly int SCREEN_PIXEL_WIDTH = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size.Y;
 	public static readonly int SCREEN_PIXEL_HEIGHT = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size.X;
 
-	private readonly RendererGl renderer;
-	private ClientNetworkService? NetHandler;
-	public GameService Game;
+	private readonly RendererGl rendererService;
+	private ClientNetworkService networkService;
+	public GameService gameService;
 	
 	private IWindow? window;
 	private IInputContext? inputContext;
@@ -46,17 +46,14 @@ public class Client : IKeySupplier{
 	public bool keyDown { get; set; }
 	public bool keyLeft { get; set; }
 	public bool keyRight { get; set; }
-
-	//public Vector2 GetCursorPosition() => inputContext.Mice[0].Position;
-
-	public Client() : this(5000) { }
-
-
-	public Client(int port) : this(NetUtil.GetLocalIP(), port) { }
-
+	
+	public Client(ClientNetworkService networkService, RendererGl renderService, GameService gameService) {
+		this.networkService = networkService;
+		this.rendererService = renderService;
+		this.gameService = gameService;
+	}
 
 	public Client(IPAddress address, int port) {
-		Thread.Sleep(5000);
 		logger=new Logger(new LoggingLevel("Client"));
 		logger.Log(
 			"address port constructor",
@@ -80,7 +77,7 @@ public class Client : IKeySupplier{
 		//ControlledPlayer = new Player(new Vector3d(100, 100, 0), 100, BitConverter.ToInt64(temp, 0));
 		Game.StartAllLoops();
 		StartThreads(address, port);
-		SetVisible();
+		rendererService.SetVisible();
 	}
 
 	public Vector3d WindowRelativePosition(Vector2 pos) =>
@@ -90,53 +87,10 @@ public class Client : IKeySupplier{
 			0
 		);
 
-
-	private void SetVisible() {
-		logger.Log("setting vivible");
-
-		var options = WindowOptions.Default;
-		options.Size = new Silk.NET.Maths.Vector2D<int>(Constants.MAP_GRID_WIDTH, Constants.MAP_GRID_HEIGHT);
-		options.Title = "ShGame";
-
-		window = Window.Create(options);
-		window.Load += 
-			() => renderer.OnLoad(window, Game);
-		window.Load += 
-			() => {
-				inputContext = window.CreateInput();
-				for (int i = 0; i < inputContext.Keyboards.Count; i++)
-					inputContext.Keyboards[i].KeyDown += KeyDown_;
-				for (int i = 0; i < inputContext.Keyboards.Count; i++)
-					inputContext.Keyboards[i].KeyUp += KeyUp_;
-				foreach (IMouse mouse in inputContext.Mice) {
-					mouse.MouseDown += OnMouseDown;
-					mouse.MouseUp += OnMouseUp;
-					mouse.MouseMove += OnMouseMove;
-			}
-		};
-
-		window.Closing+=Stop;
-
-		window.Render += (double deltaTime) =>
-			renderer.OnRender(deltaTime, window, ControlledPlayer, Game);
-		window.Closing += OnClosing;
-
-		window.Run();
-
-		return;
-	}
-
 	public unsafe void OnClosing() {
 		stop = true;
-		Game.Stop();
-		NetHandler.Stop();
-		//for (int i = 0; i<obstacles.Length; i++)
-		//	obstacles[i].Dispose();
-		//for (int i = 0; i<foreignPlayers.Length; i++)
-		//	foreignPlayers[i].Dispose();
-		//for (int i = 0; i<bullets.Length; i++)
-		//	bullets[i].Dispose();
-		//ControlledPlayer.Dispose();
+		gameService.Stop();
+		networkService.Stop();
 	}
 
 	private unsafe void StartThreads(IPAddress address, int port) {
@@ -231,81 +185,6 @@ public class Client : IKeySupplier{
 	//		}
 	//	}
 	//}
-
-	private void KeyUp_(IKeyboard keyboard, Key key, int keyCode) {
-		//logger.Log("key "+key+" up");
-		switch (key) {
-			case Key.W:
-				keyUp=false;
-				break;
-			case Key.S:
-				keyDown=false;
-				break;
-			case Key.A:
-				keyLeft=false;
-				break;
-			case Key.D:
-				keyRight=false;
-				break;
-		}
-		if (ControlledPlayer!=null)
-			ControlledPlayer.OnKeyEvent(this);
-		//Console.WriteLine("key up, p:"+player.ToString());
-	}
-
-	private void KeyDown_(IKeyboard keyboard, Key key, int keyCode) {
-		//logger.Log("key "+key+" down");
-		switch (key) {
-			case Key.W:
-				keyUp=true;
-				break;
-			case Key.S:
-				keyDown=true;
-				break;
-			case Key.A:
-				keyLeft=true;
-				break;
-			case Key.D:
-				keyRight=true;
-				break;
-			case Key.Escape:
-				Stop();
-				break;
-		}
-		if(ControlledPlayer!=null)
-			ControlledPlayer.OnKeyEvent(this);
-		//Console.WriteLine("key up, p:"+player.ToString());
-	}
-
-	private void OnMouseDown(IMouse cursor, MouseButton button) {
-		Console.WriteLine("Mouse Down! "+mousePos);
-		if (button==MouseButton.Left) {
-			mouseLeftDown=true;
-			if(ControlledPlayer!=null)
-				ControlledPlayer.IsShooting = 0x1;
-		}
-		if (button==MouseButton.Right)
-			mouseRightDown=true;
-	}
-
-	private void OnMouseUp(IMouse cursor, MouseButton button) {
-		Console.WriteLine("Mouse Up! "+mousePos);
-		if (button==MouseButton.Left) {
-			mouseLeftDown=false;
-			if(ControlledPlayer!=null)
-				ControlledPlayer.IsShooting = 0x0;
-		}
-		if (button==MouseButton.Right) {
-			mouseRightDown=false;
-		}
-	}
-
-	private void OnMouseMove(IMouse cursor, Vector2 pos) {
-		mousePos.X = pos.X*(Constants.MAP_GRID_WIDTH/window.Size.X);
-		mousePos.Y = Constants.MAP_GRID_HEIGHT-pos.Y*(Constants.MAP_GRID_HEIGHT/window.Size.Y);
-		//mousePos = pos-new Vector2(window.Position.X,window.Size.Y-window.Position.Y);
-		//Console.WriteLine("I Moved! "+mousePos);
-	}
 
 	private bool NetHandlerConnected() {
 		if (NetHandler != null)

@@ -41,7 +41,7 @@ public class GameService {
 			Bullets[i]=new();
 		Obstacles = new Obstacle[Constants.OBSTACLE_COUNT];
 		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++)
-			Obstacles[i]=new(pov, null, 0);
+			Obstacles[i]=new(null, 0);
 		InterruptSource = new CancellationTokenSource();
 		PlayersAccessLock = new ReaderWriterLockSlim();
 		ObstaclesAccessLock = new ReaderWriterLockSlim();
@@ -164,7 +164,6 @@ public class GameService {
 		line -= (int)(0.5 * Constants.MAP_GRID_HEIGHT / Constants.OBSTACKLE_LINES);
 		Random r = new();
 		Obstacles[offset] = new Obstacle(
-			null,
 			new Vector3d(
 				//the obstacles may also be offset by half the distance to the next row/line
 				//first add half of the distance between the rows to x

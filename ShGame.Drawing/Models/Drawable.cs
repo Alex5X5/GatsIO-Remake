@@ -75,24 +75,17 @@ public unsafe abstract class Drawable<ModelT> : IDisposable {
 	public static unsafe float* BufferTriangleValues(float* vertices) {
 		float* buffer = (float*)NativeMemory.Alloc(9*sizeof(float));
 		float* ptr = buffer;
-		//Console.Write("buffering:");
 		for (int i = 0; i<3; i++) {
-			//Console.Write("(");
 			*ptr=*vertices;
-			//Console.Write(*vertices+", ");
 			ptr++;
 			vertices++;
 			*ptr =*vertices;
-			//Console.Write(*vertices+", ");
 			ptr++;
 			vertices++;
 			*ptr = 0;
-			//Console.Write(0+", ");
 			vertices++;
 			ptr++;
-			//Console.Write(")");
 		}
-		//Console.WriteLine();
 		return buffer;
 	}
 

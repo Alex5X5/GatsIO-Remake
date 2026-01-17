@@ -18,15 +18,6 @@ public class GameServer:Socket {
 
 	private short PlayerIdCounter=0;
 
-	//some constants
-	//public const int TARGET_TPS = 50;
-	//public const int MAP_WIDTH = 2100, MAP_HEIGHT = 1400;
-	//public const int OBSTACKLE_ROWS = 5, OBSTACKLE_LINES = 8;
-	//public const int OBSTACLE_ROW_DISANCE = MAP_WIDTH / OBSTACKLE_ROWS;
-	//public const int OBSTACLE_LINE_DISTANCE = MAP_HEIGHT / OBSTACKLE_LINES;
-	//public const int MAX_PLAYER_COUNT = 20;
-	//public const int OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES, BULLET_COUNT = 35;
-
 	private readonly GameService Game;
 
 	private readonly ServerConnection?[] clients = new ServerConnection[Constants.PLAYER_COUNT];

@@ -1,7 +1,8 @@
 ﻿namespace ShGame.Net.Services;
 
 using ShGame.Game.Models;
-using System.Linq;
+using ShGame.Util.Services;
+
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -9,7 +10,10 @@ using System.Threading;
 
 public class ClientNetworkService : Socket {
 
-    private readonly Logger logger = new(new LoggingLevel("NetHandler"));
+    private ConfigurationService configurationService;
+    private ClientNetworkService clientNetworkService;
+
+	private readonly Logger logger = new(new LoggingLevel("NetHandler"));
     
     private readonly IPAddress IP = new([0, 0, 0, 0]);
     private readonly int PORT = 100;
@@ -43,7 +47,31 @@ public class ClientNetworkService : Socket {
             logger.Warn("no connection");
     }
 
-    private bool Connect_(IPAddress address, int port) {
+
+
+	public ClientNetworkService(ConfigurationService configurationService, ClientNetworkService clientNetworkService) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
+		this.configurationService = configurationService;
+        this.clientNetworkService = clientNetworkService;
+
+		logger.Log("port addresss constructor");
+		logger.Log(address.AddressFamily.ToString());
+		IP = IPAddress.Parse("192.168.2.112");
+		PORT = port;
+		IPEndPoint point = new(address, port);
+		logger.Log(point.ToString());
+		try {
+			logger.Log("trying to connect, point="+point.ToString()+", family="+point.Address.AddressFamily);
+			Connect(point);
+		} catch (SocketException e) {
+			logger.Warn("failed to connect (reason="+e.ToString()+")");
+		}
+		if (Connected)
+			logger.Log("connected!");
+		else
+			logger.Warn("no connection");
+	}
+
+	private bool Connect_(IPAddress address, int port) {
         IPEndPoint point = new(address, port);
         logger.Log("connecting "+point);
         IAsyncResult result = BeginConnect(point, null, null);
@@ -97,7 +125,7 @@ public class ClientNetworkService : Socket {
         if (packet!=null)
             for (int i = 0; i<Constants.OBSTACLE_COUNT; i++)
                 fixed(byte* ptr = &packet[i*Obstacle.OBSTACLE_BYTE_LENGTH+Protocoll.PAYLOAD_OFFSET])
-                    Obstacle.DeserializeObstacle(contorlledPlayer, ptr, ref obstacles[i], 0);
+                    Obstacle.DeserializeObstacle(ptr, ref obstacles[i], 0);
         foreach (Obstacle obstacle in obstacles)
             Console.WriteLine(obstacle.ToString());
     }

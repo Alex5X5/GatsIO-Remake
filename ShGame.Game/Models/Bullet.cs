@@ -4,9 +4,8 @@ using System;
 using System.Runtime.CompilerServices;
 using ShGame.Math;
 using ShGame;
-using ShGame.Drawing.Models;
 
-public class Bullet : Drawable {
+public class Bullet {
 
 	public const int BULLET_BYTE_LENGTH = 52;
 
@@ -19,48 +18,11 @@ public class Bullet : Drawable {
 
 	public Bullet() : this(null, null, 0, 0) { }
 
-	public Bullet(Vector3d? _pos, Vector3d? _dir, int _width, int _length) : base(18) {
+	public Bullet(Vector3d? _pos, Vector3d? _dir, int _width, int _length) {
 		Pos = _pos??new Vector3d(10, 10, 0);
 		Dir = _dir??new Vector3d(0, 1, 0);
 		WIDTH = (byte)(_width>0 ? _width : 5);
 		LENGHT = (byte)(_length>0 ? _length : 5);
-	}
-
-	public unsafe override void UpdateVertices() {
-		float* ptr = VertexDataPtr;
-		*ptr=(float)Pos.x;
-		ptr++;
-		*ptr=(float)Pos.y;
-		ptr++;
-		*ptr=0;
-		ptr++;
-		*ptr=(float)Pos.x+WIDTH;
-		ptr++;
-		*ptr=(float)Pos.y;
-		ptr++;
-		*ptr=0;
-		ptr++;
-		*ptr=(float)Pos.x+WIDTH;
-		ptr++;
-		*ptr=(float)Pos.y+LENGHT;
-		ptr++;
-		*ptr=0;
-		ptr++;
-		*ptr=(float)Pos.x;
-		ptr++;
-		*ptr=(float)Pos.y;
-		ptr++;
-		*ptr=0;
-		ptr++;
-		*ptr=(float)Pos.x;
-		ptr++;
-		*ptr=(float)Pos.y+LENGHT;
-		ptr++;
-		*ptr=0;
-		ptr++;
-		*ptr=(float)Pos.x+WIDTH;
-		ptr++;
-		*ptr=(float)Pos.y+LENGHT;
 	}
 
 	public void Move() {
@@ -70,7 +32,6 @@ public class Bullet : Drawable {
 		if (Pos.x<0|Pos.y<0|Pos.x>Constants.MAP_GRID_WIDTH|Pos.y>Constants.MAP_GRID_HEIGHT) {
 			Dealloc();
 		}
-		dirty = true;
 	}
 
 	public void Dealloc() {
@@ -78,7 +39,6 @@ public class Bullet : Drawable {
 		Dir.Set(0, 1, 0);
 		Speed = 0;
 		Lifetime =- 1;
-		dirty = false;
 		Console.WriteLine("dealloc bullet");
 		Console.WriteLine(this);
 	}
@@ -152,7 +112,6 @@ public class Bullet : Drawable {
 			bullet.Speed = Unsafe.Read<short>(ptr);
 			ptr += 2;
 			bullet.OwnerHandle = Unsafe.Read<short>(ptr);
-			bullet.dirty=true;
 		}
 	}
 
