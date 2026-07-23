@@ -1,56 +1,56 @@
-﻿using System;
+﻿namespace ShGame.Math;
+
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
-namespace ShGame.Math;
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct Vector3d {
 
-[StructLayout(LayoutKind.Sequential, Pack = 1)]// Ensures no extra padding is added
-public unsafe struct Vector3d {
+	public double x, y, z;
 
-	public double x;
-	public double y;
-	public double z;
-
-	public const int Size = 12;
+	public const int SizeInBytes = 24;
 
 	public static readonly Vector3d X = new(1, 0, 0);
 	public static readonly Vector3d Y = new(0, 1, 0);
 	public static readonly Vector3d Z = new(0, 0, 1);
-    public static readonly Vector3d Zero = new(0, 0, 0);
-
-    public static implicit operator Vector3f(Vector3d? v) =>
-        new(
-            (float)(v!=null ? v.Value.x : 0),
-            (float)(v!=null ? v.Value.y : 0),
-            (float)(v!=null ? v.Value.z : 0)
-        );
+	public static readonly Vector3d Zero = new(0, 0, 0);
 
 	public static implicit operator Vector256<double>(Vector3d v) =>
 		Vector256.Create(v.x, v.y, v.z, 0.0);
 
-	public Vector3d():this(0,0,0) {
-	}
+	public static Vector3d operator +(Vector3d vector1, Vector3d vector2) =>
+		vector1.Add(vector2);
+
+	public static Vector3d operator -(Vector3d vector1, Vector3d vector2) =>
+		vector1.Sub(vector2);
+
+	public static Vector3d operator *(Vector3d vector1, double scalar) =>
+		vector1.Scl(scalar);
+
+
+	public Vector3d() : this(0, 0, 0) { }
+
+	public Vector3d(Vector256<double> vec) : this(vec.GetElement(0), vec.GetElement(1), vec.GetElement(2)) { }
+
+	public Vector3d(Vector3d vector) : this(vector.x, vector.y, vector.z) { }
+
+	public Vector3d(double[] values) : this(values[0], values[1], values[2]) { }
 
 	public Vector3d(double x, double y, double z) {
-		Set(x, y, z);
-	}
-
-	public Vector3d(Vector3d vector) {
-		Set(vector);
-	}
-
-	public Vector3d(double[] values) {
-		Set(values[0], values[1], values[2]);
+		this.x = x;
+		this.y = y;
+		this.z = z;
 	}
 
 	public Vector3d Add(double _x, double _y, double _z) {
 		if (Vector256.IsHardwareAccelerated) {
 			Vector256<double> vecA = this;
 			Vector256<double> vecB = Vector256.Create(_x, _y, _z, 0.0);
-			return Set(Avx.Add(vecA, vecB));
+			return new Vector3d(Avx.Add(vecA, vecB));
 		}
-		return Set(x+_x, y+_y, z+_z);
+		return new Vector3d(x+_x, y+_y, z+_z);
 	}
 
 	public Vector3d Add(Vector3d vector) =>
@@ -61,11 +61,11 @@ public unsafe struct Vector3d {
 		Add(value, value, value);
 
 	public Vector3d Crs(Vector3d vector) {
-		return Set(y*vector.z-z*vector.y, z*vector.x-x*vector.z, x*vector.y-y*vector.x);
+		return new Vector3d(y * vector.z - z * vector.y, z * vector.x - x * vector.z, x * vector.y - y * vector.x);
 	}
 
 	public Vector3d Crs(double x, double y, double z) {
-		return Set(this.y*z-this.z*y, this.z*x-this.x*z, this.x*y-this.y*x);
+		return new Vector3d(this.y*z-this.z*y, this.z*x-this.x*z, this.x*y-this.y*x);
 	}
 
 	public readonly Vector3d Cpy() =>
@@ -100,10 +100,11 @@ public unsafe struct Vector3d {
 	public readonly double Dst(double _x, double _y, double _z) {
 		if (Vector256.IsHardwareAccelerated) {
 			Vector256<double> vecA = Vector256.Create(_x, _y, _z, 0.0);
-			vecA=Vector256.Multiply(vecA, vecA);
+			vecA = Vector256.Multiply(vecA, vecA);
 			return System.Math.Sqrt(Vector256.Sum(vecA));
+		} else {
+			return Len(_x-x, _y-y, _z-z);
 		}
-		return Len(_x-x, _y-y, _z-z);
 	}
 
 	public static double Dst2(double x1, double y1, double z1, double x2, double y2, double z2) {
@@ -132,17 +133,20 @@ public unsafe struct Vector3d {
 	}
 
 	public static double Len(double x, double y, double z) {
-		return System.Math.Sqrt(x*x+y*y+z*z);
-	}
-
-	public readonly double Len() {
 		if (Vector256.IsHardwareAccelerated) {
-			Vector256<double> vecA = this;
-			vecA=Vector256.Multiply(vecA, vecA);
-			return System.Math.Sqrt(Vector256.Sum(vecA));
+			Vector256<double> vec = Vector256.Create(x, y, z, 0.0);
+			return Len(vec);
 		}
 		return System.Math.Sqrt(x*x+y*y+z*z);
 	}
+
+	private static double Len(Vector256<double> vec) {
+		vec = Vector256.Multiply(vec, vec);
+		return System.Math.Sqrt(Vector256.Sum(vec));
+	}
+
+	public readonly double Len() =>
+		Len(x, y, z);
 
 	public readonly double Len2() {
 		return x*x+y*y+z*z;
@@ -158,25 +162,18 @@ public unsafe struct Vector3d {
 
 	public unsafe Vector3d Limit2(double limit2) {
 		double len2 = Len2();
-		if (len2>limit2) {
-			Scl((double)System.Math.Sqrt(limit2/len2));
+		if (len2 > limit2) {
+			return Scl(System.Math.Sqrt(limit2 / len2));
+		} else {
+			return this;
 		}
-		return this;
 	}
 
-	public Vector3d MulAdd(Vector3d vec, double scalar) {
-		x+=vec.x*scalar;
-		y+=vec.y*scalar;
-		z+=vec.z*scalar;
-		return this;
-	}
+	public Vector3d MulAdd(Vector3d vec, double scalar) =>
+		new Vector3d(x + vec.x * scalar, y + vec.y * scalar, z + vec.z * scalar);
 
-	public Vector3d MulAdd(Vector3d vec, Vector3d mulVec) {
-		x+=vec.x*mulVec.x;
-		y+=vec.y*mulVec.y;
-		z+=vec.z*mulVec.z;
-		return this;
-	}
+	public Vector3d MulAdd(Vector3d vec, Vector3d mulVec) =>
+		new Vector3d(x + vec.x * mulVec.x, y + vec.y * mulVec.y, z + vec.z * mulVec.z);
 
 	public Vector3d Nor() {
 		double len2 = Len2();
@@ -187,8 +184,8 @@ public unsafe struct Vector3d {
 
 	public Vector3d Scl(double _x, double _y, double _z) {
 		if (Vector256.IsHardwareAccelerated)
-			return Set(Avx.Multiply(this, Vector256.Create(_x, _y, _z, 0.0)));
-		return Set(x*_x, y*_y, z*_z);
+			return new Vector3d(Avx.Multiply(this, Vector256.Create(_x, _y, _z, 0.0)));
+		return new Vector3d(x*_x, y*_y, z*_z);
 	}
 
 	public Vector3d Scl(double value) =>
@@ -196,22 +193,6 @@ public unsafe struct Vector3d {
 
 	public Vector3d Scl(Vector3d vec) =>
 		Scl(vec.x, vec.y, vec.z);
-
-	public unsafe Vector3d Set(double x_, double y_, double z_) {
-		x=x_;
-		y=y_;
-		z=z_;
-		return this;
-	}
-	public unsafe Vector3d Set(Vector256<double> vec) {
-		x=vec.GetElement(0);
-		y=vec.GetElement(1);
-		z=vec.GetElement(2);
-		return this;
-	}
-
-	public Vector3d Set(Vector3d vector) =>
-		Set(vector.x, vector.y, vector.z);
 
 	public Vector3d SetLength(double len) {
 		return SetLength2(len*len);
@@ -222,21 +203,14 @@ public unsafe struct Vector3d {
 		return oldLen2==0||oldLen2==len2 ? this : Scl(System.Math.Sqrt(len2/oldLen2));
 	}
 
-	public Vector3d SetZero() {
-		x=0;
-		y=0;
-		z=0;
-		return this;
-	}
-
 	public Vector3d Sub(double _x, double _y, double _z) {
 		if (Vector256.IsHardwareAccelerated)
-			return Set(Vector256.Subtract(this, Vector256.Create(_x, _y, _z, 0.0)));
-		return Set(x-_x, y-_y, z-_z);
+			return new Vector3d(Vector256.Subtract(this, Vector256.Create(_x, _y, _z, 0.0)));
+		return new Vector3d(x - _x, y - _y, z - _z);
 	}
 
 	public Vector3d Sub(double value) =>
-		Set(x-value, y-value, z-value);
+		new Vector3d(x-value, y-value, z-value);
 
 	public Vector3d Sub(Vector3d vec) =>
 		Sub(vec.x, vec.y, vec.z);
