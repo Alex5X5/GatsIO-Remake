@@ -107,5 +107,39 @@ void main()
 
 	FragColor = vec4(color, 1.0);
 }";
+	public const string COLOR_VERTEXT_SHADER_SOURCE =
+@"#version 330 core
 
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec4 aColor;
+uniform float u_WindowWidth;
+uniform float u_WindowHeight;
+
+out vec4 vColor;
+
+void main()
+{
+	vColor = aColor;
+
+	vec2 ndc = vec2(
+		-1.0 + aPosition.x / (u_WindowWidth / 2.0),
+		1.0 - aPosition.y / (u_WindowHeight / 2.0));
+
+	gl_Position = vec4(ndc, aPosition.z, 1.0);
+}";
+
+	public const string COLOR_FRGMENT_SHADER_SOURCE =
+@"#version 330 core
+
+out vec4 FragColor;
+
+uniform vec2 u_mouse;
+uniform float u_time;
+
+in vec4 vColor;
+
+void main()
+{
+	FragColor = vColor;
+}";
 }
