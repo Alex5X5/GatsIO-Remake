@@ -1,4 +1,4 @@
-﻿namespace ShGame.Rendering.Views.Components;
+﻿namespace ShGame.Rendering.ViewModels.Components;
 
 using ShGame.Rendering.ViewModels;
 

@@ -14,27 +14,28 @@ public class ConfigurationService {
 	public bool StartServer { get; private set; }
 
 	public IPAddress Address { get; private set; }
+	public int Port { get; private set; }
 
 	public ConfigurationService(string[] args) {
 		List<string> args_ = args.ToList();
 		NoGUI = args_.Contains("-nogui");
+
 		StartClient = args_.Contains("--client");
 		StartServer = args_.Contains("--server");
 
-		IPAddress? address = null;
 		try {
-			address = IPAddress.Parse(args_.Contains("-ip") ? args_[args_.IndexOf("-ip")+1] : "");
+			if(args_.Contains("-ip"))
+				Address = IPAddress.Parse(args_[args_.IndexOf("-ip")+1]);
+			Address = NetUtil.GetLocalIP().MapToIPv4();
 		} catch {
-			address = NetUtil.GetLocalIP().MapToIPv4();
+			Address = NetUtil.GetLocalIP().MapToIPv4();
 		}
-		Address = address;
-		
 
-		int port = 1;
 		try {
-			port = args_.Contains("-port") ? Convert.ToInt32(args_[args_.IndexOf("-port")+1]) : 5000;
+			if(args_.Contains("-port"))
+				Port = Convert.ToInt32(args_[args_.IndexOf("-port")+1]);
 		} catch {
-			port = 5000;
+			Port = 5000;
 		}
 	}
 }

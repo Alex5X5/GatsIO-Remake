@@ -5,8 +5,9 @@ using System.Runtime.CompilerServices;
 using ShGame.Drawing.Interfaces;
 using ShGame.Drawing.Models;
 using ShGame.Math;
+using ShGame.Rendering.ViewModels.Components;
 
-public class ObstacleView:Drawable, ISupportsShadow {
+public class ObstacleView:Drawable<ObstacleViewModel>, ISupportsShadow {
 
 	public const int OBSTACLE_BYTE_LENGTH = 17;
 	public int WIDTH, HEIGHT;

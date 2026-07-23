@@ -1,7 +1,9 @@
 ﻿namespace ShGame.Rendering.Views.Components;
 
 using ShGame.Drawing.Models;
+using ShGame.Game.Models;
 using ShGame.Math;
+using ShGame.Rendering.ViewModels.Components;
 
 using System.Runtime.CompilerServices;
 
@@ -10,7 +12,8 @@ public class PlayerView : Drawable<PlayerViewModel> {
 
 	public const int PLAYER_BYTE_LENGTH = 56;
 
-	public const int SIZE = 20, SIDES_COUNT = 50, FLOAT_COUNT = 9*SIDES_COUNT;
+
+	public const int SIDES_COUNT = 50, FLOAT_COUNT = 9*SIDES_COUNT;
 
 
 	public static readonly int[] CIRCLE_OFFSETS = CalcCircleOffsets();
@@ -35,21 +38,8 @@ public class PlayerView : Drawable<PlayerViewModel> {
 	public short PlayerUUID = 0;
 	public bool Visible;
 
-	public PlayerView(Vector3d? newPos, int newHealth, short UUID):base(FLOAT_COUNT) {
-		Pos = newPos??new Vector3d(0, 0, 0);
-		dirty = true;
-		Health_ = newHealth;
-		PlayerUUID = UUID; //!=0 ? UUID : new Random().Next();
-		Visible=Health_ !=-1;
-	}
-
-	//the constructor for invalid players
 	public PlayerView(PlayerViewModel viewModel):base(viewModel, FLOAT_COUNT) {
-		Pos = new(0, 0, 0);
-		//if the health of a player is -1 it is considered invalid and won't be processed
-		Health_ = -1;
-		PlayerUUID = 0;
-		Visible = false;
+		
 	}
 
     private static int[] CalcCircleOffsets() {
@@ -59,10 +49,10 @@ public class PlayerView : Drawable<PlayerViewModel> {
         res[1] = 0;
         res[2] = 0;
         res[3] = 0;
-        res[4] = SIZE;
+        res[4] = Player.SIZE;
         res[5] = 0;
-        res[6] = (int)(System.Math.Sin(System.Math.PI*2/SIDES_COUNT*1)*SIZE);
-        res[7] = (int)(System.Math.Cos(System.Math.PI*2/SIDES_COUNT*1)*SIZE);
+        res[6] = (int)(System.Math.Sin(System.Math.PI*2/SIDES_COUNT*1)*Player.SIZE);
+        res[7] = (int)(System.Math.Cos(System.Math.PI*2/SIDES_COUNT*1)*Player.SIZE);
         res[8] = 0;
 
         for (int i = 9; i<SIDES_COUNT*9; i+=9) {

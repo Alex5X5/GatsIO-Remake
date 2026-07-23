@@ -3,6 +3,7 @@
 using ShGame.Drawing.Interfaces;
 using ShGame.Drawing.Models;
 using ShGame.Math;
+using ShGame.Rendering.ViewModels.Components;
 using ShGame.Util;
 
 using SimpleLogging.logging;
@@ -21,23 +22,6 @@ public class ShadowView : TextureDrawable<ShadowViewModel> {
 		GetShadow(out Vector3d shadowTarget1, out Vector3d shadowTarget2);
 		attatch.GetShadowOrigins(out Vector3d shadowOrigin1, out Vector3d shadowOrigin2, out Dir dir);
 		float* ptr = VertexDataPtr;
-		*ptr=(float)shadowOrigin1.x;
-		ptr++;
-		*ptr=(float)shadowOrigin1.y;
-		ptr++;
-		*ptr=0;
-		ptr++;
-		*ptr=(float)shadowOrigin2.x;
-		ptr++;
-		*ptr=(float)shadowOrigin2.y;
-		ptr++;
-		*ptr=0;
-		ptr++;
-		*ptr=(float)shadowTarget2.x;
-		ptr++;
-		*ptr=(float)shadowTarget2.y;
-		ptr++;
-		*ptr=0;
 		ptr++;
 		*ptr=(float)shadowOrigin1.x;
 		ptr++;

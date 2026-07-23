@@ -8,95 +8,47 @@ using System.Net.Sockets;
 using System.Threading;
 
 
-public class ClientNetworkService : Socket {
+public class ClientNetworkService : IDisposable {
 
-    private ConfigurationService configurationService;
-    private ClientNetworkService clientNetworkService;
-
+    private readonly ConfigurationService configurationService;
 	private readonly Logger logger = new(new LoggingLevel("NetHandler"));
-    
-    private readonly IPAddress IP = new([0, 0, 0, 0]);
-    private readonly int PORT = 100;
+
+    private Socket? socket;
 
     private bool stop = false;
 
-    internal ClientNetworkService() : this(5000) {
-        logger.Log("enpty constructor");
+    public bool Connected => socket?.Connected ?? false;
+
+    public ClientNetworkService(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
     }
 
-    internal ClientNetworkService(int port) : this(NetUtil.GetLocalIP(), port) {
-        logger.Log("port constructor");
-    }
-
-    public ClientNetworkService(IPAddress address, int port) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
-        logger.Log("port addresss constructor");
-        logger.Log(address.AddressFamily.ToString());
-        IP = IPAddress.Parse("192.168.2.112");
-        PORT = port;
-        IPEndPoint point = new(address, port);
-        logger.Log(point.ToString());
-        try {
-            logger.Log("trying to connect, point="+point.ToString()+", family="+point.Address.AddressFamily);
-            Connect(point);
-        } catch (SocketException e) {
-            logger.Warn("failed to connect (reason="+e.ToString()+")");
-        }
-        if (Connected)
-            logger.Log("connected!");
-        else
-            logger.Warn("no connection");
-    }
-
-
-
-	public ClientNetworkService(ConfigurationService configurationService, ClientNetworkService clientNetworkService) : base(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {
-		this.configurationService = configurationService;
-        this.clientNetworkService = clientNetworkService;
-
-		logger.Log("port addresss constructor");
-		logger.Log(address.AddressFamily.ToString());
-		IP = IPAddress.Parse("192.168.2.112");
-		PORT = port;
-		IPEndPoint point = new(address, port);
+	public void Connect() {
+		socket = new(configurationService.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+		logger.Log(configurationService.Address.AddressFamily.ToString());
+		IPEndPoint point = new(configurationService.Address, configurationService.Port);
 		logger.Log(point.ToString());
 		try {
 			logger.Log("trying to connect, point="+point.ToString()+", family="+point.Address.AddressFamily);
-			Connect(point);
+			socket.Connect(point);
 		} catch (SocketException e) {
 			logger.Warn("failed to connect (reason="+e.ToString()+")");
 		}
-		if (Connected)
+		if (socket.Connected)
 			logger.Log("connected!");
 		else
 			logger.Warn("no connection");
 	}
 
-	private bool Connect_(IPAddress address, int port) {
-        IPEndPoint point = new(address, port);
-        logger.Log("connecting "+point);
-        IAsyncResult result = BeginConnect(point, null, null);
-        bool success = result.AsyncWaitHandle.WaitOne(10, true);
-        while (!success)
-            Thread.Sleep(100);
-        logger.Log(Convert.ToString(Connected));
-        if (!Connected) {
-            EndConnect(result);
-            return success;
-        } else {
-            Close();
-            throw new SocketException(0, "Connect Timeout");
-        }
-    }
-
     private byte[] RecievePacket() {
-        if (!Connected)
+        if (!socket.Connected)
             throw new ConnectException("not connected");
         byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
         int recieved = 0;
         while (recieved < Protocoll.PACKET_BYTE_LENGTH && !stop) {
             int recievedBytesCount;
             try {
-                recievedBytesCount = Receive(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH - recieved, SocketFlags.None);
+                recievedBytesCount = socket.Receive(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH - recieved, SocketFlags.None);
             } catch (Exception) {
                 break;
             }
@@ -111,7 +63,7 @@ public class ClientNetworkService : Socket {
         if (send==null)
             throw new ArgumentException("cannot send null");
         try {
-            _=Send(send);
+            _=socket.Send(send);
         } catch (SocketException e) {
             logger.Error(e.ToString());
         }
@@ -151,7 +103,7 @@ public class ClientNetworkService : Socket {
         fixed(byte* ptr = &send[0])
         Player.SerializePlayer(ptr, controlledPlayer, Protocoll.PAYLOAD_OFFSET);
         try {
-            Send(send);
+			socket?.Send(send);
             byte[] packet = RecievePacket();
             if (packet != null)
                 for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
@@ -170,7 +122,7 @@ public class ClientNetworkService : Socket {
 		//logger.Log("getting bullets", [new MessageParameter("player",p.ToString())]);
 		byte[] send = Protocoll.PreparePacket(Headers.BULLET);
 		try {
-			Send(send);
+			socket?.Send(send);
 			byte[] packet = RecievePacket();
 			if (packet != null)
 				for (int i = 0; i<Constants.BULLET_COUNT; i++) {
@@ -188,11 +140,14 @@ public class ClientNetworkService : Socket {
 	public void Stop() {
         logger.Log("stopping");
         stop = true;
-        Close();
-        Dispose();
+		socket?.Close();
     }
 
     public override string ToString() {
-        return "sh_game.Game.net.NetHandler:[ip="+IP.ToString()+", port="+Convert.ToString(PORT)+"]";
+        return "sh_game.Game.net.NetHandler:[ip="+configurationService.Address.ToString()+", port="+Convert.ToString(configurationService.Port)+"]";
     }
+
+	public void Dispose() {
+        socket?.Dispose();
+	}
 }
