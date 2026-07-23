@@ -1,6 +1,6 @@
 ﻿namespace ShGame.Math;
 
-public struct Line3d {
+public struct Line {
 
 	public Vector3d A;
 	public Vector3d B;
@@ -8,12 +8,12 @@ public struct Line3d {
 	public Vector3d Origin => A;
 	public Vector3d Direction => B.Sub(A).Nor();
 
-	public Line3d(Vector3d point1, Vector3d point2) {
+	public Line(Vector3d point1, Vector3d point2) {
 		A = point1;
 		B = point2;
 	}
 
-	public Line3d(double x1, double y1, double x2, double y2) {
+	public Line(double x1, double y1, double x2, double y2) {
 		A = new Vector3d(x1, y1, 0);
 		B = new Vector3d(x2, y2, 0);
 	}
@@ -28,7 +28,7 @@ public struct Line3d {
 		return Origin.y+r*Direction.y==point.y;
 	}
 
-	public Vector3d Intercept(Line3d other) {
+	public Vector3d Intercept(Line other) {
 
 		Vector3d this2 = Origin.Add(Direction);
 		Vector3d other2 = other.Origin.Add(other.Direction);

@@ -31,7 +31,7 @@ public struct Color {
 	public static readonly Color LIGHT_GREEN = new Color(109, 198, 32);
 	public static readonly Color DARK_GREEN = new Color(0, 73, 0);
 
-	public static readonly Color BLUE = new Color(0, 0, 235);
+	public static readonly Color BLUE = new Color(51, 69, 255);
 	public static readonly Color LIGHT_BLUE = new Color(60, 180, 255);
 	public static readonly Color DARK_BLUE = new Color(10, 10, 133);
 
