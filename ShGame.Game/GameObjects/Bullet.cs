@@ -68,8 +68,8 @@ public class Bullet : Drawable {
 	}
 
 	public void Move() {
-		Pos.Add(
-			Dir.Cpy().Scl(Speed)
+		Pos = Pos.Add(
+			Dir.Scl(Speed)
 		);
 		if (Pos.x<0|Pos.y<0|Pos.x>Constants.MAP_GRID_WIDTH|Pos.y>Constants.MAP_GRID_HEIGHT) {
 			Dealloc();
@@ -78,8 +78,8 @@ public class Bullet : Drawable {
 	}
 
 	public void Dealloc() {
-		Pos.Set(10, 10, 0);
-		Dir.Set(0, 1, 0);
+		Pos = new(10, 10, 0);
+		Dir = new(0, 1, 0);
 		Speed = 0;
 		Lifetime =- 1;
 		dirty = false;

@@ -188,8 +188,8 @@ public class GameInstance {
 		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
 			logger.Log(Bullets[i].Speed.ToString());
 			if (Bullets[i].Lifetime==-1) {
-				Bullets[i].Pos.Set(p.Pos.Cpy().Add(new Vector3d(Player.SIZE/2, Player.SIZE/2, 0)));
-				Bullets[i].Dir.Set(p.Dir);
+				Bullets[i].Pos = new(p.Pos.Cpy().Add(new Vector3d(Player.SIZE/2, Player.SIZE/2, 0)));
+				Bullets[i].Dir = new(p.Dir);
 				Bullets[i].Speed = p.InitialBulletSpeed;
 				Bullets[i].OwnerHandle = p.PlayerUUID;
 				break;

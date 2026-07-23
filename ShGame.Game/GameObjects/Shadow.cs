@@ -77,14 +77,14 @@ public class Shadow : TextureDrawable {
 			3 => 70,
 			_ => 0,
 		};
-		obstacle->boundL.point1.Set(obstacle->Pos.x, obstacle->Pos.y, 0);
-		obstacle->boundL.point2.Set(obstacle->Pos.x, obstacle->Pos.y+obstacle->HEIGHT, 0);
-		obstacle->boundR.point1.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y, 0);
-		obstacle->boundR.point2.Set(obstacle->Pos.x+obstacle->WIDTH, obstacle->Pos.y+obstacle->HEIGHT, 0);
-		obstacle->boundT.point1.Set(obstacle->boundT.point1);
-		obstacle->boundT.point2.Set(obstacle->boundR.point1);
-		obstacle->boundB.point1.Set(obstacle->boundL.point2);
-		obstacle->boundB.point2.Set(obstacle->boundR.point2);
+		obstacle->boundL.point1 = new(obstacle->Pos.x, obstacle->Pos.y, 0);
+		obstacle->boundL.point2 = new(obstacle->Pos.x, obstacle->Pos.y + obstacle->HEIGHT, 0);
+		obstacle->boundR.point1 = new(obstacle->Pos.x + obstacle->WIDTH, obstacle->Pos.y, 0);
+		obstacle->boundR.point2 = new(obstacle->Pos.x + obstacle->WIDTH, obstacle->Pos.y + obstacle->HEIGHT, 0);
+		obstacle->boundT.point1 = new(obstacle->boundT.point1);
+		obstacle->boundT.point2 = new(obstacle->boundR.point1);
+		obstacle->boundB.point1 = new(obstacle->boundL.point2);
+		obstacle->boundB.point2 = new(obstacle->boundR.point2);
 	}
 
 	private unsafe void GetShadow(out Vector3d shadowTarget1, out Vector3d shadowTarget2) {
@@ -94,25 +94,25 @@ public class Shadow : TextureDrawable {
 		Vector3d ShadowPoint4 = new(0, 0, 0);
 		switch (dir) {
 			case Dir.T:
-				fixed (Line3d* line = &Constants.BORDER_BOTTOM) {
+				fixed (Line* line = &Constants.BORDER_BOTTOM) {
 					shadowTarget1 = ShadowHit(&pointOfView, &shadowOrigin1, line);
 					shadowTarget2 = ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.B:
-				fixed (Line3d* line = &Constants.BORDER_TOP) {
+				fixed (Line* line = &Constants.BORDER_TOP) {
 					shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
 					shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.R:
-				fixed (Line3d* line = &Constants.BORDER_LEFT) {
+				fixed (Line* line = &Constants.BORDER_LEFT) {
 					shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
 					shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
 				break;
 			case Dir.L:
-				fixed (Line3d* line = &Constants.BORDER_RIGHT) {
+				fixed (Line* line = &Constants.BORDER_RIGHT) {
 					shadowTarget1=ShadowHit(&pointOfView, &shadowOrigin1, line);
 					shadowTarget2=ShadowHit(&pointOfView, &shadowOrigin2, line);
 				}
@@ -125,14 +125,14 @@ public class Shadow : TextureDrawable {
 		}
 	}
 
-	private unsafe Vector3d ShadowHit(Vector3d* playerPosition, Vector3d* shadowPoint, Line3d* border) {
+	private unsafe Vector3d ShadowHit(Vector3d* playerPosition, Vector3d* shadowPoint, Line* border) {
 		//get the coordinates of the origin point of the border
-		double oth1X = border->origin.x;
-		double oth1Y = border->origin.y;
-		double oth1Z = border->origin.z;
+		double oth1X = border->Origin.x;
+		double oth1Y = border->Origin.y;
+		double oth1Z = border->Origin.z;
 		//calculate the coordinates of a vector that starts at the origin point of the border
 		//and points towards its second definition point
-		Vector3d oth2 = border->origin.Cpy().Add(border->direction);
+		Vector3d oth2 = border->Origin.Cpy().Add(border->Direction);
 		double oth2X = oth2.x;
 		double oth2Y = oth2.y;
 		double oth2Z = oth2.z;
@@ -147,11 +147,11 @@ public class Shadow : TextureDrawable {
 			);
 		//magically merge the factor with the border
 		return border->
-			origin
+			Origin
 				.Cpy()
 					.Add(
 						oth2
-							.Sub(border->origin)
+							.Sub(border->Origin)
 								.Scl(u)
 					);
 

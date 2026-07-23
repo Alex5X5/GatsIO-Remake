@@ -116,14 +116,14 @@ public class Obstacle:Drawable, ISupportsShadow {
 			3 => 70,
 			_ => 0,
 		};
-        obstacle.boundL.point1.Set(obstacle.Pos.x, obstacle.Pos.y, 0); //bottom left corner
-        obstacle.boundL.point2.Set(obstacle.Pos.x, obstacle.Pos.y+obstacle.HEIGHT, 0);//top left corner
-        obstacle.boundR.point1.Set(obstacle.Pos.x + obstacle.WIDTH, obstacle.Pos.y, 0);//bottom right corner
-        obstacle.boundR.point2.Set(obstacle.Pos.x + obstacle.WIDTH, obstacle.Pos.y+obstacle.HEIGHT, 0);//top right corner
-        obstacle.boundT.point1.Set(obstacle.boundL.point1);//bottom left corner
-        obstacle.boundT.point2.Set(obstacle.boundR.point1);//bottom right corner
-        obstacle.boundB.point1.Set(obstacle.boundL.point2);//top left corner
-        obstacle.boundB.point2.Set(obstacle.boundR.point2);//top right corner
+        obstacle.boundL.point1 = new(obstacle.Pos.x, obstacle.Pos.y, 0); //bottom left corner
+        obstacle.boundL.point2 = new(obstacle.Pos.x, obstacle.Pos.y + obstacle.HEIGHT, 0);//top left corner
+        obstacle.boundR.point1 = new(obstacle.Pos.x + obstacle.WIDTH, obstacle.Pos.y, 0);//bottom right corner
+        obstacle.boundR.point2 = new(obstacle.Pos.x + obstacle.WIDTH, obstacle.Pos.y + obstacle.HEIGHT, 0);//top right corner
+        obstacle.boundT.point1 = new(obstacle.boundL.point1);//bottom left corner
+        obstacle.boundT.point2 = new(obstacle.boundR.point1);//bottom right corner
+        obstacle.boundB.point1 = new(obstacle.boundL.point2);//top left corner
+        obstacle.boundB.point2 = new(obstacle.boundR.point2);//top right corner
     }
 
 	public static unsafe void SerializeObstacle(byte* buffer, Obstacle obstacle, int offset) {
