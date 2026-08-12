@@ -5,9 +5,10 @@ public enum PacketType : byte {
 	AbortConnection = 2,
 	PlayerLimit = 3,
 	Map = 10,
-	Player = 11,
-	Register = 12,
-	Ability = 13,
-	Bullets = 14,
+	UpdatePlayer = 11,
+	GetPlayers = 12,
+	Register = 13,
+	Ability = 14,
+	Bullets = 15,
 	Invalid = 255
 }

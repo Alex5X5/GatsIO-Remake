@@ -1,4 +1,4 @@
-﻿namespace ShGame.Net.Shared;
+﻿namespace ShGame.Net.Server;
 
 using ShGame.Util;
 
@@ -16,13 +16,13 @@ public class ServerSocket : IDisposable {
 
 	private bool stop = false;
 
-	private readonly System.Net.Sockets.Socket socket;
+	private readonly Socket socket;
 
-	private Action<System.Net.Sockets.Socket> acceptHandler;
+	private Action<Socket> acceptHandler;
 
 	public bool Bound => socket.IsBound;
 
-	public ServerSocket(Configuration config, Action<System.Net.Sockets.Socket> acceptHandler) {
+	public ServerSocket(Configuration config, Action<Socket> acceptHandler) {
 		address = IPAddress.Parse(config.Address);
 		port = config.Port;
 		socket = new(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -48,7 +48,7 @@ public class ServerSocket : IDisposable {
 			socket.Listen(1);
 			while (!stop) {
 				try {
-					System.Net.Sockets.Socket incoming = await socket.AcceptAsync();
+					Socket incoming = await socket.AcceptAsync();
 					await Task.Run(
 						() => {
 							logger.Log("accepted!");

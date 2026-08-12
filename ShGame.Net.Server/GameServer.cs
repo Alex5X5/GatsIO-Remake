@@ -23,9 +23,9 @@ public class GameServer {
 
 	public GameServer(Configuration config) {
 		socket = new(config, OnAccept);
-		gameService = new(null);
-        gameService.StartAllLoops();
+		gameService = new(new Player());
 		gameService.SpreadObstacles();
+        gameService.StartAllLoops();
 	}
 
 	#endregion constructors
@@ -56,20 +56,6 @@ public class GameServer {
 
 	#region request events
 
-	internal Packet OnMapRequest() {
-		logger.Log("processing map request");
-		Packet response = new(PacketType.Map);
-		unsafe {
-			byte* ptr = response.Payload;
-			for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
-				int offset = i*Obstacle.SizeInBytesForNetwork;
-				SerializerService.SerializeObstacle(gameService.Obstacles[i], ptr, offset);
-				ptr += Obstacle.SizeInBytesForNetwork;	
-			}
-		}
-		return response;
-	}
-
 	internal unsafe Packet? OnPingRequest(Packet packet) {
 		if (packet.Payload[0] == 1) {
 			logger.Log("answering ping");
@@ -80,18 +66,37 @@ public class GameServer {
 		}
 	}
 
-	internal unsafe Packet? OnExchangePlayerRequest(Packet packet) {
-		Player temp = SerializerService.DeserializePlayer(packet.Payload, Protocoll.PAYLOAD_OFFSET);
-		logger.Log("processing player request", new MessageParameter("player",temp));
-		Packet response = new Packet(PacketType.Player);
-		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			if (gameService.Players[i]==null)
-				continue;
-			if (gameService.Players[i].PlayerUUID == temp.PlayerUUID) {
-				gameService.Players[i].Dir = temp.Dir;
+	internal Packet? OnMapRequest() {
+		logger.Log("processing map request");
+		Packet response = new(PacketType.Map);
+		unsafe {
+			byte* ptr = response.Payload;
+			for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
+				int offset = i*Obstacle.SizeInBytesForNetwork;
+				SerializerService.SerializeObstacle(gameService.Obstacles[i], ptr, offset);
+				ptr += Obstacle.SizeInBytesForNetwork;
 			}
-			byte* ptr = packet.Payload;
-			SerializerService.SerializePlayer(ptr, gameService.Players[i], i*Player.SizeInBytes);
+		}
+		return response;
+	}
+
+	internal unsafe Packet? OnUpdatePlayerRequest(Packet request) {
+		Player player = SerializerService.DeserializePlayer(request.Payload, Protocoll.PAYLOAD_OFFSET);
+		logger.Log("processing update player request", new MessageParameter("player", player));
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
+			if (gameService.Players[i].PlayerUUID == player.PlayerUUID) {
+				gameService.Players[i].Dir = player.Dir;
+			}
+		}
+		return null;
+	}
+
+	internal unsafe Packet? OnGetPlayersRequest(Packet request) {
+		logger.Log("processing get players request");
+		Packet response = new(PacketType.GetPlayers);
+		byte* ptr = request.Payload;
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
+			SerializerService.SerializePlayer(ptr, gameService.Players[i], i*Player.SizeInBytesForNetwork);
 		}
 		return response;
 	}
@@ -101,14 +106,14 @@ public class GameServer {
 		PlayerIdCounter++;
 		Player temp = new(new(100,100,0), 100, PlayerIdCounter);
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			if (i==Constants.PLAYER_COUNT-1 && gameService.Players[i].Health!=-1)
-				return new Packet(PacketType.PlayerLimit);
 			if (gameService.Players[i].Health==-1) {
 				gameService.Players[i]=temp;
 				break;
+			} else if (i==Constants.PLAYER_COUNT-1) {
+				return new Packet(PacketType.PlayerLimit);
 			}
 		}
-		Packet response = new Packet(PacketType.Player);
+		Packet response = new Packet(PacketType.GetPlayers);
 		SerializerService.SerializePlayer(response.Payload, temp, Protocoll.PAYLOAD_OFFSET);
 		return response;
 	}
@@ -131,7 +136,7 @@ public class GameServer {
 	private bool IsPlayerRegistered(Player player) {
 		bool found = false;
 		for (int i = 0; i<Constants.PLAYER_COUNT-1; i++) {
-			if (gameService.Players[i]==null)
+			if (gameService.Players[i].Health==-1)
 				continue;
 			if (gameService.Players[i].PlayerUUID == player.PlayerUUID) {
 				found = true;
@@ -162,11 +167,11 @@ public class GameServer {
 	private void DisposeObjects() {
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			if (clients[i]!=null) {
-				if (clients[i].disposalCooldown<1000)
-					clients[i].disposalCooldown--;
-				if (clients[i].disposalCooldown==800)
-					clients[i].Stop();
-				if (clients[i].disposalCooldown<=0)
+				if (clients[i]!.disposalCooldown<1000)
+					clients[i]!.disposalCooldown--;
+				if (clients[i]!.disposalCooldown==800)
+					clients[i]!.Dispose();
+				if (clients[i]!.disposalCooldown<=0)
 					clients[i] = null;
 			}
 		}

@@ -8,7 +8,7 @@ using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-internal class ClientConnection {
+internal class ClientConnection : IDisposable {
 	
 	private readonly Shared.Socket socket;
 	private readonly GameServer server;
@@ -24,7 +24,6 @@ internal class ClientConnection {
 
 	internal async Task RunAsync() {
 		logger.Log("run");
-		byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
 		while (!stop) {
 			try {
 				Packet request = await socket.RecievePacketAsync();
@@ -33,8 +32,11 @@ internal class ClientConnection {
 					case PacketType.Bullets:
 						response = server.OnBulletRequest();
 						break;
-					case PacketType.Player:
-						response = server.OnExchangePlayerRequest(request);
+					case PacketType.UpdatePlayer:
+						response = server.OnUpdatePlayerRequest(request);
+						break;
+					case PacketType.GetPlayers:
+						response = server.OnGetPlayersRequest(request);
 						break;
 					case PacketType.Ping:
 						response = server.OnPingRequest(request);
@@ -54,7 +56,7 @@ internal class ClientConnection {
 					await socket.SendPacketAsync(response);
 			} catch (SocketException e) {
 				logger.Error(e.Message);
-				disposalCooldown--;
+				Dispose();
 				break;
 			}
 		}
@@ -63,9 +65,9 @@ internal class ClientConnection {
 	public override string? ToString()
 		=> socket.ToString();
 
-	internal void Stop() {
+	public void Dispose() {
 		logger.Log("stopping");
 		stop = true;
-		socket.Stop();
+		socket.Dispose();
 	}
 }

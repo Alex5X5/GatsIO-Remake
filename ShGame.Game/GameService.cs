@@ -30,13 +30,12 @@ public class GameService {
 
 	public Map Map;
 
-	public GameService(Player? pov) {
+	public GameService(Player pov) {
 		logger = new(new LoggingLevel("Game"));
 		Players = new Player[Constants.PLAYER_COUNT];
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
 			Players[i]=new();
-		if (pov!=null)
-			Players[0]=pov;
+		Players[0]=pov;
 		Bullets = new Bullet[Constants.BULLET_COUNT];
 		for (int i = 0; i<Constants.BULLET_COUNT; i++)
 			Bullets[i]=new();
@@ -89,39 +88,46 @@ public class GameService {
 
 	#region game loops
 
-	public Action? PrePlayerMoveLoop;
-	public Action? PastPlayerMoveLoop;
+	private delegate void RefAction<T>(ref T item);
 
-	public void PlayerMoveLoop() {
-		PrePlayerMoveLoop?.Invoke();
-		//for (int i = 0; i<200; i++) {
-		foreach (Player p in Players) {
-			if (p!=null)
-				if (p.Health!=-1) {
-					p.Move();
-				}
+	private void ForEachPlayer(RefAction<Player> action) {
+		if (Players.Length == 0)
+			return;
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
+			action(ref Players[i]);
 		}
-		PastPlayerMoveLoop?.Invoke();
 	}
 
-	public Action? PreBulletMoveLoop;
-	public Action? AfterBulletMoveLoop;
+	private void ForEachBullet(RefAction<Bullet> action) {
+		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
+			action(ref Bullets[i]);
+		}
+	}
+
+	public void PlayerMoveLoop() {
+		
+		void MovePlayer(ref Player p) {
+			if (p.Health!=-1) {
+				p.Move();
+			}
+		}
+
+		ForEachPlayer(MovePlayer);
+	}
 
 	public void BulletMoveLoop() {
-		PreBulletMoveLoop?.Invoke();
-		foreach (Bullet b in Bullets) {
+
+		void MoveBullet(ref Bullet b) {
 			b.Move();
 			b.CheckObstacleCollision(Obstacles);
 		}
-		AfterBulletMoveLoop?.Invoke();
+
+		ForEachBullet(MoveBullet);
 	}
 
-	public Action? PrePlayerShootLoop = ()=> { };
-	public Action? PastPlayerShootLoop;
-
 	public void PlayerShootLoop() {
-		PrePlayerShootLoop?.Invoke();
-		foreach (Player p in Players) {
+
+		void PlayerShoot(ref Player p) {
 			if (p.IsShooting == 0x1 && p.weaponCooldownTicksDone==0) {
 				AllocBullet(p);
 				p.weaponCooldownTicksDone = p.WeaponCooldownTicks;
@@ -129,7 +135,8 @@ public class GameService {
 			if (p.weaponCooldownTicksDone>0)
 				p.weaponCooldownTicksDone--;
 		}
-		PastPlayerShootLoop?.Invoke();
+	
+		ForEachPlayer(PlayerShoot);
 	}
 
 	#endregion game loops

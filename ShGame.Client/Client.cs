@@ -9,6 +9,7 @@ using ShGame.Types;
 using ShGame.Util;
 
 using System.Threading;
+using System.Threading.Tasks;
 
 //#pragma warning disable CS8500 //insert spaces instead of tabs
 
@@ -36,18 +37,15 @@ public class Client : Window {
 
 		netService = new NetworkService(config);
 
-
-		SetBackgroundColor(new Color(90, 90, 110));
-
 		ControlledPlayer=new(new(100, 100, 0), 100, 1);
-		var map = netService.GetMapAsync().Result;
-		gameService = new(ControlledPlayer) {
-			Map = map
-		};
-		gameService.StartAllLoops();
+		gameService = new(ControlledPlayer);
 
 		renderService = new RenderService(gameService);
 
+		StartNetworkThread();
+		gameService.StartAllLoops();
+
+		SetBackgroundColor(new Color(90, 90, 110));
 		Show();
 	}
 
@@ -56,16 +54,9 @@ public class Client : Window {
 		stop = true;
 		gameService.Stop();
 		netService.Dispose();
-		//for (int i = 0; i<obstacles.Length; i++)
-		//	obstacles[i].Dispose();
-		//for (int i = 0; i<foreignPlayers.Length; i++)
-		//	foreignPlayers[i].Dispose();
-		//for (int i = 0; i<bullets.Length; i++)
-		//	bullets[i].Dispose();
-		//ControlledPlayer.Dispose();
 	}
 
-	private void StartThreads() {
+	private void StartNetworkThread() {
 		logger.Log("start threads!");
 		NetworkThread = new Thread(
 			async () => {
@@ -75,9 +66,9 @@ public class Client : Window {
 				}
 				while (!stop && NetHandlerConnected()) {
 					logger.Log("asking for players");
-					await netService.PublishPlayerAsync(ControlledPlayer);
+					await netService.UpdatePlayerAsync(ControlledPlayer);
 					gameService.Players = await netService.GetPlayersAsync();
-					Thread.Sleep(50);
+					await Task.Delay(50);
 				}
 				netService?.Dispose();
 			}

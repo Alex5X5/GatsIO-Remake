@@ -22,39 +22,55 @@ public class NetworkService : IDisposable {
 	}
 
 	public void Dispose() {
-		socket.Stop();
+		socket.Dispose();
 	}
 
 	public async Task<Map> GetMapAsync() {
 		logger.Log("getting Map");
 		await socket.SendPacketAsync(new Packet(PacketType.Map));
-		Packet packet = await socket.RecievePacketAsync();
+		Packet response = await socket.RecievePacketAsync();
 		Map map = new();
 		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
 			int offset = i*Obstacle.SizeInBytesForNetwork;
 			unsafe {
-				map.Obstacles[i] = SerializerService.DeserializeObstacle(packet.Payload, offset);
+				map.Obstacles[i] = SerializerService.DeserializeObstacle(response.Payload, offset);
 			}
 		}
+		response.Dispose();
 		return map;
 	}
 
-	public async Task PublishPlayerAsync(Player player) {
-		
+	public async Task UpdatePlayerAsync(Player player) {
+		Packet request = new Packet(PacketType.UpdatePlayer);
+		unsafe {
+			SerializerService.SerializePlayer(request.Payload, player);
+		}
+		await socket.SendPacketAsync(request);
 	}
 
 	public async Task<Player[]> GetPlayersAsync() {
-		return [];
+		Packet request = new Packet(PacketType.GetPlayers);
+		await socket.SendPacketAsync(request);
+		Packet response = await socket.RecievePacketAsync();
+		Player[] players = new Player[Constants.PLAYER_COUNT];
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
+			int offset = i*Player.SizeInBytesForNetwork;
+			unsafe {
+				players[i] = SerializerService.DeserializePlayer(response.Payload, offset);
+			}
+		}
+		response.Dispose();
+		return players;
 	}
 
 	public async Task<Player> RegisterToServerAsync() {
 		await socket.SendPacketAsync(new Packet(PacketType.Register));
-		Packet packet = await socket.RecievePacketAsync();
+		Packet response = await socket.RecievePacketAsync();
 		Player player;
 		unsafe {
-			player = SerializerService.DeserializePlayer(packet.Payload);
+			player = SerializerService.DeserializePlayer(response.Payload);
 		}
-		packet.Dispose();
+		response.Dispose();
 		return player;
 		
 	}
