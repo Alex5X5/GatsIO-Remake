@@ -8,7 +8,7 @@ using ShGame.Util;
 
 using System.Threading.Tasks;
 
-public class GameServer {
+public class GameServer : IDisposable {
 
 	private readonly Logger logger = new(new LoggingLevel("GameServer"));
 
@@ -164,31 +164,11 @@ public class GameServer {
 		return false;
 	}
 
-	private void DisposeObjects() {
-		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			if (clients[i]!=null) {
-				if (clients[i]!.disposalCooldown<1000)
-					clients[i]!.disposalCooldown--;
-				if (clients[i]!.disposalCooldown==800)
-					clients[i]!.Dispose();
-				if (clients[i]!.disposalCooldown<=0)
-					clients[i] = null;
-			}
-		}
+	public void Dispose() {
+		gameService.Stop();
+		socket.Dispose();
+		foreach (ClientConnection? c in clients)
+			c?.Dispose();
 	}
-
-	//public void Stop() {
-	//	logger.Log("stopping");
-	//	//the AcceptLoop Thread only stops if stop is set to true
-	//	stop = true;
-	//	Game.Stop();
-	//	//stopp all connections
-	//	foreach (ClientConnection? c in clients)
-	//		c?.Stop();
-	//	Thread.Sleep(1000);
-	//	//the socket must be closed and disposed or the garbage collector won't free the memory
-	//	Close();
-	//	Dispose();
-	//}
 }
 

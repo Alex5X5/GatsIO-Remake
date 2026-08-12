@@ -67,12 +67,9 @@ public class ServerSocket : IDisposable {
 	}
 
 	public void Dispose() {
-		GC.SuppressFinalize(this);
-	}
-
-	public void Stop() {
-		socket.Disconnect(false);
+		if(socket.Connected)
+			socket.Disconnect(false);
 		socket.Dispose();
-		Dispose();
+		GC.SuppressFinalize(this);
 	}
 }
