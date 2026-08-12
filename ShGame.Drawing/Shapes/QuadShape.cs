@@ -34,6 +34,6 @@ internal struct QuadShape {
 	}
 
 	private static double Cross(Vector3d a, Vector3d b, Vector3d c) {
-		return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+		return (b.X - a.X) * (c.Y - a.Y) - (b.Y - a.Y) * (c.X - a.X);
 	}
 }

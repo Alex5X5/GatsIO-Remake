@@ -24,8 +24,8 @@ public struct Line {
 
 	public bool Contains(Vector3d point) {
 		//Originally this.Origin.x + r* this.Direction.x = point.x
-		double r = (point.x- Origin.x)/Direction.x;
-		return Origin.y+r*Direction.y==point.y;
+		double r = (point.X- Origin.X)/Direction.X;
+		return Origin.Y+r*Direction.Y==point.Y;
 	}
 
 	public Vector3d Intercept(Line other) {
@@ -34,16 +34,16 @@ public struct Line {
 		Vector3d other2 = other.Origin.Add(other.Direction);
 
 		double u = (
-			(other.Origin.x-Origin.x)*(this2.y-Origin.y)-
-			(other.Origin.y-Origin.y)*(this2.x-Origin.x)
+			(other.Origin.X-Origin.X)*(this2.Y-Origin.Y)-
+			(other.Origin.Y-Origin.Y)*(this2.X-Origin.X)
 		)/(
-			(other2.y-other.Origin.y)*(this2.x-Origin.x)-
-			(other2.x-other.Origin.x)*(this2.y-Origin.y)
+			(other2.Y-other.Origin.Y)*(this2.X-Origin.X)-
+			(other2.X-other.Origin.X)*(this2.Y-Origin.Y)
 		);
 		return new Vector3d(
-			other2.x+u*(other2.x-other.Origin.x),
-			other.Origin.y+u*(other2.y-other.Origin.y),
-			other.Origin.z+u*(other2.y-other.Origin.z)
+			other2.X+u*(other2.X-other.Origin.X),
+			other.Origin.Y+u*(other2.Y-other.Origin.Y),
+			other.Origin.Z+u*(other2.Y-other.Origin.Z)
 		);
 	}
 

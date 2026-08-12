@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ShGame.Game\ShGame.Game.csproj" />
+		<ProjectReference Include="..\ShGame.Types\ShGame.Types.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="SimpleLogging">
+	    <HintPath>..\libs\Simplelogging.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+</Project>

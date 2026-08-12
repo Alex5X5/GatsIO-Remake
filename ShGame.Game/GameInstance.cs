@@ -1,13 +1,13 @@
 ﻿namespace ShGame.Game;
 
-using ShGame.Game.GameObjects;
+//using ShGame.Game.GameObjects;
 using ShGame.Math;
 using ShGame.Util;
+using ShGame.Types;
 
 using SimpleLogging.logging;
 
 using System;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,7 +15,6 @@ public class GameInstance {
 
 	private bool Idle = true;
 	private bool Run = false;
-	private long TargetClockCounter;
 
 	private CancellationTokenSource InterruptSource;
 
@@ -29,6 +28,8 @@ public class GameInstance {
 	public Obstacle[] Obstacles;
 	public Bullet[] Bullets;
 
+	public Map Map;
+
 	public GameInstance(Player? pov) {
 		logger = new(new LoggingLevel("Game"));
 		Players = new Player[Constants.PLAYER_COUNT];
@@ -41,7 +42,7 @@ public class GameInstance {
 			Bullets[i]=new();
 		Obstacles = new Obstacle[Constants.OBSTACLE_COUNT];
 		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++)
-			Obstacles[i]=new(pov, null, 0);
+			Obstacles[i]=new(null, 0);
 		InterruptSource = new CancellationTokenSource();
 		PlayersAccessLock = new ReaderWriterLockSlim();
 		ObstaclesAccessLock = new ReaderWriterLockSlim();
@@ -164,7 +165,6 @@ public class GameInstance {
 		line -= (int)(0.5 * Constants.MAP_GRID_HEIGHT / Constants.OBSTACKLE_LINES);
 		Random r = new();
 		Obstacles[offset] = new Obstacle(
-			null,
 			new Vector3d(
 				//the obstacles may also be offset by half the distance to the next row/line
 				//first add half of the distance between the rows to x
@@ -175,7 +175,7 @@ public class GameInstance {
 				line + Constants.OBSTACLE_LINE_DISTANCE /2 + r.Next(0, Constants.OBSTACLE_LINE_DISTANCE),
 				0
 			),
-			//the upper bound of the type must be 4 becuase 3 ist the maxumum possible tytpe but the upper bound is not included
+			//the upper bound of the type must be 4 becuase 3 ist the maxumum possible type but the upper bound is not included
 			(byte)r.Next(1, 4)
 		);
 		logger.Log("generated new Obstacle ", new MessageParameter("obstacle", Obstacles[offset]));
@@ -188,7 +188,7 @@ public class GameInstance {
 		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
 			logger.Log(Bullets[i].Speed.ToString());
 			if (Bullets[i].Lifetime==-1) {
-				Bullets[i].Pos = new(p.Pos.Cpy().Add(new Vector3d(Player.SIZE/2, Player.SIZE/2, 0)));
+				Bullets[i].Pos = new(p.Pos.Cpy().Add(new Vector3d(Player.Radius, Player.Radius, 0)));
 				Bullets[i].Dir = new(p.Dir);
 				Bullets[i].Speed = p.InitialBulletSpeed;
 				Bullets[i].OwnerHandle = p.PlayerUUID;

@@ -17,7 +17,7 @@ internal struct PointF {
 	}
 
 	public PointF(Vector3d vector) {
-		x = (float)vector.x;
-		y = (float)vector.y;
+		x = (float)vector.X;
+		y = (float)vector.Y;
 	}
 }

@@ -1,4 +1,4 @@
-﻿using ShGame.Game.Net;
+﻿using ShGame.Util;
 
 namespace ShGame.Client.Rendering;
 
@@ -15,8 +15,8 @@ out vec2 frag_texCoords;
 void main()
 {
     vec2 ndc = vec2(
-		aPosition.x / ("+GameServer.MAP_WIDTH+@"/2) - 1.0,
-		aPosition.y / ("+GameServer.MAP_HEIGHT+@"/2) - 1.0
+		aPosition.x / ("+Constants.MAP_GRID_WIDTH+@"/2) - 1.0,
+		aPosition.y / ("+Constants.MAP_GRID_HEIGHT+@"/2) - 1.0
 	);
 	gl_Position = vec4(ndc, aPosition.z, 1.0);
 
@@ -36,8 +36,8 @@ uniform sampler2D uTexture;
 void main()
 {
 	vec2 ndc = vec2(
-		frag_texCoords.x / ("+GameServer.MAP_WIDTH+@"/2) - 1.0,
-		frag_texCoords.y / ("+GameServer.MAP_HEIGHT+@"/2) - 1.0
+		frag_texCoords.x / ("+Constants.MAP_GRID_WIDTH+@"/2) - 1.0,
+		frag_texCoords.y / ("+Constants.MAP_GRID_HEIGHT+@"/2) - 1.0
 	);
     out_color = texture(uTexture, ndc);
 }
@@ -53,8 +53,8 @@ uniform float u_WindowHeight;
 void main()
 {
 	vec2 ndc = vec2(
-		aPosition.x / ("+GameServer.MAP_WIDTH+@"/2) - 1.0,
-		aPosition.y / ("+GameServer.MAP_HEIGHT+@"/2) - 1.0
+		aPosition.x / ("+Constants.MAP_GRID_WIDTH+@"/2) - 1.0,
+		aPosition.y / ("+Constants.MAP_GRID_HEIGHT+@"/2) - 1.0
 	);
 	gl_Position = vec4(ndc, aPosition.z, 1.0);
 }";

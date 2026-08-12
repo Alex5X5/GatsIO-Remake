@@ -13,7 +13,7 @@ public struct Rect {
 
 	public Rect(double x, double y, double width, double height) : this(new Vector3d(x, y, 0), width, height) { }
 
-	public Rect(Vector3d pos, Vector3d bounds) : this(pos, bounds.x, bounds.y) { }
+	public Rect(Vector3d pos, Vector3d bounds) : this(pos, bounds.X, bounds.Y) { }
 
 	public Rect(Vector3d pos, double width, double height) {
 		Pos = pos;

@@ -4,16 +4,12 @@
 		<PublishSingleFile>true</PublishSingleFile>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 		<SelfContained>true</SelfContained>
-		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
-		<!-- or linux-x64, etc. -->
+		<TargetFramework>net10.0</TargetFramework>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net9.0</TargetFramework>
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<StartupObject>ShGame.Client.ClientMain</StartupObject>
-		<PackAsTool>True</PackAsTool>
-		<SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 		<NoWin32Manifest>true</NoWin32Manifest>
 	</PropertyGroup>
@@ -46,9 +42,11 @@
 		<EmbeddedResource Include="Assets\**\*" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\ShGame.Net\ShGame.Net.Client.csproj" />
 		<ProjectReference Include="..\ShGame.Drawing\ShGame.Drawing.csproj" />
 		<ProjectReference Include="..\ShGame.Math\ShGame.Math.csproj" />
-		<ProjectReference Include="..\ShGame.Net\ShGame.Net.csproj" />
-		<ProjectReference Include="..\ShGame.Game\ShGame.Game.csproj" />
+		<ProjectReference Include="..\ShGame.Rendering\ShGame.Rendering.csproj" />
+		<ProjectReference Include="..\ShGame.Types\ShGame.Types.csproj" />
+		<ProjectReference Include="..\ShGame.Util\ShGame.Util.csproj" />
 	</ItemGroup>
 </Project>

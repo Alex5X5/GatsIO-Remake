@@ -1,9 +1,9 @@
-﻿using ShGame.Math;
+﻿namespace ShGame.Util;
 
-namespace ShGame;
+using ShGame.Math;
+using System;
 
-public class Constants {
-
+public static class Constants {
 
 	public static readonly Line BORDER_TOP = new Line(new Vector3d(0, 0, 0), new Vector3d(Constants.MAP_GRID_WIDTH, 0, 0));
 	public static readonly Line BORDER_BOTTOM = new Line(new Vector3d(0, Constants.MAP_GRID_HEIGHT, 0), new Vector3d(Constants.MAP_GRID_WIDTH, Constants.MAP_GRID_HEIGHT, 0));

@@ -8,10 +8,12 @@ class ClientMain {
 	public static void Main() {
 		Logging.DisableColors();
 		Paths.ExtractFiles();
-		IPAddress? address = IPAddress.Parse("192.168.56.1");
-		int port = 5000;
-		_ = new Client(
-			address, port
-		);
+
+		Configuration config = new Configuration() {
+			Address = NetUtil.GetLocalIP().MapToIPv4().ToString(),
+			Port = 5000
+		};
+
+		_ = new Client(config);
 	}
 }

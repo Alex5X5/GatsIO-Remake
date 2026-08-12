@@ -8,4 +8,9 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\ShGame.Math\ShGame.Math.csproj" />
+		<ProjectReference Include="..\ShGame.Util\ShGame.Util.csproj" />
+	</ItemGroup>
+
 </Project>

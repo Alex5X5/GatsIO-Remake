@@ -106,7 +106,7 @@ public class DrawingContext {
 
 	public void DrawLine(Line line, Color color, double stroke = 1) {
 		Vector3d dir = line.Direction;
-		Vector3d perp = new Vector3d(dir.y * -1.0, dir.x, 0.0).Nor().Scl(stroke * 0.5);
+		Vector3d perp = new Vector3d(dir.Y * -1.0, dir.X, 0.0).Nor().Scl(stroke * 0.5);
 		Vector3d p1 = line.A.Add(perp);
 		Vector3d p2 = line.A.Add(perp.Scl(-1.0));
 		Vector3d distance = line.B.Sub(line.A);
