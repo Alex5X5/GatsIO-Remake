@@ -2,7 +2,7 @@
 
 using ShGame.Math;
 
-public class Player {
+public struct Player {
 
 	public short WeaponCooldownTicks = 10;
 	public short weaponCooldownTicksDone = 10;
@@ -27,18 +27,18 @@ public class Player {
 	public const int SizeInBytes = 100;
 	public const int SizeInBytesForNetwork = 17;
 
-	public Player(Vector3d? newPos, int newHealth, short UUID) {
-		Pos = newPos??new Vector3d(0, 0, 0);
-		Health_ = newHealth;
+	public Player(Vector3d pos, int health, short UUID) {
+		Pos = pos;
+		Health = health;
 		PlayerUUID = UUID; //!=0 ? UUID : new Random().Next();
-		Visible=Health_ !=-1;
+		Visible = Health !=-1;
 	}
 
 	//the constructor for invalid players
 	public Player() {
 		Pos = new(0, 0, 0);
 		//if the health of a player is -1 it is considered invalid and won't be processed
-		Health_ = -1;
+		Health = -1;
 		PlayerUUID = 0;
 		Visible = false;
 	}
