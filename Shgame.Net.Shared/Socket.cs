@@ -57,13 +57,15 @@ public class Socket : IDisposable {
 			try {
 				ArraySegment<byte> segment = new(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH - recieved);
 				recievedBytesCount = await socket.ReceiveAsync(segment, SocketFlags.None);
-			} catch (Exception) {
+			} catch (SocketException) {
 				break;
 			}
 			if (recievedBytesCount == 0)
 				break;
 			recieved += recievedBytesCount;
 		}
+		if (recieved == 0)
+			Dispose();
 		unsafe {
 			fixed (byte* ptr = &buffer[0])
 				return new Packet(ptr);
@@ -80,18 +82,21 @@ public class Socket : IDisposable {
 			try {
 				ArraySegment<byte> segment = new(buffer, sent, Protocoll.PACKET_BYTE_LENGTH - sent);
 				sentBytesCount = await socket.SendAsync(segment, SocketFlags.None);
-			} catch (Exception) {
+			} catch (SocketException) {
 				break;
 			}
 			if (sentBytesCount == 0)
 				break;
 			sent += sentBytesCount;
 		}
+		if (sent == 0)
+			Dispose();
 	}
 
 	public void Dispose() {
+		stop = true;
 		if (socket.Connected)
-			socket.Disconnect(false);
+			socket.Close();
 		socket.Dispose();
 		GC.SuppressFinalize(this);
 	}
