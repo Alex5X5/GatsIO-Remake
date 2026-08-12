@@ -21,7 +21,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\ShGame.Client\ShGame.Client.csproj" />
-	  <ProjectReference Include="..\ShGame.Server\ShGame.Net.Server.csproj" />
+	  <ProjectReference Include="..\ShGame.Net.Server\ShGame.Net.Server.csproj" />
 	  <ProjectReference Include="..\ShGame.Util\ShGame.Util.csproj" />
 	</ItemGroup>
 

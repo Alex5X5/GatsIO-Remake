@@ -51,6 +51,7 @@ public class Client : Window {
 		gameService.StartAllLoops();
 
 		SetBackgroundColor(new Color(90, 90, 110));
+		Thread.Sleep(1000);
 		Show();
 	}
 
@@ -66,13 +67,18 @@ public class Client : Window {
 		NetworkThread = new Thread(
 			async () => {
 				if (NetHandlerConnected()) {
-					gameService.Map = await netService.GetMapAsync();
+					var map = await netService.GetMapAsync();
+					if (map != null)
+						gameService.Map = map;
+					else
+						gameService.Map = new Map();
 					ControlledPlayer = await netService.RegisterToServerAsync();
 				}
 				while (!stop && NetHandlerConnected()) {
 					logger.Log("asking for players");
 					await netService.UpdatePlayerAsync(ControlledPlayer);
 					gameService.Players = await netService.GetPlayersAsync();
+					InvalidateVisual();
 					await Task.Delay(50);
 				}
 				netService?.Dispose();
@@ -119,6 +125,7 @@ public class Client : Window {
 				keyRight=true;
 				break;
 			case Key.Escape:
+				Close();
 				Dispose();
 				break;
 		}
@@ -151,10 +158,8 @@ public class Client : Window {
 	//}
 
 	protected override void MouseMoved(Vector3d pos) {
-		double x = pos.X * ( Constants.MAP_GRID_WIDTH / this.Size.Width );
-		double y = pos.X * ( Constants.MAP_GRID_WIDTH / this.Size.Width );
-		MousePos = new(x, y, 0.0);
-		//Console.WriteLine("I Moved! "+mousePos);
+		MousePos = pos;
+		InvalidateVisual();
 	}
 
 	private bool NetHandlerConnected() {
@@ -166,5 +171,6 @@ public class Client : Window {
 
 	protected override void Draw(double deltaTime, DrawingContext context) {
 		renderService.OnDraw(context);
+		context.DrawLine(new Vector3d(0, 0, 0), MousePos, Color.ORANGE, 3);
 	}
 }

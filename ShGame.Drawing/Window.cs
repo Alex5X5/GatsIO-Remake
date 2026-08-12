@@ -153,4 +153,8 @@ public abstract class Window : IDisposable {
 		thread = new(window!.Run);
 		thread.Start();
 	}
+
+	public void Close() {
+		window?.Close();
+	}
 }
