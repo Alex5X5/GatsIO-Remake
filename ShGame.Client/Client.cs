@@ -16,6 +16,11 @@ using System.Threading.Tasks;
 public class Client : Window {
 
 	private bool stop;
+	public bool
+		keyUp = false,
+		keyDown = false,
+		keyLeft = false,
+		keyRight = false;
 
 	public static readonly int SCREEN_PIXEL_WIDTH = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size.Y;
 	public static readonly int SCREEN_PIXEL_HEIGHT = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size.X;
@@ -77,50 +82,50 @@ public class Client : Window {
 		logger.Log("started connection thread:"+NetworkThread.IsAlive);
 	}
 
-	//private void KeyUp_(IKeyboard keyboard, Key key, int keyCode) {
-	//	//logger.Log("key "+key+" up");
-	//	switch (key) {
-	//		case Key.W:
-	//			keyUp=false;
-	//			break;
-	//		case Key.S:
-	//			keyDown=false;
-	//			break;
-	//		case Key.A:
-	//			keyLeft=false;
-	//			break;
-	//		case Key.D:
-	//			keyRight=false;
-	//			break;
-	//	}
-	//	if (ControlledPlayer!=null)
-	//		ControlledPlayer.OnKeyEvent(this);
-	//	//Console.WriteLine("key up, p:"+player.ToString());
-	//}
+	protected override void KeyPressed(Key key) {
+		//logger.Log("key "+key+" up");
+		switch (key) {
+			case Key.W:
+				keyUp=false;
+				break;
+			case Key.S:
+				keyDown=false;
+				break;
+			case Key.A:
+				keyLeft=false;
+				break;
+			case Key.D:
+				keyRight=false;
+				break;
+		}
+		//if (ControlledPlayer!=null)
+		//	ControlledPlayer.OnKeyEvent(this);
+		//Console.WriteLine("key up, p:"+player.ToString());
+	}
 
-	//private void KeyDown_(IKeyboard keyboard, Key key, int keyCode) {
-	//	//logger.Log("key "+key+" down");
-	//	switch (key) {
-	//		case Key.W:
-	//			keyUp=true;
-	//			break;
-	//		case Key.S:
-	//			keyDown=true;
-	//			break;
-	//		case Key.A:
-	//			keyLeft=true;
-	//			break;
-	//		case Key.D:
-	//			keyRight=true;
-	//			break;
-	//		case Key.Escape:
-	//			Stop();
-	//			break;
-	//	}
-	//	if(ControlledPlayer!=null)
-	//		ControlledPlayer.OnKeyEvent(this);
-	//	//Console.WriteLine("key up, p:"+player.ToString());
-	//}
+	protected override void KeyReleased(Key key) {
+		//logger.Log("key "+key+" down");
+		switch (key) {
+			case Key.W:
+				keyUp=true;
+				break;
+			case Key.S:
+				keyDown=true;
+				break;
+			case Key.A:
+				keyLeft=true;
+				break;
+			case Key.D:
+				keyRight=true;
+				break;
+			case Key.Escape:
+				Dispose();
+				break;
+		}
+		//if (ControlledPlayer!=null)
+		//	ControlledPlayer.OnKeyEvent(this);
+		//Console.WriteLine("key up, p:"+player.ToString());
+	}
 
 	//private void OnMouseDown(IMouse cursor, MouseButton button) {
 	//	Console.WriteLine("Mouse Down! "+mousePos);

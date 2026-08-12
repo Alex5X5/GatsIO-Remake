@@ -122,20 +122,20 @@ public abstract class Window : IDisposable {
 		MouseMoved(pos_);
 	}
 
-	private void KeyDownBase(IKeyboard keyboard, Key key, int arg3) {
-		KeyPressed();
+	private void KeyDownBase(IKeyboard keyboard, Silk.NET.Input.Key key, int arg3) {
+		KeyPressed((Key)key);
 	}
 
-	private void KeyUpBase(IKeyboard keyboard, Key key, int arg3) {
-		KeyReleased();
+	private void KeyUpBase(IKeyboard keyboard, Silk.NET.Input.Key key, int arg3) {
+		KeyReleased((Key)key);
 	}
 
 	private void OnClosingBase() {
 		OnClosing();
 	}
 
-	protected virtual void KeyPressed() { }
-	protected virtual void KeyReleased() { }
+	protected virtual void KeyPressed(Key key) { }
+	protected virtual void KeyReleased(Key key) { }
 
 	protected virtual void MouseMoved(Vector3d pos) { }
 	protected virtual void MousePressed(Vector3d pos) { }
