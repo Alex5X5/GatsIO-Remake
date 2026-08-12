@@ -11,7 +11,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class GameInstance {
+public class GameService {
 
 	private bool Idle = true;
 	private bool Run = false;
@@ -30,7 +30,7 @@ public class GameInstance {
 
 	public Map Map;
 
-	public GameInstance(Player? pov) {
+	public GameService(Player? pov) {
 		logger = new(new LoggingLevel("Game"));
 		Players = new Player[Constants.PLAYER_COUNT];
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
@@ -51,7 +51,7 @@ public class GameInstance {
 
 	#region flow controll
 
-	public void StartNewLoop(Action loop) {
+	private void StartNewLoop(Action loop) {
 		new Thread(
 			() => {
 				logger.Log("start loop");
@@ -69,7 +69,6 @@ public class GameInstance {
 	}
 
 	public void StartAllLoops() {
-		//StartClock();
 		Run=true;
 		StartNewLoop(PlayerMoveLoop);
 		StartNewLoop(PlayerShootLoop);
@@ -99,13 +98,9 @@ public class GameInstance {
 		foreach (Player p in Players) {
 			if (p!=null)
 				if (p.Health!=-1) {
-					p.Pos.Add(p.Dir.Cpy().Scl(p.Speed));
-					//logger.Log("moved player ", new MessageParameter("player ", p.ToString()));
+					p.Move();
 				}
 		}
-		//Assembly ass = Assembly.GetEntryAssembly();
-  //      if (ass.FullName.Contains(".Server")) 
-		//	Console.Write("");
 		PastPlayerMoveLoop?.Invoke();
 	}
 

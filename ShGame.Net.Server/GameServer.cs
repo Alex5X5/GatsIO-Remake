@@ -12,7 +12,7 @@ public class GameServer {
 
 	private readonly Logger logger = new(new LoggingLevel("GameServer"));
 
-	private readonly GameInstance Game;
+	private readonly GameService gameService;
 
 	private readonly ServerSocket socket;
 
@@ -23,9 +23,9 @@ public class GameServer {
 
 	public GameServer(Configuration config) {
 		socket = new(config, OnAccept);
-		Game = new(null);
-        Game.StartAllLoops();
-		Game.SpreadObstacles();
+		gameService = new(null);
+        gameService.StartAllLoops();
+		gameService.SpreadObstacles();
 	}
 
 	#endregion constructors
@@ -63,7 +63,7 @@ public class GameServer {
 			byte* ptr = response.Payload;
 			for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
 				int offset = i*Obstacle.SizeInBytesForNetwork;
-				SerializerService.SerializeObstacle(Game.Obstacles[i], ptr, offset);
+				SerializerService.SerializeObstacle(gameService.Obstacles[i], ptr, offset);
 				ptr += Obstacle.SizeInBytesForNetwork;	
 			}
 		}
@@ -85,13 +85,13 @@ public class GameServer {
 		logger.Log("processing player request", new MessageParameter("player",temp));
 		Packet response = new Packet(PacketType.Player);
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			if (Game.Players[i]==null)
+			if (gameService.Players[i]==null)
 				continue;
-			if (Game.Players[i].PlayerUUID == temp.PlayerUUID) {
-				Game.Players[i].Dir = temp.Dir;
+			if (gameService.Players[i].PlayerUUID == temp.PlayerUUID) {
+				gameService.Players[i].Dir = temp.Dir;
 			}
 			byte* ptr = packet.Payload;
-			SerializerService.SerializePlayer(ptr, Game.Players[i], i*Player.SizeInBytes);
+			SerializerService.SerializePlayer(ptr, gameService.Players[i], i*Player.SizeInBytes);
 		}
 		return response;
 	}
@@ -101,10 +101,10 @@ public class GameServer {
 		PlayerIdCounter++;
 		Player temp = new(new(100,100,0), 100, PlayerIdCounter);
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			if (i==Constants.PLAYER_COUNT-1 && Game.Players[i].Health!=-1)
+			if (i==Constants.PLAYER_COUNT-1 && gameService.Players[i].Health!=-1)
 				return new Packet(PacketType.PlayerLimit);
-			if (Game.Players[i].Health==-1) {
-				Game.Players[i]=temp;
+			if (gameService.Players[i].Health==-1) {
+				gameService.Players[i]=temp;
 				break;
 			}
 		}
@@ -119,7 +119,7 @@ public class GameServer {
 		byte* ptr = response.Payload;
 		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
 			int offset = i*Obstacle.SizeInBytes;
-			SerializerService.SerializeBullet(Game.Bullets[i], ptr, offset);
+			SerializerService.SerializeBullet(gameService.Bullets[i], ptr, offset);
 			ptr += Bullet.BULLET_BYTE_LENGTH;
 		}
 		return response;
@@ -131,9 +131,9 @@ public class GameServer {
 	private bool IsPlayerRegistered(Player player) {
 		bool found = false;
 		for (int i = 0; i<Constants.PLAYER_COUNT-1; i++) {
-			if (Game.Players[i]==null)
+			if (gameService.Players[i]==null)
 				continue;
-			if (Game.Players[i].PlayerUUID == player.PlayerUUID) {
+			if (gameService.Players[i].PlayerUUID == player.PlayerUUID) {
 				found = true;
 				break;
 			}
@@ -147,10 +147,10 @@ public class GameServer {
 		//loop through the player array and search for an unused player
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			//the slot is considered empty if the player's health is -1
-			if (Game.Players[i].Health==-1) {
-				Game.Players[i].Health=100;
-				Game.Players[i].PlayerUUID = player.PlayerUUID;
-				Game.Players[i].Dir=player.Dir.Nor();
+			if (gameService.Players[i].Health==-1) {
+				gameService.Players[i].Health=100;
+				gameService.Players[i].PlayerUUID = player.PlayerUUID;
+				gameService.Players[i].Dir=player.Dir.Nor();
 				logger.Log("sucessfully registred new player", new MessageParameter("UUID", player.PlayerUUID));
 				return true;
 			}

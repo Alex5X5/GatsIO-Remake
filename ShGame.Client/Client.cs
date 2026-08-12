@@ -21,7 +21,7 @@ public class Client : Window {
 
 	private RenderService renderService;
 	private NetworkService netService;
-	private	GameInstance Game;
+	private	GameService gameService;
 	private Logger logger;
 
 	private Player ControlledPlayer;
@@ -34,7 +34,6 @@ public class Client : Window {
 		
 		logger=new Logger(new LoggingLevel("Client"));
 
-		renderService = new RenderService();
 		netService = new NetworkService(config);
 
 
@@ -42,10 +41,12 @@ public class Client : Window {
 
 		ControlledPlayer=new(new(100, 100, 0), 100, 1);
 		var map = netService.GetMapAsync().Result;
-		Game = new(ControlledPlayer) {
+		gameService = new(ControlledPlayer) {
 			Map = map
 		};
-		Game.StartAllLoops();
+		gameService.StartAllLoops();
+
+		renderService = new RenderService(gameService);
 
 		Show();
 	}
@@ -53,7 +54,7 @@ public class Client : Window {
 
 	protected override void OnClosing() {
 		stop = true;
-		Game.Stop();
+		gameService.Stop();
 		netService.Dispose();
 		//for (int i = 0; i<obstacles.Length; i++)
 		//	obstacles[i].Dispose();
@@ -69,13 +70,13 @@ public class Client : Window {
 		NetworkThread = new Thread(
 			async () => {
 				if (NetHandlerConnected()) {
-					Game.Map = await netService.GetMapAsync();
+					gameService.Map = await netService.GetMapAsync();
 					ControlledPlayer = await netService.RegisterToServerAsync();
 				}
 				while (!stop && NetHandlerConnected()) {
 					logger.Log("asking for players");
 					await netService.PublishPlayerAsync(ControlledPlayer);
-					Game.Players = await netService.GetPlayersAsync();
+					gameService.Players = await netService.GetPlayersAsync();
 					Thread.Sleep(50);
 				}
 				netService?.Dispose();
@@ -168,15 +169,6 @@ public class Client : Window {
 	}
 
 	protected override void Draw(double deltaTime, DrawingContext context) {
-		var map = netService.GetMapAsync().Result;
-		foreach (var o in map.Obstacles) {
-			var col = o.type switch {
-				0 => Color.BLUE,
-				1 => Color.BLUE,
-				2 => Color.YELLOW,
-				_ => Color.GREEN
-			};
-			context.DrawRectangle(new Rect(o.Pos.X, o.Pos.Y, o.WIDTH, o.HEIGHT), col);
-		}
+		renderService.OnDraw(context);
 	}
 }
