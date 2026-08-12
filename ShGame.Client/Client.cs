@@ -32,8 +32,6 @@ public class Client : Window {
 
 	private Player ControlledPlayer;
 
-	private Thread NetworkThread;
-
 	private Vector3d MousePos;
 	
 	public Client(Configuration config) : base(1200, 800, "ShGame") {
@@ -45,7 +43,7 @@ public class Client : Window {
 		ControlledPlayer=new(new(100, 100, 0), 100, 1);
 		gameService = new(ControlledPlayer);
 
-		renderService = new RenderService(gameService);
+		renderService = new RenderService(gameService, ControlledPlayer);
 
 		StartNetworkThread();
 		gameService.StartAllLoops();
@@ -64,7 +62,7 @@ public class Client : Window {
 
 	private void StartNetworkThread() {
 		logger.Log("start threads!");
-		NetworkThread = new Thread(
+		var NetworkThread = new Thread(
 			async () => {
 				if (NetHandlerConnected()) {
 					var map = await netService.GetMapAsync();
@@ -76,7 +74,10 @@ public class Client : Window {
 				}
 				while (!stop && NetHandlerConnected()) {
 					logger.Log("asking for players");
-					await netService.UpdatePlayerAsync(ControlledPlayer);
+
+					for (int i = 0; i<Constants.PLAYER_COUNT; i++)
+						if (gameService.Players[i].PlayerUUID == ControlledPlayer.PlayerUUID)
+							await netService.UpdatePlayerAsync(gameService.Players[i]);
 					gameService.Players = await netService.GetPlayersAsync();
 					InvalidateVisual();
 					await Task.Delay(50);
@@ -90,27 +91,6 @@ public class Client : Window {
 
 	protected override void KeyPressed(Key key) {
 		//logger.Log("key "+key+" up");
-		switch (key) {
-			case Key.W:
-				keyUp=false;
-				break;
-			case Key.S:
-				keyDown=false;
-				break;
-			case Key.A:
-				keyLeft=false;
-				break;
-			case Key.D:
-				keyRight=false;
-				break;
-		}
-		//if (ControlledPlayer!=null)
-		//	ControlledPlayer.OnKeyEvent(this);
-		//Console.WriteLine("key up, p:"+player.ToString());
-	}
-
-	protected override void KeyReleased(Key key) {
-		//logger.Log("key "+key+" down");
 		switch (key) {
 			case Key.W:
 				keyUp=true;
@@ -129,9 +109,33 @@ public class Client : Window {
 				Dispose();
 				break;
 		}
-		//if (ControlledPlayer!=null)
-		//	ControlledPlayer.OnKeyEvent(this);
+		UpdateControlledDir();
+	}
+
+	protected override void KeyReleased(Key key) {
+		//logger.Log("key "+key+" down");
+		switch (key) {
+			case Key.W:
+				keyUp=false;
+				break;
+			case Key.S:
+				keyDown=false;
+				break;
+			case Key.A:
+				keyLeft=false;
+				break;
+			case Key.D:
+				keyRight=false;
+				break;
+		}
+		UpdateControlledDir();
 		//Console.WriteLine("key up, p:"+player.ToString());
+	}
+
+	private void UpdateControlledDir() {
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
+			if (gameService.Players[i].PlayerUUID == ControlledPlayer.PlayerUUID)
+				gameService.Players[i].UpdateDir(keyUp, keyDown, keyLeft, keyRight);
 	}
 
 	//private void OnMouseDown(IMouse cursor, MouseButton button) {

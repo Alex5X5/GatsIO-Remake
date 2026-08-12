@@ -81,7 +81,7 @@ public class GameServer : IDisposable {
 	}
 
 	internal unsafe Packet? OnUpdatePlayerRequest(Packet request) {
-		Player player = SerializerService.DeserializePlayer(request.Payload, Protocoll.PAYLOAD_OFFSET);
+		Player player = SerializerService.DeserializePlayer(request.Payload);
 		logger.Log("processing update player request", new MessageParameter("player", player));
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			if (gameService.Players[i].PlayerUUID == player.PlayerUUID) {
@@ -94,9 +94,8 @@ public class GameServer : IDisposable {
 	internal unsafe Packet? OnGetPlayersRequest(Packet request) {
 		logger.Log("processing get players request");
 		Packet response = new(PacketType.GetPlayers);
-		byte* ptr = request.Payload;
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			SerializerService.SerializePlayer(ptr, gameService.Players[i], i*Player.SizeInBytesForNetwork);
+			SerializerService.SerializePlayer(response.Payload, gameService.Players[i], i*Player.SizeInBytesForNetwork);
 		}
 		return response;
 	}
@@ -114,7 +113,7 @@ public class GameServer : IDisposable {
 			}
 		}
 		Packet response = new Packet(PacketType.GetPlayers);
-		SerializerService.SerializePlayer(response.Payload, temp, Protocoll.PAYLOAD_OFFSET);
+		SerializerService.SerializePlayer(response.Payload, temp, 0);
 		return response;
 	}
 

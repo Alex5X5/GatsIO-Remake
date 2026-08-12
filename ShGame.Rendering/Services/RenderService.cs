@@ -3,13 +3,17 @@
 using ShGame.Drawing;
 using ShGame.Game;
 using ShGame.Math;
+using ShGame.Types;
 
 public class RenderService {
 
 	private GameService game;
 
-	public RenderService(GameService game) {
+	private Player controlled;
+
+	public RenderService(GameService game, Player controlled) {
 		this.game = game;
+		this.controlled = controlled;
 	}
 
 	public void OnDraw(DrawingContext context) {
@@ -25,7 +29,8 @@ public class RenderService {
 		}
 
 		foreach (var p in game.Players) {
-			MappingService.ToModel(p).Draw(context);
+			var col = p.PlayerUUID != controlled.PlayerUUID ? Color.RED : Color.BLUE;
+			context.DrawRectangle(new Rect(p.Pos.X, p.Pos.Y, 10, 10), col);
 		}
 	}
 
