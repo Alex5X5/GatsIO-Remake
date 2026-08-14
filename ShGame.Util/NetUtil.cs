@@ -16,7 +16,7 @@ public static class NetUtil {
 				Address;
 
 	public static IPAddress GetLocalIP() =>
-		NetworkInterface.GetAllNetworkInterfaces()[0].
+		NetworkInterface.GetAllNetworkInterfaces()[5].
 			GetIPProperties().UnicastAddresses[^1].
 				Address;
 }

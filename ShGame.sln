@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShGame.Game", "ShGame.Game\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShGame.Util", "ShGame.Util\ShGame.Util.csproj", "{99EE3141-1707-ED54-6BD1-59503CBD11F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShGame.Start", "ShGame.Start\ShGame.Start.csproj", "{ADDF337B-8687-41D6-8FD6-8D931716211D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShGame", "ShGame\ShGame.csproj", "{ADDF337B-8687-41D6-8FD6-8D931716211D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShGame.Types", "ShGame.Types\ShGame.Types.csproj", "{7020349F-A8A7-4368-B65C-C02BE9E77138}"
 EndProject

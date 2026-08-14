@@ -105,7 +105,6 @@ public class GameService {
 	}
 
 	public void PlayerMoveLoop() {
-		
 		void MovePlayer(ref Player p) {
 			if (p.Health!=-1) {
 				p.Move();

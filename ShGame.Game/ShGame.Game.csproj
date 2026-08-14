@@ -13,13 +13,13 @@
 		<ProjectReference Include="..\ShGame.Types\ShGame.Types.csproj" />
 		<ProjectReference Include="..\ShGame.Util\ShGame.Util.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="..\libs\Simplelogging.dll" />
+	</ItemGroup>
+
     <ItemGroup>
         <EmbeddedResource Include="Assets\shadow.png" />
-    </ItemGroup>
-    <ItemGroup>
-      <Reference Include="SimpleLogging">
-        <HintPath>..\libs\Simplelogging.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>

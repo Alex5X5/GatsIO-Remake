@@ -1,12 +1,14 @@
 ﻿namespace ShGame.Net.Shared;
 
+using SimpleLogging.logging;
+
 using ShGame.Net.Shared.Exceptions;
 using ShGame.Util;
 
-using SimpleLogging.logging;
-
+using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 public class Socket : IDisposable {
 

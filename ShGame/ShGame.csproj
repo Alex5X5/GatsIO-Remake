@@ -1,10 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<PublishSingleFile>true</PublishSingleFile>
+		<OutputType>exe</OutputType>
 		<SelfContained>true</SelfContained>
-		<PackAsTool>True</PackAsTool>
-		<OutputType>Exe</OutputType>
 		<TargetFramework>net10.0</TargetFramework>
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<Nullable>enable</Nullable>
@@ -13,20 +10,21 @@
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 		<NoWin32Manifest>true</NoWin32Manifest>
 	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<WarningLevel>1</WarningLevel>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<WarningLevel>1</WarningLevel>
 	</PropertyGroup>
+
 	<ItemGroup>
-	  <ProjectReference Include="..\ShGame.Client\ShGame.Client.csproj" />
-	  <ProjectReference Include="..\ShGame.Net.Server\ShGame.Net.Server.csproj" />
-	  <ProjectReference Include="..\ShGame.Util\ShGame.Util.csproj" />
+		<ProjectReference Include="..\ShGame.Client\ShGame.Client.csproj" />
+		<ProjectReference Include="..\ShGame.Net.Server\ShGame.Net.Server.csproj" />
+		<ProjectReference Include="..\ShGame.Util\ShGame.Util.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="..\libs\Simplelogging.dll" />
 	</ItemGroup>
-
 </Project>

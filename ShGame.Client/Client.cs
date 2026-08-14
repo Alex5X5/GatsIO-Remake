@@ -73,7 +73,7 @@ public class Client : Window {
 					ControlledPlayer = await netService.RegisterToServerAsync();
 				}
 				while (!stop && NetHandlerConnected()) {
-					logger.Log("asking for players");
+					//logger.Log("asking for players");
 
 					for (int i = 0; i<Constants.PLAYER_COUNT; i++)
 						if (gameService.Players[i].PlayerUUID == ControlledPlayer.PlayerUUID)

@@ -9,6 +9,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
 using System;
+using System.Threading;
 
 public abstract class Window : IDisposable {
 
