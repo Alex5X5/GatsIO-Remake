@@ -30,7 +30,7 @@ public class RenderService {
 
 		foreach (var p in game.Players) {
 			var col = p.PlayerUUID != controlled.PlayerUUID ? Color.RED : Color.BLUE;
-			context.DrawRectangle(new Rect(p.Pos.X, p.Pos.Y, 10, 10), col);
+			context.DrawCircle(new Circle(p.Pos, 20), col);
 		}
 	}
 

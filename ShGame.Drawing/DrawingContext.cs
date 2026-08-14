@@ -153,6 +153,13 @@ public class DrawingContext {
 		triangleBufferSize += 2 * TriangleShape.SizeInBytes;
 	}
 
+	public void DrawCircle(Circle circle, Color color) {
+		CircleShape shape = new(circle, color);
+		foreach(var triangle in shape.triangles)
+			bufferedTriangles.Add(triangle);
+		triangleBufferSize += (uint)(shape.triangles.Length * TriangleShape.SizeInBytes);
+	}
+
 	public void DrawLineRectangle() {
 
 	}

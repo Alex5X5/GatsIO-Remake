@@ -9,8 +9,6 @@ internal struct RectShape {
 
 	internal TriangleShape triangle1, triangle2;
 
-	internal ColorF color;
-
 	public const int SizeInBytes = 2 * TriangleShape.SizeInBytes + ColorF.SizeInBytes;
 
 	internal RectShape(Rect rect, Color color) {
@@ -20,6 +18,5 @@ internal struct RectShape {
 		var bottomRight = bottomLeft.Add(rect.Width, 0, 0);
 		triangle1 = new TriangleShape(new Triangle(topLeft, topRight, bottomRight), color);
 		triangle2 = new TriangleShape(new Triangle(topLeft, bottomLeft, bottomRight), color);
-		this.color = new ColorF(color);
 	}
 }
