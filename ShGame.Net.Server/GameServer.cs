@@ -19,7 +19,6 @@ public class GameServer : IDisposable {
 	private readonly ClientConnection?[] clients = new ClientConnection[Constants.PLAYER_COUNT];
 
 	private short PlayerIdCounter = 1;
-    #region constructors
 
 	public GameServer(Configuration config) {
 		socket = new(config, OnAccept);
@@ -27,8 +26,6 @@ public class GameServer : IDisposable {
 		gameService.SpreadObstacles();
         gameService.StartAllLoops();
 	}
-
-	#endregion constructors
 
 	private void OnAccept(System.Net.Sockets.Socket socket) {
 		logger.Log("OnAccept("+socket.ToString()+")");

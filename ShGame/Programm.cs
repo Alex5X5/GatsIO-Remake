@@ -18,9 +18,9 @@ public static class Programm {
 		string address = "";
 		int port = 1;
 
-		try {
-			address = args.Contains("-ip") ? args[args.IndexOf("-ip")+1] : "";
-		} catch {
+		if (args.Contains("-ip")) {
+			address =  args[args.IndexOf("-ip")+1];
+		} else {
 			address = NetUtil.GetLocalIP().MapToIPv4().ToString();
 		}
 
@@ -48,20 +48,12 @@ public static class Programm {
 		//start a server if the --server argument is provided
 		//otherwise start a client
 		if (args_.Contains("--server")) {
-			new Thread(
-				() => {
-					Configuration configuration = ExtractStartupConfig(args);
-					_ = new GameServer(configuration);
-				}
-			).Start();
+			Configuration configuration = ExtractStartupConfig(args);
+			var server = new GameServer(configuration);
+			server.StartAcceptLoopAsync().Wait();
 		} else {
-			new Thread(
-					() => {
-						Configuration configuration = ExtractStartupConfig(args);
-						_ = new Client(configuration);
-					}
-				).Start();
-			return;
+			Configuration configuration = ExtractStartupConfig(args);
+			_ = new Client(configuration);
 		}
 	}
 }

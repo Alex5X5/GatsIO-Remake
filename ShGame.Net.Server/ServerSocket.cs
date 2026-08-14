@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 public class ServerSocket : IDisposable {
 
-	private readonly Logger logger = new(new LoggingLevel("Socket"));
+	private readonly Logger logger = new(new LoggingLevel("ServerSocket"));
 
 	private readonly IPAddress address = new([0, 0, 0, 0]);
 	private readonly int port = 100;
