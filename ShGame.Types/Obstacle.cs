@@ -3,14 +3,14 @@
 using System;
 using ShGame.Math;
 
-public struct Obstacle {
+public readonly struct Obstacle {
 
 	public const int SizeInBytes = 29;
 	public const int SizeInBytesForNetwork = 17;
 
-	public byte type;
-	public Vector3d Pos;
-	public int WIDTH, HEIGHT;
+	public readonly byte type;
+	public readonly Vector3d Pos;
+	public readonly int WIDTH, HEIGHT;
 	
 	public Obstacle() : this(new Vector3d(0.0, 0.0, 0.0), 1){
 	
