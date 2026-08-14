@@ -25,10 +25,9 @@ public class GameService {
 	private readonly Logger logger;
 
 	public Player[] Players;
-	public Obstacle[] Obstacles;
 	public Bullet[] Bullets;
 
-	public Map Map;
+	public Map Map = new();
 
 	public GameService(Player pov) {
 		logger = new(new LoggingLevel("Game"));
@@ -39,9 +38,6 @@ public class GameService {
 		Bullets = new Bullet[Constants.BULLET_COUNT];
 		for (int i = 0; i<Constants.BULLET_COUNT; i++)
 			Bullets[i]=new();
-		Obstacles = new Obstacle[Constants.OBSTACLE_COUNT];
-		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++)
-			Obstacles[i]=new(null, 0);
 		InterruptSource = new CancellationTokenSource();
 		PlayersAccessLock = new ReaderWriterLockSlim();
 		ObstaclesAccessLock = new ReaderWriterLockSlim();
@@ -118,7 +114,7 @@ public class GameService {
 
 		void MoveBullet(ref Bullet b) {
 			b.Move();
-			b.CheckObstacleCollision(Obstacles);
+			b.CheckObstacleCollision(Map.Obstacles);
 		}
 
 		ForEachBullet(MoveBullet);
@@ -165,7 +161,7 @@ public class GameService {
 		//substract half of the distance between the lines so the obstakles get placed in the middle of each line
 		line -= (int)(0.5 * Constants.MAP_GRID_HEIGHT / Constants.OBSTACKLE_LINES);
 		Random r = new();
-		Obstacles[offset] = new Obstacle(
+		Map.Obstacles[offset] = new Obstacle(
 			new Vector3d(
 				//the obstacles may also be offset by half the distance to the next row/line
 				//first add half of the distance between the rows to x
@@ -179,7 +175,7 @@ public class GameService {
 			//the upper bound of the type must be 4 becuase 3 ist the maxumum possible type but the upper bound is not included
 			(byte)r.Next(1, 4)
 		);
-		logger.Log("generated new Obstacle ", new MessageParameter("obstacle", Obstacles[offset]));
+		logger.Log("generated new Obstacle ", new MessageParameter("obstacle", Map.Obstacles[offset]));
 	}
 
 	#endregion obstacle placement

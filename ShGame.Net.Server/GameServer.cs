@@ -70,7 +70,7 @@ public class GameServer : IDisposable {
 			byte* ptr = response.Payload;
 			for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
 				int offset = i*Obstacle.SizeInBytesForNetwork;
-				SerializerService.SerializeObstacle(gameService.Obstacles[i], ptr, offset);
+				SerializerService.SerializeObstacle(gameService.Map.Obstacles[i], ptr, offset);
 				ptr += Obstacle.SizeInBytesForNetwork;
 			}
 		}
