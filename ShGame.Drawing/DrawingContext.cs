@@ -1,6 +1,5 @@
 ﻿namespace ShGame.Drawing;
 
-using ShGame.Drawing.Shapes;
 using ShGame.Math;
 
 using Silk.NET.Maths;
@@ -8,14 +7,13 @@ using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
-public class DrawingContext {
+public class DrawingContext : IDisposable {
 
 	private IWindow window;
 	private GL? Gl;
 
-	private List<TriangleShape> bufferedTriangles;
+	private TriangleBuffer buffer;
 	private uint triangleBufferSize;
 
 	private List<LineShape> triangles;
@@ -27,7 +25,7 @@ public class DrawingContext {
 
 	public DrawingContext(IWindow window) {
 		this.window = window;
-		bufferedTriangles = [];
+		buffer = new();
 		triangleBufferSize = 0;
 	}
 
@@ -66,13 +64,15 @@ public class DrawingContext {
 	}
 
 	internal void BufferTrianglesToGpu(GL Gl) {
-		Span<TriangleShape> span = CollectionsMarshal.AsSpan(bufferedTriangles);
+		//Span<TriangleShape> span = CollectionsMarshal.AsSpan(bufferedTriangles);
 		BindVAO();
 		BindVBO();
 		unsafe {
-			fixed (TriangleShape* ptr = span) {
-				Gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)triangleBufferSize, ptr, BufferUsageARB.DynamicDraw);
-			}
+			Gl.BufferData(
+				BufferTargetARB.ArrayBuffer,
+				buffer.Count*TriangleShape.SizeInBytes,
+				buffer.Data,
+				BufferUsageARB.DynamicDraw);
 		}
 		UnbindVAO();
 		UnbindVBO();
@@ -82,14 +82,14 @@ public class DrawingContext {
 		Gl.UseProgram(fillShaderProgramm.ProgramHandle);
 		BindVAO();
 		BindVBO();
-		uint triangleCount = triangleBufferSize / TriangleShape.SizeInBytes;
+		uint triangleCount = buffer.Count;
 		Gl.DrawArrays(PrimitiveType.Triangles, 0, triangleCount * 3);
 		UnbindVAO();
 		UnbindVBO();
 	}
 
 	internal void ClearOps() {
-		bufferedTriangles = [];
+		buffer.clear();
 		triangleBufferSize = 0;
 	}
 
@@ -126,8 +126,9 @@ public class DrawingContext {
 
 	public void DrawTriangle(Triangle triangle, Color color) {
 		TriangleShape shape = new TriangleShape(triangle, color);
-		bufferedTriangles.Add(shape);
-		triangleBufferSize += TriangleShape.SizeInBytes;
+		unsafe {
+			buffer.Buffer(&shape, 1);
+		}
 	}
 
 	public void DrawQuad(Vector3d p1, Vector3d p2, Vector3d p3, Vector3d p4, Color color) {
@@ -136,9 +137,9 @@ public class DrawingContext {
 
 	public void DrawQuad(Quad quad, Color color) {
 		QuadShape shape = new QuadShape(quad, color);
-		bufferedTriangles.Add(shape.triangle1);
-		bufferedTriangles.Add(shape.triangle2);
-		triangleBufferSize += 2 * TriangleShape.SizeInBytes;
+		unsafe {
+			buffer.Buffer((TriangleShape*)&shape, 2);
+		}
 	}
 
 	public void DrawRectangle(double x, double y, double width, double height, Color color) {
@@ -148,19 +149,24 @@ public class DrawingContext {
 
 	public void DrawRectangle(Rect rect, Color color) {
 		RectShape shape = new(rect, color);
-		bufferedTriangles.Add(shape.triangle1);
-		bufferedTriangles.Add(shape.triangle2);
-		triangleBufferSize += 2 * TriangleShape.SizeInBytes;
+		unsafe {
+			buffer.Buffer((TriangleShape*)&shape, 2);
+		}
 	}
 
 	public void DrawCircle(Circle circle, Color color) {
 		CircleShape shape = new(circle, color);
-		foreach(var triangle in shape.triangles)
-			bufferedTriangles.Add(triangle);
-		triangleBufferSize += (uint)(shape.triangles.Length * TriangleShape.SizeInBytes);
+		unsafe {
+			fixed(TriangleShape* ptr = &shape.triangles[0])
+				buffer.Buffer(ptr, (uint)shape.triangles.Length);
+		}
 	}
 
 	public void DrawLineRectangle() {
 
+	}
+
+	public void Dispose() {
+		
 	}
 }
