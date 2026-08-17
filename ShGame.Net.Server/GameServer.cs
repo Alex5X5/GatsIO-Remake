@@ -129,37 +129,6 @@ public class GameServer : IDisposable {
 
 	#endregion request events
 
-	private bool IsPlayerRegistered(Player player) {
-		bool found = false;
-		for (int i = 0; i<Constants.PLAYER_COUNT-1; i++) {
-			if (gameService.Players[i].Health==-1)
-				continue;
-			if (gameService.Players[i].PlayerUUID == player.PlayerUUID) {
-				found = true;
-				break;
-			}
-		}
-		return found;
-	}
-
-	private bool RegisterNewPlayer(Player player) {
-		//since the player isn't known, try to register it
-		logger.Log("registering new player", new MessageParameter("UUID", player.PlayerUUID));
-		//loop through the player array and search for an unused player
-		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			//the slot is considered empty if the player's health is -1
-			if (gameService.Players[i].Health==-1) {
-				gameService.Players[i].Health=100;
-				gameService.Players[i].PlayerUUID = player.PlayerUUID;
-				gameService.Players[i].Dir=player.Dir.Nor();
-				logger.Log("sucessfully registred new player", new MessageParameter("UUID", player.PlayerUUID));
-				return true;
-			}
-		}
-		logger.Log("failed to register player", new MessageParameter("UUID", player.PlayerUUID));
-		return false;
-	}
-
 	public void Dispose() {
 		gameService.Stop();
 		socket.Dispose();
