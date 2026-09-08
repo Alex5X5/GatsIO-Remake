@@ -3,9 +3,6 @@
 using System.Net.NetworkInformation;
 using System.Net;
 
-
-
-
 public static class NetUtil {
 
 	public static IPAddress GetLocalIPv4() =>
@@ -19,7 +16,7 @@ public static class NetUtil {
 				Address;
 
 	public static IPAddress GetLocalIP() =>
-		NetworkInterface.GetAllNetworkInterfaces()[1].
+		NetworkInterface.GetAllNetworkInterfaces()[5].
 			GetIPProperties().UnicastAddresses[^1].
 				Address;
 }

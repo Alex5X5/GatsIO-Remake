@@ -1,5 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+	<PropertyGroup>
+		<OutputType>library</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Silk.NET" Version="2.22.0" />
 		<PackageReference Include="Silk.NET.Input.Extensions" Version="2.22.0" />
@@ -20,12 +28,5 @@
 	    <HintPath>..\libs\Simplelogging.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
-
-	<PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
 
 </Project>

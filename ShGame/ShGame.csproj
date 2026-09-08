@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>exe</OutputType>
+		<SelfContained>true</SelfContained>
+		<TargetFramework>net10.0</TargetFramework>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<StartupObject>ShGame.Start.Programm</StartupObject>
+		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+		<NoWin32Manifest>true</NoWin32Manifest>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<WarningLevel>1</WarningLevel>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<WarningLevel>1</WarningLevel>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ShGame.Client\ShGame.Client.csproj" />
+		<ProjectReference Include="..\ShGame.Net.Server\ShGame.Net.Server.csproj" />
+		<ProjectReference Include="..\ShGame.Util\ShGame.Util.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="..\libs\Simplelogging.dll" />
+	</ItemGroup>
+</Project>

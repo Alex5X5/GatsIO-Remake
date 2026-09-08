@@ -1,14 +1,14 @@
-﻿using ShGame.Math;
+﻿namespace ShGame.Util;
 
-namespace ShGame;
+using ShGame.Math;
+using System;
 
-public class Constants {
+public static class Constants {
 
-
-	public static readonly Line3d BORDER_TOP = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(Constants.MAP_GRID_WIDTH, 0, 0));
-	public static readonly Line3d BORDER_BOTTOM = Line3d.FromPoints(new Vector3d(0, Constants.MAP_GRID_HEIGHT, 0), new Vector3d(Constants.MAP_GRID_WIDTH, Constants.MAP_GRID_HEIGHT, 0));
-	public static readonly Line3d BORDER_LEFT = Line3d.FromPoints(new Vector3d(0, 0, 0), new Vector3d(0, Constants.MAP_GRID_HEIGHT, 0));
-	public static readonly Line3d BORDER_RIGHT = Line3d.FromPoints(new Vector3d(Constants.MAP_GRID_WIDTH, 0, 0), new Vector3d(Constants.MAP_GRID_WIDTH, Constants.MAP_GRID_HEIGHT, 0));
+	public static readonly Line BORDER_TOP = new Line(new Vector3d(0, 0, 0), new Vector3d(Constants.MAP_GRID_WIDTH, 0, 0));
+	public static readonly Line BORDER_BOTTOM = new Line(new Vector3d(0, Constants.MAP_GRID_HEIGHT, 0), new Vector3d(Constants.MAP_GRID_WIDTH, Constants.MAP_GRID_HEIGHT, 0));
+	public static readonly Line BORDER_LEFT = new Line(new Vector3d(0, 0, 0), new Vector3d(0, Constants.MAP_GRID_HEIGHT, 0));
+	public static readonly Line BORDER_RIGHT = new Line(new Vector3d(Constants.MAP_GRID_WIDTH, 0, 0), new Vector3d(Constants.MAP_GRID_WIDTH, Constants.MAP_GRID_HEIGHT, 0));
 
 	public const int PLAYER_COUNT = 20;
 	public const int BULLET_COUNT = 200;

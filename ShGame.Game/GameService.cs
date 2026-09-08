@@ -1,0 +1,196 @@
+﻿namespace ShGame.Game;
+
+//using ShGame.Game.GameObjects;
+using ShGame.Math;
+using ShGame.Util;
+using ShGame.Types;
+
+using SimpleLogging.logging;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+public class GameService {
+
+	private bool Idle = true;
+	private bool Run = false;
+
+	private CancellationTokenSource InterruptSource;
+
+	public ReaderWriterLockSlim PlayersAccessLock;
+	public ReaderWriterLockSlim ObstaclesAccessLock;
+	public ReaderWriterLockSlim BulletsAccessLock;	
+
+	private readonly Logger logger;
+
+	public Player[] Players;
+	public Bullet[] Bullets;
+
+	public Map Map = new();
+
+	public GameService(Player pov) {
+		logger = new(new LoggingLevel("Game"));
+		Players = new Player[Constants.PLAYER_COUNT];
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
+			Players[i]=new();
+		Players[0]=pov;
+		Bullets = new Bullet[Constants.BULLET_COUNT];
+		for (int i = 0; i<Constants.BULLET_COUNT; i++)
+			Bullets[i]=new();
+		InterruptSource = new CancellationTokenSource();
+		PlayersAccessLock = new ReaderWriterLockSlim();
+		ObstaclesAccessLock = new ReaderWriterLockSlim();
+		BulletsAccessLock = new ReaderWriterLockSlim();
+	}
+
+	#region flow controll
+
+	private void StartNewLoop(Action loop) {
+		new Thread(
+			() => {
+				logger.Log("start loop");
+				long nextExecution = DateTime.Now.Ticks + Constants.TARGET_LOOP_DELAY_TICKS;
+				while (Run) {
+					while (DateTime.Now.Ticks<nextExecution && Run)
+						Thread.Sleep(Constants.LOOP_FRAGMENT_SLEEP_TIMESPAN);
+					nextExecution = DateTime.Now.Ticks + Constants.TARGET_LOOP_DELAY_TICKS;
+					loop();
+				}
+			}
+			//,
+			//InterruptSource.Token
+		).Start();
+	}
+
+	public void StartAllLoops() {
+		Run=true;
+		StartNewLoop(PlayerMoveLoop);
+		StartNewLoop(PlayerShootLoop);
+		StartNewLoop(BulletMoveLoop);
+	}
+
+	public void Stop() {
+		Run = false;
+		InterruptSource.Cancel();
+		Task.Delay(1000);
+		InterruptSource.Dispose();
+		PlayersAccessLock.Dispose();
+		ObstaclesAccessLock.Dispose();
+		BulletsAccessLock.Dispose();
+	}
+
+	#endregion flow controll
+
+	#region game loops
+
+	private delegate void RefAction<T>(ref T item);
+
+	private void ForEachPlayer(RefAction<Player> action) {
+		if (Players.Length == 0)
+			return;
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
+			action(ref Players[i]);
+		}
+	}
+
+	private void ForEachBullet(RefAction<Bullet> action) {
+		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
+			action(ref Bullets[i]);
+		}
+	}
+
+	public void PlayerMoveLoop() {
+		void MovePlayer(ref Player p) {
+			if (p.Health!=-1) {
+				p.Move();
+			}
+		}
+
+		ForEachPlayer(MovePlayer);
+	}
+
+	public void BulletMoveLoop() {
+
+		void MoveBullet(ref Bullet b) {
+			b.Move();
+			b.CheckObstacleCollision(Map.Obstacles);
+		}
+
+		ForEachBullet(MoveBullet);
+	}
+
+	public void PlayerShootLoop() {
+
+		void PlayerShoot(ref Player p) {
+			if (p.IsShooting == 0x1 && p.weaponCooldownTicksDone==0) {
+				AllocBullet(p);
+				p.weaponCooldownTicksDone = p.WeaponCooldownTicks;
+			}
+			if (p.weaponCooldownTicksDone>0)
+				p.weaponCooldownTicksDone--;
+		}
+	
+		ForEachPlayer(PlayerShoot);
+	}
+
+	#endregion game loops
+
+	#region obstacle generation
+
+	public void SpreadObstacles() {
+		logger.Log("generating Obstacles");
+		int c = 0;
+		//spreading obstacles over OBSTACKLE_ROWS rows
+		for (int row = 0; row<Constants.OBSTACKLE_ROWS; row++)
+			//spreading obstacles over OBSTACKLE_LINES lines so there are OBSTACKLE_ROWS*OBSTACKLE_LINES obstacles all together
+			for (int line = 0; line<Constants.OBSTACKLE_LINES; line++) {
+				PlaceObstacles(1 + row, 1 + line, c);
+				//c is the position of the obstacle in the arary
+				c++;
+			}
+	}
+
+	public void PlaceObstacles(int row, int line, int offset) {
+		//since there are OBSTACLE_ROWS rows the distance between the rows has to be MAP_WIDTH/OBSTACLE_ROWS
+		row = Constants.MAP_GRID_WIDTH / Constants.OBSTACKLE_ROWS * row;
+		//substract half of the distance between the rows so the obstakles get placed in the middle of each row
+		row -= (int)(0.5 * Constants.MAP_GRID_WIDTH / Constants.OBSTACKLE_ROWS);
+		//since there are OBSTACKLE_LINES lines the distance between the lines has to be MAP_HEIGHT/OBSTACKLE_LINES
+		line = Constants.MAP_GRID_HEIGHT / Constants.OBSTACKLE_LINES * line;
+		//substract half of the distance between the lines so the obstakles get placed in the middle of each line
+		line -= (int)(0.5 * Constants.MAP_GRID_HEIGHT / Constants.OBSTACKLE_LINES);
+		Random r = new();
+		Map.Obstacles[offset] = new Obstacle(
+			new Vector3d(
+				//the obstacles may also be offset by half the distance to the next row/line
+				//first add half of the distance between the rows to x
+				//then substract a random number between 0 and OBSTACLE_ROW_DISANCE from it
+				row + Constants.OBSTACLE_ROW_DISANCE / 2 - r.Next(0, Constants.OBSTACLE_ROW_DISANCE),
+				//first add half of the distance between the lines to y
+				//then substract a random number between 0 and OBSTACLE_LINE_DISTANCE from it
+				line + Constants.OBSTACLE_LINE_DISTANCE /2 + r.Next(0, Constants.OBSTACLE_LINE_DISTANCE),
+				0
+			),
+			//the upper bound of the type must be 4 becuase 3 ist the maxumum possible type but the upper bound is not included
+			(byte)r.Next(1, 4)
+		);
+		logger.Log("generated new Obstacle ", new MessageParameter("obstacle", Map.Obstacles[offset]));
+	}
+
+	#endregion obstacle placement
+
+	private void AllocBullet(Player p) {
+		logger.Log("alloc bullet");
+		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
+			logger.Log(Bullets[i].Speed.ToString());
+			if (Bullets[i].Lifetime==-1) {
+				Bullets[i].Pos = new(p.Pos.Cpy().Add(new Vector3d(Player.Radius, Player.Radius, 0)));
+				Bullets[i].Dir = new(p.Dir);
+				Bullets[i].Speed = p.InitialBulletSpeed;
+				Bullets[i].OwnerHandle = p.PlayerUUID;
+				break;
+			}
+		}
+	}
+}
