@@ -7,7 +7,7 @@ internal struct ColorF {
 
 	public float Red, Green, Blue, Alpha;
 
-	public const int SizeInBytes = 16;
+	public const uint SizeInBytes = 16;
 
 	public ColorF(Color color) {
 		Red = (float)color.Red / 255.0f;

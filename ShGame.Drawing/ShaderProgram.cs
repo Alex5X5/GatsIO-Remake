@@ -6,7 +6,6 @@ using Silk.NET.Windowing;
 
 internal class ShaderProgram {
 
-	private readonly IWindow window;
 	private readonly GL Gl;
 
 	public readonly uint vaoHandle, vboHandle;
@@ -16,8 +15,7 @@ internal class ShaderProgram {
 		get => programm;
 	}
 
-	public ShaderProgram(GL gl, IWindow window, string vertexShaderSource, string fragmentShaderSource) {
-		this.window = window;
+	public ShaderProgram(GL gl, string vertexShaderSource, string fragmentShaderSource) {
 		Gl = gl;
 
 		programm = Gl.CreateProgram();
@@ -39,7 +37,7 @@ internal class ShaderProgram {
 		PrintUnifom1Info("u_WindowWidth");
 		PrintUnifom1Info("u_WindowHeight");
 
-		OnFrameBufferSizeChanged(window.FramebufferSize);
+		//OnFrameBufferSizeChanged(window.FramebufferSize);
 
 		Gl.DeleteShader(vertexShader);
 		Gl.DeleteShader(fragmentShader);

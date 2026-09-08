@@ -9,7 +9,7 @@ internal struct RectShape {
 
 	internal TriangleShape triangle1, triangle2;
 
-	public const int SizeInBytes = 2 * TriangleShape.SizeInBytes + ColorF.SizeInBytes;
+	public const uint SizeInBytes = 2 * TriangleShape.SizeInBytes + ColorF.SizeInBytes;
 
 	internal RectShape(Rect rect, Color color) {
 		var topLeft = rect.Pos;

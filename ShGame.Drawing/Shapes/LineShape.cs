@@ -9,7 +9,7 @@ internal struct LineShape {
 
 	internal ColoredPointF p1, p2;
 
-	public const int SizeInBytes = 2 * ColoredPointF.SizeInBytes;
+	public const uint SizeInBytes = 2 * ColoredPointF.SizeInBytes;
 
 	internal LineShape(Line line, Color color) {
 		var color_ = new ColorF(color);

@@ -20,9 +20,9 @@ public class RenderService {
 
 		foreach (var o in game.Map.Obstacles) {
 			var col = o.type switch {
-				0 => Color.BLUE,
-				1 => Color.BLUE,
-				2 => Color.YELLOW,
+				0 => Color.DARK_GRAY,
+				1 => Color.DARK_GRAY,
+				2 => Color.DARK_GRAY,
 				_ => Color.GREEN
 			};
 			context.DrawRectangle(new Rect(o.Pos.X, o.Pos.Y, o.WIDTH, o.HEIGHT), col);

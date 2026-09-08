@@ -7,8 +7,10 @@ internal struct ColoredPointF {
 
 	internal PointF point;
 	internal ColorF color;
+	//internal PointF texturePos;
+	//internal float textureIndex;
 
-	public const int SizeInBytes = PointF.SizeInBytes + ColorF.SizeInBytes;
+	internal const uint SizeInBytes = PointF.SizeInBytes + ColorF.SizeInBytes;// + PointF.SizeInBytes + sizeof(float);
 
 	public ColoredPointF(PointF point, ColorF color) {
 		this.point = point;

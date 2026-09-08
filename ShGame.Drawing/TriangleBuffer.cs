@@ -53,7 +53,7 @@ internal unsafe class TriangleBuffer : IDisposable {
 		Count += triangleCount;
 	}
 
-	public void clear() {
+	public void Clear() {
 		NativeMemory.Free(buffer);
 		Capacity = 0;
 		Count = 0;

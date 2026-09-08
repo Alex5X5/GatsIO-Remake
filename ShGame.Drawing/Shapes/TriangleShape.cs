@@ -9,7 +9,7 @@ internal struct TriangleShape {
 
 	internal ColoredPointF p1, p2, p3;
 
-	internal const int SizeInBytes = 3 * ColoredPointF.SizeInBytes;
+	internal const uint SizeInBytes = 3 * ColoredPointF.SizeInBytes;
 
 	internal TriangleShape(Triangle triangle, Color color) {
 		var color_ = new ColorF(color);

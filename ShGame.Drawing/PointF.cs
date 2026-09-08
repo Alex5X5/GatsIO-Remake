@@ -9,7 +9,7 @@ internal struct PointF {
 
 	internal float x, y;
 
-	public const int SizeInBytes = 8;
+	public const uint SizeInBytes = 8;
 
 	public PointF(float x, float y) {
 		this.x = x;

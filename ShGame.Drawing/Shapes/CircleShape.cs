@@ -11,7 +11,7 @@ internal struct CircleShape {
 
 	internal readonly int SidesCount;
 
-	public const int SizeInBytes = 2 * TriangleShape.SizeInBytes + ColorF.SizeInBytes;
+	public const uint SizeInBytes = 2 * TriangleShape.SizeInBytes + ColorF.SizeInBytes;
 
 	internal CircleShape(Circle circle, Color color) {
 		SidesCount = (int)System.Math.Ceiling(System.Math.Sqrt((float)circle.Radius * 2 * System.Math.PI) * 2);

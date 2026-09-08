@@ -4,7 +4,7 @@ using ShGame.Math;
 
 using System;
 
-public struct Player {
+public class Player {
 
 	public short WeaponCooldownTicks = 10;
 	public short weaponCooldownTicksDone = 10;

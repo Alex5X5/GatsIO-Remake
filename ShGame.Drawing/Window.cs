@@ -15,7 +15,7 @@ public abstract class Window : IDisposable {
 
 	private Thread thread;
 
-	private IWindow? window;
+	private IWindow window;
 	IInputContext input;
 
 	private double Time;
@@ -29,6 +29,8 @@ public abstract class Window : IDisposable {
 	private GL Gl;
 	private DrawingContext drawingContext;
 
+	public bool Closing { get; private set; } = false;
+
 	public Rect Size => new(0, 0, window != null ? (double)window.Size.X : 0.0, window != null ? (double)window.Size.Y : 0.0);
 
 
@@ -37,7 +39,7 @@ public abstract class Window : IDisposable {
 	public Window(WindowOptions options) {
 		window = Silk.NET.Windowing.Window.Create(options);
 		Initialize();
-		drawingContext = new(window);
+		drawingContext = new();
 	}
 
 	private static WindowOptions CreateWindowoptions(double width, double height, string title) {
@@ -55,7 +57,8 @@ public abstract class Window : IDisposable {
 	}
 
 	public void Dispose() {
-
+		drawingContext.Dispose();
+		window?.Dispose();
 	}
 
 	private void OnLoad() {
@@ -63,6 +66,7 @@ public abstract class Window : IDisposable {
 		Gl = GL.GetApi(window);
 		drawingContext.Load(Gl);
 		input = window!.CreateInput();
+		OnFrameBufferResize(window.Size);
 		foreach (var keyboard in input.Keyboards) {
 			keyboard.KeyUp += KeyUpBase;
 			keyboard.KeyDown += KeyDownBase;
@@ -72,7 +76,7 @@ public abstract class Window : IDisposable {
 			mouse.MouseDown += MouseDownBase;
 			mouse.MouseMove += MouseMovedBase;
 		}
-		window!.Closing += OnClosing;
+		window!.Closing += OnClosingBase;
 	}
 
 	public void InvalidateVisual() {
@@ -95,7 +99,7 @@ public abstract class Window : IDisposable {
 	private void ReDraw(double deltaTime) {
 		drawingContext.ClearOps();
 		Draw(deltaTime, drawingContext);
-		drawingContext.BufferTrianglesToGpu(Gl);
+		drawingContext.BufferTrianglesToGpu();
 	}
 
 	private void OnImmediateRender(double deltaTime) {
@@ -132,6 +136,7 @@ public abstract class Window : IDisposable {
 	}
 
 	private void OnClosingBase() {
+		Closing = true;
 		OnClosing();
 	}
 
