@@ -56,7 +56,8 @@ public class Client : Window {
 	private void RefreshLoop() {
 		while (!Closing) {
 			InvalidateVisual();
-			Thread.Sleep(50);
+			Thread.Sleep(20);
+			Console.WriteLine("refreshing");
 		}
 	}
 
