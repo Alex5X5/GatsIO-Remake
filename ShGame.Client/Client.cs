@@ -11,8 +11,6 @@ using ShGame.Util;
 using System.Threading;
 using System.Threading.Tasks;
 
-//#pragma warning disable CS8500 //insert spaces instead of tabs
-
 public class Client : Window {
 
 	private bool stop;
@@ -50,9 +48,17 @@ public class Client : Window {
 
 		SetBackgroundColor(new Color(90, 90, 110));
 		Thread.Sleep(1000);
+
+		new Thread(RefreshLoop).Start();
 		Show();
 	}
 
+	private void RefreshLoop() {
+		while (!Closing) {
+			InvalidateVisual();
+			Thread.Sleep(50);
+		}
+	}
 
 	protected override void OnClosing() {
 		stop = true;
@@ -79,7 +85,6 @@ public class Client : Window {
 						if (gameService.Players[i].PlayerUUID == ControlledPlayer.PlayerUUID)
 							await netService.UpdatePlayerAsync(gameService.Players[i]);
 					gameService.Players = await netService.GetPlayersAsync();
-					InvalidateVisual();
 					await Task.Delay(50);
 				}
 				netService?.Dispose();
