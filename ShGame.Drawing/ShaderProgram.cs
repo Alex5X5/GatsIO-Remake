@@ -65,6 +65,14 @@ internal class ShaderProgram {
 		}
 	}
 
+	internal void PrintErrors() {
+		var error = Gl.GetError();
+		if (error == GLEnum.NoError)
+			return;
+		string infoLog = Gl.GetProgramInfoLog(programm);
+		Console.Error.WriteLine($"Error in program: {infoLog}");
+	}
+
 	private void PrintUnifom1Info(string uniform) {
 		int location = Gl.GetUniformLocation(programm, uniform);
 		if (location < 0) {
@@ -77,8 +85,10 @@ internal class ShaderProgram {
 
 	private void SetFloatUniform(string uniform, float value) {
 		int location = Gl.GetUniformLocation(programm, uniform);
-		if (location < 0)
-			throw new InvalidOperationException($"""Unable to set uniform "{uniform}": not found""");
+		if (location < 0){
+			Console.WriteLine($"""Unable to set uniform "{uniform}": not found""");
+			return;
+		}
 		Gl.Uniform1(location, value);
 	}
 
