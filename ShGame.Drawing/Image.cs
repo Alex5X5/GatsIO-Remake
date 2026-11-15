@@ -1,29 +1,32 @@
 ﻿namespace ShGame.Drawing;
 
-using System.Runtime.InteropServices;
-
 using Silk.NET.OpenGL;
 
-using StbImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-using SharpImage = SixLabors.ImageSharp.Image;
+using StbImageSharp;
+
 using System.IO;
+using System.Runtime.InteropServices;
+
+using static System.Net.Mime.MediaTypeNames;
+
+using SharpImage = SixLabors.ImageSharp.Image;
 
 public unsafe struct Image : IDisposable {
 
-	private SixLabors.ImageSharp.Image<Rgba32> image;
-	private readonly byte* pixelData;
-	private readonly uint dataSize;
-	private uint texture;
-
 	public readonly uint Width, Height;
 
-	public bool IsLoaded { private set; get; } = false;
+	private readonly byte* pixelData;
+	private readonly uint dataSize;
 
-	public Image(string path) {
-		image = SharpImage.Load<Rgba32>(path);
-		Width = (uint)image.Width;
+	internal uint texture;
+
+	private bool IsLoaded { set; get; } = false;
+
+	internal Image(string path) {
+		var image = SharpImage.Load<Rgba32>(path);
+		Width = (uint)image.Width;;
 		Height = (uint)image.Height;
 		dataSize = Width * Height * 4;
 		pixelData = (byte*)NativeMemory.Alloc(dataSize);
@@ -37,6 +40,7 @@ public unsafe struct Image : IDisposable {
 		texture = gl.GenTexture();
 		gl.ActiveTexture(TextureUnit.Texture0);
 		gl.BindTexture(TextureTarget.Texture2D, texture);
+
 		gl.TexImage2D(
 			TextureTarget.Texture2D,
 			0,
@@ -55,9 +59,10 @@ public unsafe struct Image : IDisposable {
 		gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)GLEnum.Linear);
 		gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)GLEnum.Linear);
 
-		gl.BindTexture(TextureTarget.Texture2D, 0);
 		IsLoaded = true;
 	}
+
+	internal void Bind(GL gl) => gl.BindTexture(TextureTarget.Texture2D, texture);
 
 	public void Dispose() {
 		NativeMemory.Free(pixelData);

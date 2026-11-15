@@ -64,6 +64,8 @@ public abstract class Window : IDisposable {
 	private void OnLoad() {
 		loaded = true;
 		Gl = GL.GetApi(window);
+		LoadingContext context = new(Gl);
+		Load(context);
 		drawingContext.Load(Gl);
 		input = window!.CreateInput();
 		OnFrameBufferResize(window.Size);
@@ -106,9 +108,10 @@ public abstract class Window : IDisposable {
 		ThrowHelper.ThrowIfNull(Gl, "Can not render while gl is null");
 		Gl.ClearColor(backgroundColor.Red, backgroundColor.Green, backgroundColor.Blue, 1f);
 		Gl.Clear((uint)ClearBufferMask.ColorBufferBit);
-		Gl.UseProgram(drawingContext.fillShaderProgramm.ProgramHandle);
 		drawingContext.DrawTriangleBuffer();
 	}
+
+	protected abstract void Load(LoadingContext context);
 
 	protected abstract void Draw(double deltaTime, DrawingContext context);
 
