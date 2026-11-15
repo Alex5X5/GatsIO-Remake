@@ -16,14 +16,14 @@ public struct Bullet {
 	public short OwnerHandle;
 	public const int SizeInBytesForNetwork = 38;
 
-	public Bullet() : this(null, null, 0, 0) { }
+	public Bullet() : this(null, null, -1, 0, 0) { }
 
-	public Bullet(Vector3d? _pos, Vector3d? _dir, int _width, int _length) {
+	public Bullet(Vector3d? _pos, Vector3d? _dir, short lifetime, int _width, int _length) {
 		Pos = _pos??new Vector3d(10, 10, 0);
 		Dir = _dir??new Vector3d(0, 1, 0);
 		WIDTH = (byte)(_width>0 ? _width : 5);
 		LENGHT = (byte)(_length>0 ? _length : 5);
-		Lifetime = -1;
+		Lifetime = lifetime;
 	}
 
 	public void Move() {

@@ -159,7 +159,7 @@ public static class SerializerService {
 		short owner = Unsafe.Read<short>(ptr);
 		var pos = new Vector3d(px, py, 0.0);
 		var dir = new Vector3d(dx, dy, 0.0);
-		return new Bullet(pos, dir, 5, 10);
+		return new Bullet(pos, dir, lifetime, 5, 10);
 	}
 
 }
