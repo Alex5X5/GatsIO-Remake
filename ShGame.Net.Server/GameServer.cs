@@ -7,6 +7,7 @@ using ShGame.Types;
 using ShGame.Util;
 
 using System.Threading.Tasks;
+using System.Net;
 
 public class GameServer : IDisposable {
 
@@ -21,7 +22,9 @@ public class GameServer : IDisposable {
 	private short PlayerIdCounter = 1;
 
 	public GameServer(Configuration config) {
-		socket = new(config, OnAccept);
+		var address = IPAddress.Parse(config.Address);
+		var port = config.Port;
+		socket = new(address, port, OnAccept);
 		gameService = new(new Player());
 		gameService.SpreadObstacles();
         gameService.StartAllLoops();

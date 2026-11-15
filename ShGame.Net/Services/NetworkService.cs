@@ -5,6 +5,7 @@ using ShGame.Net.Shared.Services;
 using ShGame.Types;
 using ShGame.Util;
 
+using System.Net;
 using System.Threading.Tasks;
 
 public class NetworkService : IDisposable {
@@ -18,7 +19,9 @@ public class NetworkService : IDisposable {
 	public bool Connected => socket.Connected;
 
 	public NetworkService(Configuration config) {
-		socket = new(config);
+		var address = IPAddress.Parse(config.Address);
+		var port = config.Port;
+		socket = new(address, port);
 	}
 
 	public void Dispose() {

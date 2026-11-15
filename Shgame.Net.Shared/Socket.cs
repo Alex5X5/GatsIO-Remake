@@ -23,9 +23,14 @@ public class Socket : IDisposable {
 
 	public bool Connected => socket.Connected;
 
-	public Socket(Configuration config) {
-		address = IPAddress.Parse(config.Address);
-		port = config.Port;
+	public Socket(System.Net.Sockets.Socket socket) {
+		this.socket = socket;
+		LogConnected();
+	}
+
+	public Socket(IPAddress address, int port) {
+		this.address = address;
+		this.port = port;
 		socket = new(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
 		IPEndPoint point = new(address, port);
@@ -35,11 +40,6 @@ public class Socket : IDisposable {
 		} catch (SocketException e) {
 			logger.Warn("failed to connect (reason="+e.ToString()+")");
 		}
-		LogConnected();
-	}
-
-	public Socket(System.Net.Sockets.Socket socket) {
-		this.socket = socket;
 		LogConnected();
 	}
 

@@ -22,10 +22,10 @@ public class ServerSocket : IDisposable {
 
 	public bool Bound => socket.IsBound;
 
-	public ServerSocket(Configuration config, Action<Socket> acceptHandler) {
-		address = IPAddress.Parse(config.Address);
-		port = config.Port;
-		socket = new(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+	public ServerSocket(IPAddress address, int port, Action<Socket> acceptHandler) {
+		this.address = address;
+		this.port = port;
+		socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 		this.acceptHandler = acceptHandler;
 
 		IPEndPoint point = new(address, port);
