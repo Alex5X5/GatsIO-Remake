@@ -31,9 +31,11 @@ public class Client : Window {
 	private Player ControlledPlayer;
 
 	private Vector3d MousePos;
+
+	private Image fogImage;
 	
 	public Client(Configuration config) : base(1200, 800, "ShGame") {
-		
+
 		logger=new Logger(new LoggingLevel("Client"));
 
 		netService = new NetworkService(config);
@@ -57,7 +59,6 @@ public class Client : Window {
 		while (!Closing) {
 			InvalidateVisual();
 			Thread.Sleep(20);
-			Console.WriteLine("refreshing");
 		}
 	}
 
@@ -169,7 +170,6 @@ public class Client : Window {
 
 	protected override void MouseMoved(Vector3d pos) {
 		MousePos = pos;
-		InvalidateVisual();
 	}
 
 	private bool NetHandlerConnected() {
@@ -177,6 +177,10 @@ public class Client : Window {
 			if (netService.Connected)
 				return true;
 		return false;
+	}
+
+	protected override void Load(LoadingContext context) {
+		fogImage = context.LoadImage("ShGame/Assets/shadow.png");
 	}
 
 	protected override void Draw(double deltaTime, DrawingContext context) {
