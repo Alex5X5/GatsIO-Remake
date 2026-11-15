@@ -165,7 +165,14 @@ public class Client : Window {
 	}
 
 	protected override void MouseMoved(Vector3d pos) {
-		MousePos = pos;
+		Console.WriteLine(pos);
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
+			if (gameService.Players[i].PlayerUUID == ControlledPlayer.PlayerUUID) {
+				var player = gameService.Players[i];
+				var playerPos = player.Pos;
+				var relative = pos.Sub(playerPos).Nor();
+				gameService.Players[i].LookDir = relative;
+			}
 	}
 
 	private bool NetHandlerConnected() {
@@ -176,11 +183,17 @@ public class Client : Window {
 	}
 
 	protected override void Load(LoadingContext context) {
-		fogImage = context.LoadImage("ShGame/Assets/shadow.png");
+		fogImage = context.LoadImage(Paths.AssetsPath("shadow.png"));
 	}
 
 	protected override void Draw(double deltaTime, DrawingContext context) {
 		renderService.OnDraw(context);
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
+			if (gameService.Players[i].PlayerUUID == ControlledPlayer.PlayerUUID) {
+				var player = gameService.Players[i];
+				var lp = new Vector3d(100, 100, 0).Add(player.LookDir.Scl(30));
+				context.DrawLine(new Vector3d(100,100,0), lp, new Color(49, 245, 39));
+			}
 		context.DrawLine(new Vector3d(0, 0, 0), MousePos, Color.ORANGE, 3);
 	}
 }

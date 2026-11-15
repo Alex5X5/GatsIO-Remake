@@ -13,7 +13,8 @@ public class Player {
 	public short InitialBulletSpeed = 0x30;
 
 	public Vector3d Pos;
-	public Vector3d Dir = new(0, 0, 0);
+	public Vector3d MoveDir = new(0, 0, 0);
+	public Vector3d LookDir = new(0, 0, 0);
 
 	public double Speed = 2;
 	private int Health_;
@@ -27,7 +28,7 @@ public class Player {
 	public bool Visible;
 
 	public const int SizeInBytes = 100;
-	public const int SizeInBytesForNetwork = 47;
+	public const int SizeInBytesForNetwork = 63;
 
 	public Player(Vector3d pos, int health, short UUID) {
 		Pos = pos;
@@ -46,10 +47,10 @@ public class Player {
 	}
 
 	public override string ToString() =>
-		$"Game.graphics.client.Player[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{Dir}, UUID:{PlayerUUID}]";
+		$"Game.graphics.client.Player[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{MoveDir}, UUID:{PlayerUUID}]";
 
 	public void Move() {
-		Pos = Pos.Add(Dir.Nor().Scl(Speed));
+		Pos = Pos.Add(MoveDir.Nor().Scl(Speed));
 	}
 
 	public void UpdateDir(bool up, bool down, bool left, bool right) {
@@ -58,37 +59,37 @@ public class Player {
 			if (left) {
 				if (down) {
 					if (right) {
-						Dir.X=0; //wasd
-						Dir.Y=0;
+						MoveDir.X=0; //wasd
+						MoveDir.Y=0;
 					} else {
-						Dir.X=-1; //was
-						Dir.Y=0;
+						MoveDir.X=-1; //was
+						MoveDir.Y=0;
 					}
 				} else {
 					if (right) {
-						Dir.X=0; //wad
-						Dir.Y=-1;
+						MoveDir.X=0; //wad
+						MoveDir.Y=-1;
 					} else {
-						Dir.X=-1/System.Math.Sqrt(2); //wa
-						Dir.Y=-1/System.Math.Sqrt(2);
+						MoveDir.X=-1/System.Math.Sqrt(2); //wa
+						MoveDir.Y=-1/System.Math.Sqrt(2);
 					}
 				}
 			} else {
 				if (down) {
 					if (right) {
-						Dir.X=1; //wsd
-						Dir.Y=0;
+						MoveDir.X=1; //wsd
+						MoveDir.Y=0;
 					} else {
-						Dir.X=0; //ws
-						Dir.Y=0;
+						MoveDir.X=0; //ws
+						MoveDir.Y=0;
 					}
 				} else {
 					if (right) {
-						Dir.X=1/System.Math.Sqrt(2); //wd
-						Dir.Y=-1/System.Math.Sqrt(2);
+						MoveDir.X=1/System.Math.Sqrt(2); //wd
+						MoveDir.Y=-1/System.Math.Sqrt(2);
 					} else {
-						Dir.X=0; //w
-						Dir.Y=-1;
+						MoveDir.X=0; //w
+						MoveDir.Y=-1;
 					}
 				}
 			}
@@ -96,42 +97,42 @@ public class Player {
 			if (left) {
 				if (down) {
 					if (right) {
-						Dir.X=0; //asd
-						Dir.Y=1;
+						MoveDir.X=0; //asd
+						MoveDir.Y=1;
 					} else {
-						Dir.X=-1/System.Math.Sqrt(2); //as
-						Dir.Y=1/System.Math.Sqrt(2);
+						MoveDir.X=-1/System.Math.Sqrt(2); //as
+						MoveDir.Y=1/System.Math.Sqrt(2);
 					}
 				} else {
 					if (right) {
-						Dir.X=0; //ad
-						Dir.Y=0;
+						MoveDir.X=0; //ad
+						MoveDir.Y=0;
 					} else {
-						Dir.X=-1; //a
-						Dir.Y=0;
+						MoveDir.X=-1; //a
+						MoveDir.Y=0;
 					}
 				}
 			} else {
 				if (down) {
 					if (right) {
-						Dir.X=1/System.Math.Sqrt(2); //sd
-						Dir.Y=1/System.Math.Sqrt(2);
+						MoveDir.X=1/System.Math.Sqrt(2); //sd
+						MoveDir.Y=1/System.Math.Sqrt(2);
 					} else {
-						Dir.X=0; //s
-						Dir.Y=1;
+						MoveDir.X=0; //s
+						MoveDir.Y=1;
 					}
 				} else {
 					if (right) {
-						Dir.X=1; //d
-						Dir.Y=0;
+						MoveDir.X=1; //d
+						MoveDir.Y=0;
 					} else {
-						Dir.X=0; //
-						Dir.Y=0;
+						MoveDir.X=0; //
+						MoveDir.Y=0;
 					}
 				}
 			}
 		}
-		Console.WriteLine(Dir.ToString());
+		Console.WriteLine(MoveDir.ToString());
 		Console.WriteLine(Pos.ToString());
 	}
 }

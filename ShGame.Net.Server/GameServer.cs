@@ -85,7 +85,8 @@ public class GameServer : IDisposable {
 		logger.Log("processing update player request", new MessageParameter("player", player));
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			if (gameService.Players[i].PlayerUUID == player.PlayerUUID) {
-				gameService.Players[i].Dir = player.Dir;
+				gameService.Players[i].MoveDir = player.MoveDir;
+				gameService.Players[i].LookDir = player.LookDir;
 			}
 		}
 		return null;

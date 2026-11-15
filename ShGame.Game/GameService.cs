@@ -186,7 +186,7 @@ public class GameService {
 			logger.Log(Bullets[i].Speed.ToString());
 			if (Bullets[i].Lifetime==-1) {
 				Bullets[i].Pos = new(p.Pos.Cpy().Add(new Vector3d(Player.Radius, Player.Radius, 0)));
-				Bullets[i].Dir = new(p.Dir);
+				Bullets[i].Dir = new(p.MoveDir);
 				Bullets[i].Speed = p.InitialBulletSpeed;
 				Bullets[i].OwnerHandle = p.PlayerUUID;
 				break;

@@ -21,9 +21,13 @@ public static class SerializerService {
 		ptr += 8;
 		Unsafe.Write(ptr, player.Pos.Y);
 		ptr += 8;
-		Unsafe.Write(ptr, player.Dir.X);
+		Unsafe.Write(ptr, player.MoveDir.X);
 		ptr += 8;
-		Unsafe.Write(ptr, player.Dir.Y);
+		Unsafe.Write(ptr, player.MoveDir.Y);
+		ptr += 8;
+		Unsafe.Write(ptr, player.LookDir.X);
+		ptr += 8;
+		Unsafe.Write(ptr, player.LookDir.Y);
 		ptr += 8;
 		Unsafe.Write(ptr, (int)player.Speed);
 		ptr += 4;
@@ -50,6 +54,10 @@ public static class SerializerService {
 		ptr += 8;
 		double dy = Unsafe.Read<double>(ptr);
 		ptr += 8;
+		double lx = Unsafe.Read<double>(ptr);
+		ptr += 8;
+		double ly = Unsafe.Read<double>(ptr);
+		ptr += 8;
 		int speed = Unsafe.Read<int>(ptr);
 		ptr += 4;
 		short uuid = Unsafe.Read<short>(ptr);
@@ -62,7 +70,8 @@ public static class SerializerService {
 		return new Player() {
 			Health = health,
 			Pos = new Vector3d(px, py, 0.0),
-			Dir = new Vector3d(dx, dy, 0.0),
+			MoveDir = new Vector3d(dx, dy, 0.0),
+			LookDir = new Vector3d(lx, ly, 0.0),
 			Speed = speed,
 			PlayerUUID = uuid,
 			WeaponCooldownTicks = cooldown,

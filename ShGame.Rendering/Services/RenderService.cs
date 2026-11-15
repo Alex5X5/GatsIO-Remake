@@ -31,6 +31,18 @@ public class RenderService {
 		foreach (var p in game.Players) {
 			var col = p.PlayerUUID != controlled.PlayerUUID ? Color.RED : Color.BLUE;
 			context.DrawCircle(new Circle(p.Pos, 20), col);
+			var mp = p.Pos.Add(p.MoveDir.Scl(30));
+			context.DrawLine(p.Pos, mp, new Color(232, 44, 207));
+			var lp = p.Pos.Add(p.LookDir.Scl(30));
+			System.Console.WriteLine($"drawing view line from {p.Pos} to {lp}");
+			context.DrawLine(p.Pos, lp, new Color(49, 245, 39));
+		}
+
+		foreach (var b in game.Bullets) {
+			if (b.Lifetime == -1)
+				continue;
+			var rect = new Rect(b.Pos, 10.0, 10.0);
+			context.DrawRectangle(rect, new Color(50, 50, 50));
 		}
 	}
 
