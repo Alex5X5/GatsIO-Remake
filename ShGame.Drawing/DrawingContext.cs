@@ -4,35 +4,41 @@ using ShGame.Math;
 
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using Silk.NET.Windowing;
+
+using System.Collections.Generic;
 
 public class DrawingContext : IDisposable {
 	
 	private GL? Gl;
 
 	private TriangleBuffer buffer;
-	private TextureBuffer textures;
 
 	private uint vaoHandle, vboHandle;
 	internal ShaderProgram fillShaderProgramm;
+	internal ShaderProgram textureShaderProgram;
+
+	private readonly List<DrawBatch> batches = new();
+	private int batchStart;
+
 
 	public DrawingContext() {
 		buffer = new();
-		textures = new();
 	}
 
 	internal void Load(GL gl) {
 		Gl = gl;
-		fillShaderProgramm = new(Gl, ShaderSources.COLOR_VERTEXT_SHADER_SOURCE, ShaderSources.COLOR_FRGMENT_SHADER_SOURCE);
+		
+		fillShaderProgramm = new(Gl, ShaderSources.COLOR_VERTEX_SHADER_SOURCE, ShaderSources.COLOR_FRAGMENT_SHADER_SOURCE);
+		textureShaderProgram = new(Gl, ShaderSources.TEXTURE_VERTEX_SHADER_SOURCE, ShaderSources.TEXTURE_FRAGMENT_SHADER_SOURCE);
+		
 		vaoHandle = Gl.GenVertexArray();
 		vboHandle = Gl.GenBuffer();
-		BindVAO();
-		BindVBO();
+		Gl?.BindVertexArray(vaoHandle);
+		Gl?.BindBuffer(BufferTargetARB.ArrayBuffer, vboHandle);
 		unsafe {
 			Gl.EnableVertexAttribArray(0);
 			Gl.EnableVertexAttribArray(1);
 			Gl.EnableVertexAttribArray(2);
-			Gl.EnableVertexAttribArray(3);
 			const uint stride = ColoredPointF.SizeInBytes;
 			//position data
 			Gl.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, stride, (void*)0);
@@ -40,8 +46,6 @@ public class DrawingContext : IDisposable {
 			Gl.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, stride, (void*)PointF.SizeInBytes);
 			// texture position
 			Gl.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, stride, (void*)(PointF.SizeInBytes + ColorF.SizeInBytes));
-			// texture index
-			Gl.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, stride, (void*)(PointF.SizeInBytes + ColorF.SizeInBytes + PointF.SizeInBytes));
 		}
 	}
 
@@ -53,44 +57,52 @@ public class DrawingContext : IDisposable {
 
 	internal void OnFrameBufferSizeChanged(Vector2D<int> size) {
 		fillShaderProgramm.OnFrameBufferSizeChanged(size);
+		textureShaderProgram.OnFrameBufferSizeChanged(size);
 	}
 
 	internal void BufferTrianglesToGpu() {
-		//Span<TriangleShape> span = CollectionsMarshal.AsSpan(bufferedTriangles);
+		CloseBatch(0);
 		BindVAO();
 		BindVBO();
 		unsafe {
-			Gl.BufferData(
+			Gl!.BufferData(
 				BufferTargetARB.ArrayBuffer,
-				buffer.Count*TriangleShape.SizeInBytes,
+				buffer.Count * TriangleShape.SizeInBytes,
 				buffer.Data,
 				BufferUsageARB.DynamicDraw);
 		}
-		UnbindVAO();
-		UnbindVBO();
 	}
 
-	internal void BufferTexturesToGpu() {
-		foreach(var image in textures.buffer) {
-			
-		}
-	}
 
 	internal void DrawTriangleBuffer() {
-		Gl.UseProgram(fillShaderProgramm.ProgramHandle);
 		BindVAO();
 		BindVBO();
-		Gl.DrawArrays(PrimitiveType.Triangles, 0, buffer.Count * 3);
-		UnbindVAO();
-		UnbindVBO();
+		foreach (var b in batches) {
+			if (b.Texture == 0) {
+				Gl!.UseProgram(fillShaderProgramm.ProgramHandle);
+			} else {
+				Gl!.UseProgram(textureShaderProgram.ProgramHandle);
+				Gl.BindTexture(TextureTarget.Texture2D, b.Texture);
+				textureShaderProgram.PrintErrors();
+				var error = Gl.GetError();
+				if(error != GLEnum.NoError)
+					Console.WriteLine(error);
+			}
+			Gl.DrawArrays(PrimitiveType.Triangles, b.FirstVertex, (uint)b.VertexCount);
+		}
 	}
 
 	internal void ClearOps() {
 		buffer.Clear();
+		batches.Clear();
+		batchStart = 0;
 	}
 
-	internal DrawingContext CreateChildContext() {
-		return null;
+	private void CloseBatch(uint texture) {
+		int end = (int)buffer.Count * 3;
+		if (end > batchStart)
+			batches.Add(new DrawBatch(batchStart, end - batchStart, texture));
+		batchStart = end;
 	}
 
 	public void DrawLine(double x1, double y1, double x2, double y2, Color color, double stroke = 1) {
@@ -162,25 +174,16 @@ public class DrawingContext : IDisposable {
 
 	}
 
-	public void DrawBuffer() {
-		
-	}
-
-	public unsafe void DrawImage(Vector3d pos, Image image) {
-		RectShape shape = new(new Rect(pos.X, pos.Y, image.Width, image.Height), Color.WHITE);
-		ColoredPointF* ptr = (ColoredPointF*)&shape;
-		//for(int i=0; i<6; i++) {
-		//	ptr->color = new ColorF(Color.WHITE);
-		//	ptr->texturePos = new PointF(0, 0);
-		//	ptr->textureIndex = 0;
-		//	ptr++;
-		//}
-		unsafe {
-			buffer.Buffer((TriangleShape*)&shape, 2);
-		}	
+	public void DrawImage(Vector3d pos, Image image) {
+		CloseBatch(0);
+		Rect rect = new(pos.X, pos.Y, image.Width, image.Height);
+		DrawRectangle(rect, Color.BLACK);
+		CloseBatch(image.texture);
 	}
 
 	public void Dispose() {
 		buffer.Dispose();
 	}
+
+	private readonly record struct DrawBatch(int FirstVertex, int VertexCount, uint Texture);
 }
