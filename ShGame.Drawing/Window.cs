@@ -117,12 +117,12 @@ public abstract class Window : IDisposable {
 
 	private void MouseDownBase(IMouse mouse, MouseButton button) {
 		Vector3d pos = new(mouse.Position.X, mouse.Position.Y, 0.0);
-		MousePressed(pos);
+		MousePressed(pos, (MouseKey)button);
 	}
 
 	private void MouseUpBase(IMouse mouse, MouseButton button) {
 		Vector3d pos = new(mouse.Position.X, mouse.Position.Y, 0.0);
-		MouseReleased(pos);
+		MouseReleased(pos, (MouseKey)button);
 	}
 
 	private void MouseMovedBase(IMouse mouse, System.Numerics.Vector2 pos) {
@@ -147,9 +147,9 @@ public abstract class Window : IDisposable {
 	protected virtual void KeyReleased(Key key) { }
 
 	protected virtual void MouseMoved(Vector3d pos) { }
-	protected virtual void MousePressed(Vector3d pos) { }
-	protected virtual void MouseReleased(Vector3d pos) { }
-	protected virtual void MouseClicked(Vector3d pos) { }
+	protected virtual void MousePressed(Vector3d pos, MouseKey key) { }
+	protected virtual void MouseReleased(Vector3d pos, MouseKey key) { }
+	protected virtual void MouseClicked(Vector3d pos, MouseKey key) { }
 
 	protected virtual void OnClosing() { }
 

@@ -20,9 +20,6 @@ public class Client : Window {
 		keyLeft = false,
 		keyRight = false;
 
-	public static readonly int SCREEN_PIXEL_WIDTH = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size.Y;
-	public static readonly int SCREEN_PIXEL_HEIGHT = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size.X;
-
 	private RenderService renderService;
 	private NetworkService netService;
 	private	GameService gameService;
@@ -145,28 +142,27 @@ public class Client : Window {
 				gameService.Players[i].UpdateDir(keyUp, keyDown, keyLeft, keyRight);
 	}
 
-	//private void OnMouseDown(IMouse cursor, MouseButton button) {
-	//	Console.WriteLine("Mouse Down! "+mousePos);
-	//	if (button==MouseButton.Left) {
-	//		mouseLeftDown=true;
-	//		if(ControlledPlayer!=null)
-	//			ControlledPlayer.IsShooting = 0x1;
-	//	}
-	//	if (button==MouseButton.Right)
-	//		mouseRightDown=true;
-	//}
+	protected override void MousePressed(Vector3d pos, MouseKey key) {
+		Console.WriteLine("Mouse Down! "+pos);
+		if (key==MouseKey.Left) {
+			//mouseLeftDown=true;
+			if (ControlledPlayer!=null)
+				ControlledPlayer.IsShooting = 0x1;
+		}
+		//if (key==MouseKey.Right)
+		//	mouseRightDown=true;
+	}
 
-	//private void OnMouseUp(IMouse cursor, MouseButton button) {
-	//	Console.WriteLine("Mouse Up! "+mousePos);
-	//	if (button==MouseButton.Left) {
-	//		mouseLeftDown=false;
-	//		if(ControlledPlayer!=null)
-	//			ControlledPlayer.IsShooting = 0x0;
-	//	}
-	//	if (button==MouseButton.Right) {
-	//		mouseRightDown=false;
-	//	}
-	//}
+	protected override void MouseReleased(Vector3d pos, MouseKey key) {
+		Console.WriteLine("Mouse Up! "+pos);
+		if (key==MouseKey.Left) {
+			//mouseLeftDown=false;
+			if (ControlledPlayer!=null)
+				ControlledPlayer.IsShooting = 0x0;
+		}
+		//if (button==MouseButton.Right)
+			//mouseRightDown=false;
+	}
 
 	protected override void MouseMoved(Vector3d pos) {
 		MousePos = pos;
