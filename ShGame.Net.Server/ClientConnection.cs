@@ -27,30 +27,15 @@ internal class ClientConnection : IDisposable {
 		while (!stop) {
 			try {
 				Packet request = await socket.RecievePacketAsync();
-				Packet? response = null;
-				switch (request.Type) {
-					case PacketType.Bullets:
-						response = server.OnBulletRequest();
-						break;
-					case PacketType.UpdatePlayer:
-						response = server.OnUpdatePlayerRequest(request);
-						break;
-					case PacketType.GetPlayers:
-						response = server.OnGetPlayersRequest(request);
-						break;
-					case PacketType.Ping:
-						response = server.OnPingRequest(request);
-						break;
-					case PacketType.Map:
-						response = server.OnMapRequest();
-						break;
-					case PacketType.Register:
-						response = server.OnRegisterPlayerRequest(request);
-						break;
-					default:
-						logger.Warn("Unknown protocol type (protocol.type=" + request.Type + ")");
-						break;
-				}
+				Packet response = request.Type switch {
+					PacketType.Bullets => server.OnGetBulletsRequest(),
+					PacketType.UpdatePlayer => server.OnUpdatePlayerRequest(request),
+					PacketType.GetPlayers => server.OnGetPlayersRequest(request),
+					PacketType.Ping => server.OnPingRequest(request),
+					PacketType.Map => server.OnMapRequest(),
+					PacketType.Register => server.OnRegisterPlayerRequest(request),
+					_ => throw new InvalidOperationException($"invalid protocol type {request.Type}")
+				};
 				request.Dispose();
 				if(response != null)
 					await socket.SendPacketAsync(response);

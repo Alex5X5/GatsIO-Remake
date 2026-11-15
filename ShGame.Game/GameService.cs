@@ -113,8 +113,13 @@ public class GameService {
 	public void BulletMoveLoop() {
 
 		void MoveBullet(ref Bullet b) {
+			if (b.Lifetime == -1)
+				return;
 			b.Move();
-			b.CheckObstacleCollision(Map.Obstacles);
+			if (b.CheckObstacleCollision(Map.Obstacles))
+				DeallocBullet(ref b);
+			if (b.Pos.X<0|b.Pos.Y<0|b.Pos.X>Constants.MAP_GRID_WIDTH|b.Pos.Y>Constants.MAP_GRID_HEIGHT)
+				DeallocBullet(ref b);
 		}
 
 		ForEachBullet(MoveBullet);
@@ -180,17 +185,32 @@ public class GameService {
 
 	#endregion obstacle placement
 
+	public ref Player GetPlayerById(short playerId) {
+		for (int i = 0; i<Players.Length; i++)
+			if (Players[i].PlayerUUID == playerId)
+				return ref Players[i];
+		throw new InvalidOperationException($"player with id {playerId} not found");
+	}
+
 	private void AllocBullet(Player p) {
 		logger.Log("alloc bullet");
 		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
-			logger.Log(Bullets[i].Speed.ToString());
 			if (Bullets[i].Lifetime==-1) {
-				Bullets[i].Pos = new(p.Pos.Cpy().Add(new Vector3d(Player.Radius, Player.Radius, 0)));
-				Bullets[i].Dir = new(p.MoveDir);
+				Bullets[i].Lifetime = 100;
+				Bullets[i].Pos = new(p.Pos.Cpy().Add(p.LookDir.Scl(Player.Radius)));
+				Bullets[i].Dir = new(p.LookDir);
 				Bullets[i].Speed = p.InitialBulletSpeed;
 				Bullets[i].OwnerHandle = p.PlayerUUID;
-				break;
+				return;
 			}
 		}
+	}
+
+	private void DeallocBullet(ref Bullet b) {
+		logger.Log("dealloc bullet");
+		b.Pos = new(10, 10, 0);
+		b.Dir = new(0, 1, 0);
+		b.Speed = 0;
+		b.Lifetime = -1;
 	}
 }

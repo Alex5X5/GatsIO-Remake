@@ -5,6 +5,7 @@ using ShGame.Net.Shared.Services;
 using ShGame.Types;
 using ShGame.Util;
 
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -41,6 +42,21 @@ public class NetworkService : IDisposable {
 		}
 		response.Dispose();
 		return map;
+	}
+
+	public async Task<Bullet[]> GetBulletsAsync() {
+		logger.Log("getting bullets");
+		await socket.SendPacketAsync(new Packet(PacketType.Bullets));
+		Packet response = await socket.RecievePacketAsync();
+		Bullet[] bullets = new Bullet[Constants.BULLET_COUNT];
+		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
+			int offset = i*Bullet.SizeInBytesForNetwork;
+			unsafe {
+				bullets[i] = SerializerService.DeserializeBullet(response.Payload, offset);
+			}
+		}
+		response.Dispose();
+		return bullets;
 	}
 
 	public async Task UpdatePlayerAsync(Player player) {

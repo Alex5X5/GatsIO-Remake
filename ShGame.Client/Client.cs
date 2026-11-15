@@ -76,14 +76,12 @@ public class Client : Window {
 					else
 						gameService.Map = new Map();
 					ControlledPlayer = await netService.RegisterToServerAsync();
+					gameService.Players = await netService.GetPlayersAsync();
 				}
 				while (!stop && NetHandlerConnected()) {
-					//logger.Log("asking for players");
-
-					for (int i = 0; i<Constants.PLAYER_COUNT; i++)
-						if (gameService.Players[i].PlayerUUID == ControlledPlayer.PlayerUUID)
-							await netService.UpdatePlayerAsync(gameService.Players[i]);
+					await netService.UpdatePlayerAsync(gameService.GetPlayerById(ControlledPlayer.PlayerUUID));
 					gameService.Players = await netService.GetPlayersAsync();
+					gameService.Bullets = await netService.GetBulletsAsync();
 					await Task.Delay(50);
 				}
 				netService?.Dispose();
@@ -137,42 +135,32 @@ public class Client : Window {
 	}
 
 	private void UpdateControlledDir() {
-		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
-			if (gameService.Players[i].PlayerUUID == ControlledPlayer.PlayerUUID)
-				gameService.Players[i].UpdateDir(keyUp, keyDown, keyLeft, keyRight);
+		gameService
+			.GetPlayerById(ControlledPlayer.PlayerUUID)
+			.UpdateDir(keyUp, keyDown, keyLeft, keyRight);
 	}
 
 	protected override void MousePressed(Vector3d pos, MouseKey key) {
 		Console.WriteLine("Mouse Down! "+pos);
 		if (key==MouseKey.Left) {
-			//mouseLeftDown=true;
-			if (ControlledPlayer!=null)
-				ControlledPlayer.IsShooting = 0x1;
+			gameService.GetPlayerById(ControlledPlayer.PlayerUUID).IsShooting = 0x1;
 		}
-		//if (key==MouseKey.Right)
-		//	mouseRightDown=true;
+		Console.WriteLine(gameService.GetPlayerById(ControlledPlayer.PlayerUUID).IsShooting);
 	}
 
 	protected override void MouseReleased(Vector3d pos, MouseKey key) {
 		Console.WriteLine("Mouse Up! "+pos);
 		if (key==MouseKey.Left) {
-			//mouseLeftDown=false;
-			if (ControlledPlayer!=null)
-				ControlledPlayer.IsShooting = 0x0;
+			gameService.GetPlayerById(ControlledPlayer.PlayerUUID).IsShooting = 0x0;
 		}
-		//if (button==MouseButton.Right)
-			//mouseRightDown=false;
+		Console.WriteLine(gameService.GetPlayerById(ControlledPlayer.PlayerUUID).IsShooting);
 	}
 
 	protected override void MouseMoved(Vector3d pos) {
-		Console.WriteLine(pos);
-		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
-			if (gameService.Players[i].PlayerUUID == ControlledPlayer.PlayerUUID) {
-				var player = gameService.Players[i];
-				var playerPos = player.Pos;
-				var relative = pos.Sub(playerPos).Nor();
-				gameService.Players[i].LookDir = relative;
-			}
+		Player player = gameService.GetPlayerById(ControlledPlayer.PlayerUUID);
+		var playerPos = player.Pos;
+		var relative = pos.Sub(playerPos).Nor();
+		player.LookDir = relative;
 	}
 
 	private bool NetHandlerConnected() {
@@ -188,12 +176,11 @@ public class Client : Window {
 
 	protected override void Draw(double deltaTime, DrawingContext context) {
 		renderService.OnDraw(context);
-		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
-			if (gameService.Players[i].PlayerUUID == ControlledPlayer.PlayerUUID) {
-				var player = gameService.Players[i];
-				var lp = new Vector3d(100, 100, 0).Add(player.LookDir.Scl(30));
-				context.DrawLine(new Vector3d(100,100,0), lp, new Color(49, 245, 39));
-			}
+		if(Constants.DEBUG_DRAW) {
+			var player = gameService.GetPlayerById(ControlledPlayer.PlayerUUID);
+			var lp = new Vector3d(100, 100, 0).Add(player.LookDir.Scl(30));
+			context.DrawLine(new Vector3d(100,100,0), lp, new Color(49, 245, 39));
+		}
 		context.DrawLine(new Vector3d(0, 0, 0), MousePos, Color.ORANGE, 3);
 	}
 }

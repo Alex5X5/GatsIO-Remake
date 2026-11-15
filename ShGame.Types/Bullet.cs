@@ -14,6 +14,7 @@ public struct Bullet {
 	public short Speed;
 	public short Lifetime;
 	public short OwnerHandle;
+	public const int SizeInBytesForNetwork = 38;
 
 	public Bullet() : this(null, null, 0, 0) { }
 
@@ -22,6 +23,7 @@ public struct Bullet {
 		Dir = _dir??new Vector3d(0, 1, 0);
 		WIDTH = (byte)(_width>0 ? _width : 5);
 		LENGHT = (byte)(_length>0 ? _length : 5);
+		Lifetime = -1;
 	}
 
 	public void Move() {
@@ -34,7 +36,8 @@ public struct Bullet {
 		//dirty = true;
 	}
 
-	public void CheckObstacleCollision(Obstacle[] obstacles) {
+	public bool CheckObstacleCollision(Obstacle[] obstacles) {
+		bool collided = false;
 		foreach (Obstacle obstacle in obstacles) {
 			Vector3d bulletCorner1 = Pos;
 			Vector3d bulletCorner2 = Pos.Cpy().Add(WIDTH, LENGHT, 0);
@@ -42,13 +45,15 @@ public struct Bullet {
 			Vector3d obstacleCorner1 = obstacle.Pos;
 			Vector3d obstacleCorner2 = obstacle.Pos.Cpy().Add(obstacle.WIDTH, obstacle.HEIGHT, 0);
 
-			//if (
-			//	bulletCorner1.x <= obstacleCorner2.x && bulletCorner1.y <= obstacleCorner2.y &&
-			//	bulletCorner2.x >= obstacleCorner1.x && bulletCorner2.y >= obstacleCorner1.y
-			//) {
-			//	Dealloc();
-			//}
+
+			if (
+				bulletCorner1.X <= obstacleCorner2.X && bulletCorner1.Y <= obstacleCorner2.Y &&
+				bulletCorner2.X >= obstacleCorner1.X && bulletCorner2.Y >= obstacleCorner1.Y
+			) {
+				collided = true;
+			}
 		}
+		return collided;
 	}
 
 	public override string ToString() => "ShGame.Types.Bullet[Pos:"+Pos.ToString()+", Dir:"+Dir.ToString()+"]";

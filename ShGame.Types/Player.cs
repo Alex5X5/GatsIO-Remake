@@ -6,11 +6,11 @@ using System;
 
 public class Player {
 
-	public short WeaponCooldownTicks = 10;
-	public short weaponCooldownTicksDone = 10;
+	public short WeaponCooldownTicks = 20;
+	public short weaponCooldownTicksDone = 0;
 
 	public byte IsShooting = 0x0;
-	public short InitialBulletSpeed = 0x30;
+	public short InitialBulletSpeed = 0x5;
 
 	public Vector3d Pos;
 	public Vector3d MoveDir = new(0, 0, 0);
@@ -28,26 +28,23 @@ public class Player {
 	public bool Visible;
 
 	public const int SizeInBytes = 100;
-	public const int SizeInBytesForNetwork = 63;
+	public const int SizeInBytesForNetwork = 65;
+
+	//the constructor for invalid players
+	public Player() : this(new(0, 0, 0), -1, 0) {
+		Visible = false;
+	}
 
 	public Player(Vector3d pos, int health, short UUID) {
 		Pos = pos;
 		Health = health;
-		PlayerUUID = UUID; //!=0 ? UUID : new Random().Next();
+		PlayerUUID = UUID;
 		Visible = Health !=-1;
-	}
-
-	//the constructor for invalid players
-	public Player() {
-		Pos = new(0, 0, 0);
-		//if the health of a player is -1 it is considered invalid and won't be processed
-		Health = -1;
-		PlayerUUID = 0;
-		Visible = false;
+		IsShooting = 0x0;
 	}
 
 	public override string ToString() =>
-		$"Game.graphics.client.Player[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{MoveDir}, UUID:{PlayerUUID}]";
+		$"Game.graphics.client.Player[health:{Health}, speed:{Speed}, pos:{Pos}, dir:{MoveDir}, UUID:{PlayerUUID}, IsShooting:{IsShooting}]";
 
 	public void Move() {
 		Pos = Pos.Add(MoveDir.Nor().Scl(Speed));

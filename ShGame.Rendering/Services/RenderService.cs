@@ -34,7 +34,6 @@ public class RenderService {
 			var mp = p.Pos.Add(p.MoveDir.Scl(30));
 			context.DrawLine(p.Pos, mp, new Color(232, 44, 207));
 			var lp = p.Pos.Add(p.LookDir.Scl(30));
-			System.Console.WriteLine($"drawing view line from {p.Pos} to {lp}");
 			context.DrawLine(p.Pos, lp, new Color(49, 245, 39));
 		}
 

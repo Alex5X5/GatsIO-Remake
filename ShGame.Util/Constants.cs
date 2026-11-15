@@ -5,13 +5,15 @@ using System;
 
 public static class Constants {
 
+	public static bool DEBUG_DRAW = true;
+
 	public static readonly Line BORDER_TOP = new Line(new Vector3d(0, 0, 0), new Vector3d(Constants.MAP_GRID_WIDTH, 0, 0));
 	public static readonly Line BORDER_BOTTOM = new Line(new Vector3d(0, Constants.MAP_GRID_HEIGHT, 0), new Vector3d(Constants.MAP_GRID_WIDTH, Constants.MAP_GRID_HEIGHT, 0));
 	public static readonly Line BORDER_LEFT = new Line(new Vector3d(0, 0, 0), new Vector3d(0, Constants.MAP_GRID_HEIGHT, 0));
 	public static readonly Line BORDER_RIGHT = new Line(new Vector3d(Constants.MAP_GRID_WIDTH, 0, 0), new Vector3d(Constants.MAP_GRID_WIDTH, Constants.MAP_GRID_HEIGHT, 0));
 
-	public const int PLAYER_COUNT = 20;
-	public const int BULLET_COUNT = 200;
+	public const int PLAYER_COUNT = 10;
+	public const int BULLET_COUNT = 50;
 
 	public const int OBSTACKLE_ROWS = 5, OBSTACKLE_LINES = 8;
 	public const int OBSTACLE_ROW_DISANCE = MAP_GRID_WIDTH / OBSTACKLE_ROWS;

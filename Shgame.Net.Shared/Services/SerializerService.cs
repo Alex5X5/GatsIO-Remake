@@ -3,6 +3,7 @@
 using ShGame.Math;
 using ShGame.Types;
 
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 public static class SerializerService {
@@ -35,7 +36,7 @@ public static class SerializerService {
 		ptr += 2;
 		Unsafe.Write(ptr, player.WeaponCooldownTicks);
 		ptr += 2;
-		Unsafe.Write(ptr, player.WeaponCooldownTicks);
+		Unsafe.Write(ptr, player.weaponCooldownTicksDone);
 		ptr += 2;
 		Unsafe.Write(ptr, player.InitialBulletSpeed);
 		ptr += 2;
@@ -66,6 +67,8 @@ public static class SerializerService {
 		ptr += 2;
 		short cooldownDone = Unsafe.Read<short>(ptr);
 		ptr += 2;
+		short bulletSpeed = Unsafe.Read<short>(ptr);
+		ptr += 2;
 		byte shooting = *ptr;
 		return new Player() {
 			Health = health,
@@ -76,6 +79,7 @@ public static class SerializerService {
 			PlayerUUID = uuid,
 			WeaponCooldownTicks = cooldown,
 			weaponCooldownTicksDone = cooldownDone,
+			InitialBulletSpeed = bulletSpeed,
 			IsShooting = shooting
 		};
 	}
@@ -119,7 +123,7 @@ public static class SerializerService {
 		return new Obstacle(new Vector3d(x, y, 0.0), type);
 	}
 
-	public static unsafe void SerializeBullet(Bullet bullet, byte* buffer, int offset) {
+	public static unsafe void SerializeBullet(byte* buffer, Bullet bullet, int offset) {
 		byte* ptr = PtrWithOffset(buffer, offset);
 		Unsafe.Write(ptr, bullet.Lifetime);
 		ptr += 2;

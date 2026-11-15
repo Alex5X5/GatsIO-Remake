@@ -56,7 +56,7 @@ public class GameServer : IDisposable {
 
 	#region request events
 
-	internal unsafe Packet? OnPingRequest(Packet packet) {
+	internal unsafe Packet OnPingRequest(Packet packet) {
 		if (packet.Payload[0] == 1) {
 			logger.Log("answering ping");
 			return new Packet(PacketType.Ping);
@@ -66,7 +66,7 @@ public class GameServer : IDisposable {
 		}
 	}
 
-	internal Packet? OnMapRequest() {
+	internal Packet OnMapRequest() {
 		logger.Log("processing map request");
 		Packet response = new(PacketType.Map);
 		unsafe {
@@ -80,28 +80,20 @@ public class GameServer : IDisposable {
 		return response;
 	}
 
-	internal unsafe Packet? OnUpdatePlayerRequest(Packet request) {
+	internal unsafe Packet OnUpdatePlayerRequest(Packet request) {
 		Player player = SerializerService.DeserializePlayer(request.Payload);
 		logger.Log("processing update player request", new MessageParameter("player", player));
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			if (gameService.Players[i].PlayerUUID == player.PlayerUUID) {
 				gameService.Players[i].MoveDir = player.MoveDir;
 				gameService.Players[i].LookDir = player.LookDir;
+				gameService.Players[i].IsShooting = player.IsShooting;
 			}
 		}
 		return null;
 	}
 
-	internal unsafe Packet? OnGetPlayersRequest(Packet request) {
-		logger.Log("processing get players request");
-		Packet response = new(PacketType.GetPlayers);
-		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			SerializerService.SerializePlayer(response.Payload, gameService.Players[i], i*Player.SizeInBytesForNetwork);
-		}
-		return response;
-	}
-
-	internal unsafe Packet? OnRegisterPlayerRequest(Packet packet) {
+	internal unsafe Packet OnRegisterPlayerRequest(Packet packet) {
 		logger.Log("processing player register request");
 		PlayerIdCounter++;
 		Player temp = new(new(100,100,0), 100, PlayerIdCounter);
@@ -118,14 +110,20 @@ public class GameServer : IDisposable {
 		return response;
 	}
 
-	internal unsafe Packet? OnBulletRequest() {
-		logger.Log("processing bullet request");
+	internal unsafe Packet OnGetPlayersRequest(Packet request) {
+		logger.Log("processing get players request");
+		Packet response = new(PacketType.GetPlayers);
+		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
+			SerializerService.SerializePlayer(response.Payload, gameService.Players[i], i*Player.SizeInBytesForNetwork);
+		}
+		return response;
+	}
+
+	internal unsafe Packet OnGetBulletsRequest() {
+		logger.Log("processing get bullets request");
 		Packet response = new Packet(PacketType.Bullets);
-		byte* ptr = response.Payload;
-		for (int i = 0; i<Constants.OBSTACLE_COUNT; i++) {
-			int offset = i*Obstacle.SizeInBytes;
-			SerializerService.SerializeBullet(gameService.Bullets[i], ptr, offset);
-			ptr += Bullet.BULLET_BYTE_LENGTH;
+		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
+			SerializerService.SerializeBullet(response.Payload, gameService.Bullets[i], i*Bullet.SizeInBytesForNetwork);
 		}
 		return response;
 	}
