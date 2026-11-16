@@ -1,45 +1,52 @@
 ﻿namespace ShGame.Net.Shared;
 
-using SimpleLogging.logging;
-
 using ShGame.Net.Shared.Exceptions;
-using ShGame.Util;
+
+using SimpleLogging.logging;
 
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 public class Socket : IDisposable {
 
 	private readonly Logger logger = new(new LoggingLevel("Socket"));
 
+	private readonly System.Net.Sockets.Socket socket;
+	
+	private CancellationTokenSource InterrupSouce;
+
 	private readonly IPAddress address = new([0, 0, 0, 0]);
 	private readonly int port = 100;
 
-	private bool stop = false;
-
-	private readonly System.Net.Sockets.Socket socket;
-
 	public bool Connected => socket.Connected;
+	private bool stop = false;
 
 	public Socket(System.Net.Sockets.Socket socket) {
 		this.socket = socket;
+		InterrupSouce = new();
+
 		LogConnected();
 	}
 
 	public Socket(IPAddress address, int port) {
 		this.address = address;
 		this.port = port;
+		
 		socket = new(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+		InterrupSouce = new();
 
 		IPEndPoint point = new(address, port);
+
 		try {
 			logger.Log("trying to connect, point="+point.ToString()+", family="+point.Address.AddressFamily);
 			socket.Connect(point);
 		} catch (SocketException e) {
 			logger.Warn("failed to connect (reason="+e.ToString()+")");
 		}
+
 		LogConnected();
 	}
 
