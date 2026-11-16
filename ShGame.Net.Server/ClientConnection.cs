@@ -25,8 +25,10 @@ internal class ClientConnection : IDisposable {
 	internal async Task RunAsync() {
 		logger.Log("run");
 		while (!stop) {
+			Packet request;
 			try {
-				Packet request = await socket.RecievePacketAsync();
+				request = await socket.RecievePacketAsync();
+				bool shouldAnswer = GameServer.ShouldAnswer(request);
 				Packet response = request.Type switch {
 					PacketType.Bullets => server.OnGetBulletsRequest(),
 					PacketType.UpdatePlayer => server.OnUpdatePlayerRequest(request),
@@ -36,12 +38,14 @@ internal class ClientConnection : IDisposable {
 					PacketType.Register => server.OnRegisterPlayerRequest(request),
 					_ => throw new InvalidOperationException($"invalid protocol type {request.Type}")
 				};
-				request.Dispose();
-				await socket.SendPacketAsync(response);
+				if(shouldAnswer)
+					await socket.SendPacketAsync(response);
 			} catch (SocketException e) {
 				logger.Error(e.Message);
 				Dispose();
 				break;
+			} finally {
+				request.Dispose();
 			}
 		}
 	}

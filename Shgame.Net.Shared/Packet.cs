@@ -34,6 +34,9 @@ public unsafe struct Packet : IDisposable {
 		NativeMemory.Copy(newData, data, Protocoll.PACKET_BYTE_LENGTH);
 	}
 
+	public static Packet Empty =>
+		new(PacketType.Empty);
+		
 	public byte[] GetBufferArray() {
 		byte[] buffer = new byte[Protocoll.PACKET_BYTE_LENGTH];
 		unsafe {

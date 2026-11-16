@@ -8,6 +8,7 @@ using ShGame.Util;
 
 using System.Threading.Tasks;
 using System.Net;
+using System.Runtime.CompilerServices;
 
 public class GameServer : IDisposable {
 
@@ -56,13 +57,35 @@ public class GameServer : IDisposable {
 
 	#region request events
 
+	internal static bool ShouldAnswer(Packet packet) {
+		var type = packet.Type;
+		if (type == PacketType.Bullets)
+			return true;
+		if (type == PacketType.GetPlayers)
+			return true;
+		if (type == PacketType.UpdatePlayer)
+			return false;
+		if (type == PacketType.Map)
+			return true;
+		if (type == PacketType.Register)
+			return true;
+		if (type == PacketType.Ping)
+			unsafe {
+				if (Unsafe.Read<byte>(packet.Payload) == 0x1)
+					return true;
+				else
+					return false;
+			}
+		return false;
+	}
+
 	internal unsafe Packet OnPingRequest(Packet packet) {
 		if (packet.Payload[0] == 1) {
 			logger.Log("answering ping");
 			return new Packet(PacketType.Ping);
 		} else {
 			logger.Log("not answering ping");
-			return null;
+			return Packet.Empty;
 		}
 	}
 
@@ -90,7 +113,7 @@ public class GameServer : IDisposable {
 				gameService.Players[i].IsShooting = player.IsShooting;
 			}
 		}
-		return null;
+		return Packet.Empty;
 	}
 
 	internal unsafe Packet OnRegisterPlayerRequest(Packet packet) {

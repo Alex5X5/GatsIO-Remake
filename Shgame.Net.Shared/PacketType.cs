@@ -10,5 +10,6 @@ public enum PacketType : byte {
 	Register = 13,
 	Ability = 14,
 	Bullets = 15,
+	Empty = 254,
 	Invalid = 255
 }
