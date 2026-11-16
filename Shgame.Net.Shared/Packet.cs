@@ -4,7 +4,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-public unsafe class Packet : IDisposable {
+public unsafe struct Packet : IDisposable {
 
 	private readonly byte* data;
 	
@@ -21,18 +21,16 @@ public unsafe class Packet : IDisposable {
 	public byte* Payload {
 		get => data + Protocoll.PAYLOAD_OFFSET;
 	}
-	
-	public byte* Data {
-		get => data;
+
+	public Packet() {
+		data = (byte*)NativeMemory.AllocZeroed(Protocoll.PACKET_BYTE_LENGTH);
 	}
 
-	public Packet(PacketType type) {
-		data = (byte*)NativeMemory.AllocZeroed(Protocoll.PACKET_BYTE_LENGTH);
+	public Packet(PacketType type) : this() {
 		Type = type;
 	}
 
-	public Packet(byte* newData) {
-		data = (byte*)NativeMemory.AllocZeroed(Protocoll.PACKET_BYTE_LENGTH);
+	public Packet(byte* newData) : this() {
 		NativeMemory.Copy(newData, data, Protocoll.PACKET_BYTE_LENGTH);
 	}
 

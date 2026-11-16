@@ -37,8 +37,7 @@ internal class ClientConnection : IDisposable {
 					_ => throw new InvalidOperationException($"invalid protocol type {request.Type}")
 				};
 				request.Dispose();
-				if(response != null)
-					await socket.SendPacketAsync(response);
+				await socket.SendPacketAsync(response);
 			} catch (SocketException e) {
 				logger.Error(e.Message);
 				Dispose();
