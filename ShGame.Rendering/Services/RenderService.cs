@@ -37,11 +37,12 @@ public class RenderService {
 			context.DrawLine(p.Pos, lp, new Color(49, 245, 39));
 		}
 
+		double alpha = game.GetBulletTickAlpha();
 		foreach (var b in game.Bullets) {
 			if (b.Lifetime == -1)
 				continue;
-			var rect = new Rect(b.Pos, 10.0, 10.0);
-			context.DrawRectangle(rect, new Color(50, 50, 50));
+			var drawPos = b.Pos.Add(b.Dir.Scl(b.Speed * alpha));
+			context.DrawRectangle(new Rect(drawPos, 10.0, 10.0), new Color(50, 50, 50));
 		}
 	}
 

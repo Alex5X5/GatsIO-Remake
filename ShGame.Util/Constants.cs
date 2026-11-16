@@ -15,6 +15,8 @@ public static class Constants {
 	public const int PLAYER_COUNT = 10;
 	public const int BULLET_COUNT = 50;
 
+	public const double MAX_BULLET_POS_ERROR = 10.0;
+
 	public const int OBSTACKLE_ROWS = 5, OBSTACKLE_LINES = 8;
 	public const int OBSTACLE_ROW_DISANCE = MAP_GRID_WIDTH / OBSTACKLE_ROWS;
 	public const int OBSTACLE_COUNT = OBSTACKLE_ROWS*OBSTACKLE_LINES;

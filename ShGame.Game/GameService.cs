@@ -8,6 +8,7 @@ using ShGame.Types;
 using SimpleLogging.logging;
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -110,6 +111,13 @@ public class GameService {
 		ForEachPlayer(MovePlayer);
 	}
 
+	private long lastBulletTick = Stopwatch.GetTimestamp();
+	public double GetBulletTickAlpha() {
+		double elapsed = (Stopwatch.GetTimestamp() - Volatile.Read(ref lastBulletTick)) / (double)Stopwatch.Frequency;
+		double tickLength = Constants.TARGET_LOOP_DELAY_TICKS / (double)TimeSpan.TicksPerSecond;
+		return Math.Clamp(elapsed / tickLength, 0.0, 1.0);
+	}
+
 	public void BulletMoveLoop() {
 
 		void MoveBullet(ref Bullet b) {
@@ -123,6 +131,26 @@ public class GameService {
 		}
 
 		ForEachBullet(MoveBullet);
+
+		Volatile.Write(ref lastBulletTick, Stopwatch.GetTimestamp());
+	}
+
+	public void MergeBulletSnapshot(Bullet[] snapshot, double latencyTicks) {
+		for(int i=0; i<Constants.BULLET_COUNT; i++) {
+			var b = snapshot[i];
+			if (b.Lifetime == -1) {
+				if (Bullets[i].Lifetime != -1)
+					DeallocBullet(ref Bullets[i]);
+				continue;
+			}
+
+			var predicted = b.Pos.Add(b.Dir.Scl(b.Speed * latencyTicks));
+			var error = predicted.Cpy().Sub(Bullets[i].Pos);
+			if (error.Len() > Constants.MAX_BULLET_POS_ERROR)
+				Bullets[i].Pos = predicted;
+			else
+				Bullets[i].Pos.Add(error.Scl(0.2));
+		}
 	}
 
 	public void PlayerShootLoop() {
@@ -197,7 +225,7 @@ public class GameService {
 		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
 			if (Bullets[i].Lifetime==-1) {
 				Bullets[i].Lifetime = 100;
-				Bullets[i].Pos = new(p.Pos.Cpy().Add(p.LookDir.Scl(Player.Radius)));
+				Bullets[i].Pos = new(p.Pos.Add(p.LookDir.Scl(Player.Radius)));
 				Bullets[i].Dir = new(p.LookDir);
 				Bullets[i].Speed = p.InitialBulletSpeed;
 				Bullets[i].OwnerHandle = p.PlayerUUID;

@@ -8,6 +8,7 @@ using ShGame.Rendering.Services;
 using ShGame.Types;
 using ShGame.Util;
 
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -78,10 +79,15 @@ public class Client : Window {
 					ControlledPlayer = await netService.RegisterToServerAsync();
 					gameService.Players = await netService.GetPlayersAsync();
 				}
+				var sw = new Stopwatch();
 				while (!stop && NetHandlerConnected()) {
+					sw.Start();
 					await netService.UpdatePlayerAsync(gameService.GetPlayerById(ControlledPlayer.PlayerUUID));
 					gameService.Players = await netService.GetPlayersAsync();
-					gameService.Bullets = await netService.GetBulletsAsync();
+					Bullet[] bullets = await netService.GetBulletsAsync();
+					sw.Stop();
+					gameService.MergeBulletSnapshot(bullets, sw.ElapsedTicks / 2.0);
+					sw.Reset();
 					await Task.Delay(50);
 				}
 				netService?.Dispose();
@@ -157,6 +163,7 @@ public class Client : Window {
 	}
 
 	protected override void MouseMoved(Vector3d pos) {
+		MousePos = pos;
 		Player player = gameService.GetPlayerById(ControlledPlayer.PlayerUUID);
 		var playerPos = player.Pos;
 		var relative = pos.Sub(playerPos).Nor();
