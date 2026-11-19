@@ -31,9 +31,9 @@ public class RenderService {
 
 	private Color GetLightColor(Color col){
 		return new Color(
-			(byte)System.Math.Min(col.Red*1.5, 255),
-			(byte)System.Math.Min(col.Green*1.5, 255),
-			(byte)System.Math.Min(col.Blue*1.5, 255));
+			(byte)System.Math.Min(col.Red+70, 255),
+			(byte)System.Math.Min(col.Green+70, 255),
+			(byte)System.Math.Min(col.Blue+70, 255));
 	}
 
 	public void OnDraw(DrawingContext context) {

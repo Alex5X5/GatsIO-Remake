@@ -56,9 +56,9 @@ public struct Bullet {
 		return collided;
 	}
 
-	public bool CheckPlayerCollision(Player[] players, out Player? player) {
+	public bool CheckPlayerCollision(Player[] players, out Player player) {
 		bool collided = false;
-		player = null;
+		player = new();
 		foreach (Player p in players) {
 			if (OwnerHandle == p.PlayerUUID)
 				continue;

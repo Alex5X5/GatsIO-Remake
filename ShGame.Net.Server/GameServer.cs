@@ -26,7 +26,7 @@ public class GameServer : IDisposable {
 		var address = IPAddress.Parse(config.Address);
 		var port = config.Port;
 		socket = new(address, port, OnAccept);
-		gameService = new(new Player());
+		gameService = new();
 		gameService.SpreadObstacles();
         gameService.StartAllLoops();
 	}
@@ -104,16 +104,16 @@ public class GameServer : IDisposable {
 	}
 
 	internal unsafe Packet OnUpdatePlayerRequest(Packet request) {
-		Player player = SerializerService.DeserializePlayer(request.Payload);
-		logger.Log("processing update player request", new MessageParameter("player", player));
-		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			if (gameService.Players[i].PlayerUUID == player.PlayerUUID) {
-				gameService.Players[i].MoveDir = player.MoveDir;
-				gameService.Players[i].LookDir = player.LookDir;
-				gameService.Players[i].IsShooting = player.IsShooting;
-			}
-		}
+		Player updated = SerializerService.DeserializePlayer(request.Payload);
+		//logger.Log("processing update player request", new MessageParameter("player", player));
+		UpdatePlayer(ref gameService.GetPlayerById(updated.PlayerUUID), updated);
 		return Packet.Empty;
+	}
+
+	private void UpdatePlayer(ref Player player, Player updated) {
+		player.MoveDir = updated.MoveDir;
+		player.LookDir = updated.LookDir;
+		player.IsShooting = updated.IsShooting;
 	}
 
 	internal unsafe Packet OnRegisterPlayerRequest(Packet packet) {
@@ -134,7 +134,7 @@ public class GameServer : IDisposable {
 	}
 
 	internal unsafe Packet OnGetPlayersRequest(Packet request) {
-		logger.Log("processing get players request");
+		//logger.Log("processing get players request");
 		Packet response = new(PacketType.GetPlayers);
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			SerializerService.SerializePlayer(response.Payload, gameService.Players[i], i*Player.SizeInBytesForNetwork);
@@ -143,7 +143,7 @@ public class GameServer : IDisposable {
 	}
 
 	internal unsafe Packet OnGetBulletsRequest() {
-		logger.Log("processing get bullets request");
+		//logger.Log("processing get bullets request");
 		Packet response = new Packet(PacketType.Bullets);
 		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
 			SerializerService.SerializeBullet(response.Payload, gameService.Bullets[i], i*Bullet.SizeInBytesForNetwork);

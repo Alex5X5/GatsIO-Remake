@@ -39,7 +39,7 @@ public class Client : Window {
 
 		ControlledPlayer=new(new(100, 100, 0), 100, 1);
 		
-		gameService = new GameService(ControlledPlayer);
+		gameService = new GameService();
 		shadowService = new ShadowService(gameService);
 		renderService = new RenderService(gameService, shadowService, ControlledPlayer);
 
@@ -79,7 +79,8 @@ public class Client : Window {
 				} else {
 					gameService.Map = new Map();
 					gameService.SpreadObstacles();
-					gameService.Players[1] = new(new(100, 300, 0), 100, 4);
+					gameService.Players[0] = ControlledPlayer;
+					gameService.Players[1] = new(new(100, 300, 0), 100, 2);
 					shadowService = new ShadowService(gameService);
 					renderService = new(gameService, shadowService, ControlledPlayer);
 				}
@@ -167,10 +168,9 @@ public class Client : Window {
 
 	protected override void MouseMoved(Vector3d pos) {
 		MousePos = pos;
-		Player player = gameService.GetPlayerById(ControlledPlayer.PlayerUUID);
-		var playerPos = player.Pos;
+		var playerPos = gameService.GetPlayerById(ControlledPlayer.PlayerUUID).Pos;
 		var relative = pos.Sub(playerPos).Nor();
-		player.LookDir = relative;
+		gameService.GetPlayerById(ControlledPlayer.PlayerUUID).LookDir = relative;
 	}
 
 	private bool NetHandlerConnected() {

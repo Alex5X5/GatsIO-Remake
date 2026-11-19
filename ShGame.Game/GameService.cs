@@ -30,12 +30,11 @@ public class GameService {
 
 	public Map Map = new();
 
-	public GameService(Player pov) {
+	public GameService() {
 		logger = new(new LoggingLevel("Game"));
 		Players = new Player[Constants.PLAYER_COUNT];
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++)
 			Players[i]=new();
-		Players[0]=pov;
 		Bullets = new Bullet[Constants.BULLET_COUNT];
 		for (int i = 0; i<Constants.BULLET_COUNT; i++)
 			Bullets[i]=new();
@@ -99,9 +98,8 @@ public class GameService {
 
 	public void PlayerMoveLoop() {
 		void MovePlayer(ref Player p) {
-			if (p.Health!=-1) {
+			if (p.Health >= 0)
 				p.Move();
-			}
 		}
 
 		ForEachPlayer(MovePlayer);
@@ -121,13 +119,16 @@ public class GameService {
 				return;
 			b.Move();
 
-			if (b.CheckPlayerCollision(Players, out Player? target)) {
-				target!.Health -= 10;
+			if (b.CheckPlayerCollision(Players, out Player target)) {
+				HitPlayer(ref GetPlayerById(target.PlayerUUID));
 				DeallocBullet(ref b);
+				return;
 			}
 				
-			if (b.CheckObstacleCollision(Map.Obstacles))
+			if (b.CheckObstacleCollision(Map.Obstacles)) {
 				DeallocBullet(ref b);
+				return;
+			}
 			
 			if (b.Pos.X<0|b.Pos.Y<0|b.Pos.X>Constants.MAP_GRID_WIDTH|b.Pos.Y>Constants.MAP_GRID_HEIGHT)
 				DeallocBullet(ref b);
@@ -136,6 +137,18 @@ public class GameService {
 		ForEachBullet(MoveBullet);
 
 		Volatile.Write(ref lastBulletTick, Stopwatch.GetTimestamp());
+	}
+
+	private void HitPlayer(ref Player player) {
+		GetPlayerById(player.PlayerUUID).Health -= 10;
+		if (player.Health >= 0)
+			return;
+		RespawnPlayer(ref player);
+	}
+
+	private void RespawnPlayer(ref Player player) {
+		player.Pos = new(300, 100, 0);
+		player.Health = Player.MAX_HEALTH;
 	}
 
 	public void MergeBulletSnapshot(Bullet[] snapshot, double latencyTicks) {
