@@ -23,16 +23,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Silk.NET" Version="2.22.0" />
-		<PackageReference Include="Silk.NET.Input.Extensions" Version="2.22.0" />
-		<PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.22.0" />
-		<PackageReference Include="Silk.NET.Windowing" Version="2.22.0" />
-		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.8" />
-		<PackageReference Include="StbImageSharp" Version="2.30.15" />
-		<PackageReference Include="Ultz.Native.GLFW" Version="3.4.0" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\ShGame.Net\ShGame.Net.Client.csproj" />
 		<ProjectReference Include="..\ShGame.Drawing\ShGame.Drawing.csproj" />
 		<ProjectReference Include="..\ShGame.Math\ShGame.Math.csproj" />
