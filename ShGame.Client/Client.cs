@@ -22,6 +22,7 @@ public class Client : Window {
 		keyRight = false;
 
 	private RenderService renderService;
+	private ShadowService shadowService;
 	private NetworkService netService;
 	private	GameService gameService;
 	private Logger logger;
@@ -29,8 +30,6 @@ public class Client : Window {
 	private Player ControlledPlayer;
 
 	private Vector3d MousePos;
-
-	private Image fogImage;
 	
 	public Client(Configuration config) : base(1200, 800, "ShGame") {
 
@@ -39,9 +38,11 @@ public class Client : Window {
 		netService = new NetworkService(config);
 
 		ControlledPlayer=new(new(100, 100, 0), 100, 1);
-		gameService = new(ControlledPlayer);
-
-		renderService = new RenderService(gameService, ControlledPlayer);
+		
+		gameService = new GameService(ControlledPlayer);
+		gameService.SpreadObstacles();
+		shadowService = new ShadowService(gameService);
+		renderService = new RenderService(gameService, shadowService, ControlledPlayer);
 
 		StartNetworkThread();
 		gameService.StartAllLoops();
@@ -54,7 +55,7 @@ public class Client : Window {
 	}
 
 	private void RefreshLoop() {
-		while (!Closing) {
+		while (!Closing && !stop) {
 			InvalidateVisual();
 			Thread.Sleep(20);
 		}
@@ -77,6 +78,7 @@ public class Client : Window {
 					else
 						gameService.Map = new Map();
 					ControlledPlayer = await netService.RegisterToServerAsync();
+					renderService.UpdateControlledPlayer(ControlledPlayer);
 					gameService.Players = await netService.GetPlayersAsync();
 				}
 				var sw = new Stopwatch();
@@ -90,7 +92,6 @@ public class Client : Window {
 					sw.Reset();
 					await Task.Delay(50);
 				}
-				netService?.Dispose();
 			}
 		);
 		NetworkThread.Start();
@@ -114,7 +115,7 @@ public class Client : Window {
 				break;
 			case Key.Escape:
 				Close();
-				Dispose();
+				stop = true;
 				break;
 		}
 		UpdateControlledDir();
@@ -178,7 +179,7 @@ public class Client : Window {
 	}
 
 	protected override void Load(LoadingContext context) {
-		fogImage = context.LoadImage(Paths.AssetsPath("shadow.png"));
+		renderService.OnLoad(context);
 	}
 
 	protected override void Draw(double deltaTime, DrawingContext context) {
@@ -188,6 +189,6 @@ public class Client : Window {
 			var lp = new Vector3d(100, 100, 0).Add(player.LookDir.Scl(30));
 			context.DrawLine(new Vector3d(100,100,0), lp, new Color(49, 245, 39));
 		}
-		context.DrawLine(new Vector3d(0, 0, 0), MousePos, Color.ORANGE, 3);
+		//context.DrawLine(new Vector3d(0, 0, 0), MousePos, Color.ORANGE, 3);
 	}
 }

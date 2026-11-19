@@ -19,6 +19,11 @@ public struct Rect {
 		get => Pos.Y;
 	}
 
+	public Vector3d TopLeft => new Vector3d(Pos.X, Pos.Y, 0);
+	public Vector3d BottomLeft => new Vector3d(Pos.X, Pos.Y+Height, 0);
+	public Vector3d TopRight => new Vector3d(Pos.X+Width, Pos.Y, 0);
+	public Vector3d BottomRight => new Vector3d(Pos.X+Width, Pos.Y+Height, 0);
+
 	public const int SizeInBytes = 40;
 
 	public Rect(double x, double y, double width, double height) : this(new Vector3d(x, y, 0), width, height) { }
