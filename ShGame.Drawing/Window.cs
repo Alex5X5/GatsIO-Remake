@@ -18,11 +18,7 @@ public abstract class Window : IDisposable {
 	private IWindow window;
 	IInputContext input;
 
-	private double Time;
-	private double LastFrame;
 	private bool Dirty = true;
-
-	private bool loaded = false;
 
 	private ColorF backgroundColor = new(Color.BLACK);
 
@@ -44,7 +40,7 @@ public abstract class Window : IDisposable {
 
 	private static WindowOptions CreateWindowoptions(double width, double height, string title) {
 		var options = WindowOptions.Default;
-		options.Size = new Silk.NET.Maths.Vector2D<int>((int)Math.Floor(width), (int)Math.Floor(height));
+		options.Size = new Vector2D<int>((int)Math.Floor(width), (int)Math.Floor(height));
 		options.Title = title;
 		return options;
 	}
@@ -62,7 +58,6 @@ public abstract class Window : IDisposable {
 	}
 
 	private void OnLoad() {
-		loaded = true;
 		Gl = GL.GetApi(window);
 		LoadingContext context = new(Gl);
 		Load(context);
