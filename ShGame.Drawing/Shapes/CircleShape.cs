@@ -2,6 +2,8 @@
 
 using ShGame.Math;
 
+using Silk.NET.Maths;
+
 using System.Runtime.InteropServices;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -14,7 +16,7 @@ internal struct CircleShape {
 	public const uint SizeInBytes = 2 * TriangleShape.SizeInBytes + ColorF.SizeInBytes;
 
 	internal CircleShape(Circle circle, Color color) {
-		SidesCount = (int)System.Math.Ceiling(System.Math.Sqrt((float)circle.Radius * 2 * System.Math.PI) * 2);
+		SidesCount = GetSidesCount(circle.Radius);
 		triangles = new TriangleShape[SidesCount];
 		float[] offsets = CalcCircleOffsets(SidesCount, circle.Radius);
 		for (int i = 1; i<SidesCount; i++) {
@@ -28,7 +30,15 @@ internal struct CircleShape {
 		}
 	}
 
+	private static int GetSidesCount(double radius) {
+		double c = System.Math.Sqrt(radius * 6) * 2;
+		c = System.Math.Max(3.0, c);
+		return (int)System.Math.Ceiling(c);
+	}
+
 	private static float[] CalcCircleOffsets(int count, double radius) {
+		if (count == 0)
+			return [0,0,0,0,0,0,0,0,0];
 		float[] res = new float[(count)*6];
 		float radius_ = (float)radius;
 		res[0] = 0;

@@ -45,8 +45,6 @@ public class GameService {
 		BulletsAccessLock = new ReaderWriterLockSlim();
 	}
 
-	#region flow controll
-
 	private void StartNewLoop(Action loop) {
 		new Thread(
 			() => {
@@ -80,8 +78,6 @@ public class GameService {
 		ObstaclesAccessLock.Dispose();
 		BulletsAccessLock.Dispose();
 	}
-
-	#endregion flow controll
 
 	#region game loops
 
@@ -124,8 +120,15 @@ public class GameService {
 			if (b.Lifetime == -1)
 				return;
 			b.Move();
+
+			if (b.CheckPlayerCollision(Players, out Player? target)) {
+				target!.Health -= 10;
+				DeallocBullet(ref b);
+			}
+				
 			if (b.CheckObstacleCollision(Map.Obstacles))
 				DeallocBullet(ref b);
+			
 			if (b.Pos.X<0|b.Pos.Y<0|b.Pos.X>Constants.MAP_GRID_WIDTH|b.Pos.Y>Constants.MAP_GRID_HEIGHT)
 				DeallocBullet(ref b);
 		}
@@ -225,7 +228,7 @@ public class GameService {
 		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
 			if (Bullets[i].Lifetime==-1) {
 				Bullets[i].Lifetime = 100;
-				Bullets[i].Pos = new(p.Pos.Add(p.LookDir.Scl(Player.Radius)));
+				Bullets[i].Pos = new(p.Pos.Add(p.LookDir.Scl(Player.RADIUS)));
 				Bullets[i].Dir = new(p.LookDir);
 				Bullets[i].Speed = p.InitialBulletSpeed;
 				Bullets[i].OwnerHandle = p.PlayerUUID;

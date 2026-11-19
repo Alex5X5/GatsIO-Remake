@@ -79,6 +79,7 @@ public class Client : Window {
 				} else {
 					gameService.Map = new Map();
 					gameService.SpreadObstacles();
+					gameService.Players[1] = new(new(100, 300, 0), 100, 4);
 					shadowService = new ShadowService(gameService);
 					renderService = new(gameService, shadowService, ControlledPlayer);
 				}

@@ -56,5 +56,21 @@ public struct Bullet {
 		return collided;
 	}
 
+	public bool CheckPlayerCollision(Player[] players, out Player? player) {
+		bool collided = false;
+		player = null;
+		foreach (Player p in players) {
+			if (OwnerHandle == p.PlayerUUID)
+				continue;
+			if (p.CenterPos.Dst(Pos) > Player.RADIUS)
+				continue;
+			player = p;	
+			collided = true;
+			break;
+		}
+		return collided;
+	}
+
+
 	public override string ToString() => "ShGame.Types.Bullet[Pos:"+Pos.ToString()+", Dir:"+Dir.ToString()+"]";
 }

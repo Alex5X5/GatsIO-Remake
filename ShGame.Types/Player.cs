@@ -16,14 +16,19 @@ public class Player {
 	public Vector3d MoveDir = new(0, 0, 0);
 	public Vector3d LookDir = new(0, 0, 0);
 
+	public Vector3d CenterPos => Pos.Add(RADIUS*0.5, RADIUS*0.5, 0);
+
 	public double Speed = 2;
+
+	public const int MAX_HEALTH = 100;
+
 	private int Health_;
 	public int Health {
 		get => Health_;
-		set => Health_ = value > 100 ? 100 : value < -1 ? -1 : value;
+		set => Health_ = value > MAX_HEALTH ? MAX_HEALTH : value < -1 ? -1 : value;
 	}
 
-	public const int Radius = 10;
+	public const double RADIUS = 20.0;
 	public short PlayerUUID = 0;
 	public bool Visible;
 
