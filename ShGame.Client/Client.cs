@@ -40,7 +40,6 @@ public class Client : Window {
 		ControlledPlayer=new(new(100, 100, 0), 100, 1);
 		
 		gameService = new GameService(ControlledPlayer);
-		gameService.SpreadObstacles();
 		shadowService = new ShadowService(gameService);
 		renderService = new RenderService(gameService, shadowService, ControlledPlayer);
 
@@ -72,14 +71,16 @@ public class Client : Window {
 		var NetworkThread = new Thread(
 			async () => {
 				if (NetHandlerConnected()) {
-					var map = await netService.GetMapAsync();
-					if (map != null)
-						gameService.Map = map;
-					else
-						gameService.Map = new Map();
+					gameService.Map = await netService.GetMapAsync();
 					ControlledPlayer = await netService.RegisterToServerAsync();
-					renderService.UpdateControlledPlayer(ControlledPlayer);
 					gameService.Players = await netService.GetPlayersAsync();
+					shadowService = new ShadowService(gameService);
+					renderService = new(gameService, shadowService, ControlledPlayer);
+				} else {
+					gameService.Map = new Map();
+					gameService.SpreadObstacles();
+					shadowService = new ShadowService(gameService);
+					renderService = new(gameService, shadowService, ControlledPlayer);
 				}
 				var sw = new Stopwatch();
 				while (!stop && NetHandlerConnected()) {
