@@ -1,5 +1,6 @@
 ﻿namespace ShGame.Drawing;
 
+using ShGame.Drawing.Helpers;
 using ShGame.Math;
 
 using Silk.NET.Maths;
@@ -14,14 +15,16 @@ public class DrawingContext : IDisposable {
 	private TriangleBuffer buffer;
 
 	private uint vaoHandle, vboHandle;
-	internal ShaderProgram fillShaderProgramm;
-	internal ShaderProgram textureShaderProgram;
+	private uint currentTexture;
+
+	internal ShaderProgram? fillShaderProgramm;
+	internal ShaderProgram? textureShaderProgram;
 
 	private readonly List<DrawBatch> batches = new();
 	private int batchStart;
 
 
-	public DrawingContext() {
+	internal DrawingContext() {
 		buffer = new();
 	}
 
@@ -56,12 +59,12 @@ public class DrawingContext : IDisposable {
 	private void UnbindVAO() => Gl?.BindVertexArray(0);
 
 	internal void OnFrameBufferSizeChanged(Vector2D<int> size) {
-		fillShaderProgramm.OnFrameBufferSizeChanged(size);
-		textureShaderProgram.OnFrameBufferSizeChanged(size);
+		fillShaderProgramm?.OnFrameBufferSizeChanged(size);
+		textureShaderProgram?.OnFrameBufferSizeChanged(size);
 	}
 
 	internal void BufferTrianglesToGpu() {
-		CloseBatch(0);
+		FlushBatch();
 		BindVAO();
 		BindVBO();
 		unsafe {
@@ -73,8 +76,11 @@ public class DrawingContext : IDisposable {
 		}
 	}
 
-
 	internal void DrawTriangleBuffer() {
+		if (fillShaderProgramm is null)
+			throw new InvalidOperationException("can not draw when fill shader programm is null");
+		if (textureShaderProgram is null)
+			throw new InvalidOperationException("can not draw when texture shader programm is null");
 		BindVAO();
 		BindVBO();
 		foreach (var b in batches) {
@@ -84,9 +90,6 @@ public class DrawingContext : IDisposable {
 				Gl!.UseProgram(textureShaderProgram.ProgramHandle);
 				Gl.BindTexture(TextureTarget.Texture2D, b.Texture);
 				textureShaderProgram.PrintErrors();
-				var error = Gl.GetError();
-				if(error != GLEnum.NoError)
-					Console.WriteLine(error);
 			}
 			Gl.DrawArrays(PrimitiveType.Triangles, b.FirstVertex, (uint)b.VertexCount);
 		}
@@ -98,11 +101,40 @@ public class DrawingContext : IDisposable {
 		batchStart = 0;
 	}
 
+	private void FlushBatch() {
+		int end = (int)buffer.Count * 3;
+		if (end > batchStart)
+			batches.Add(new DrawBatch(batchStart, end - batchStart, currentTexture));
+		batchStart = end;
+	}
+
+	private void SwitchTexture(uint texture) {
+		if (texture != currentTexture) {
+			FlushBatch();
+			currentTexture = texture;
+		}
+	}
+
 	private void CloseBatch(uint texture) {
 		int end = (int)buffer.Count * 3;
 		if (end > batchStart)
 			batches.Add(new DrawBatch(batchStart, end - batchStart, texture));
 		batchStart = end;
+	}
+
+	private void AppendToBatch(Image image, int count) {
+		if(batches.Count == 0)
+			CloseBatch(0);
+		if(batches.Count == 0){
+			batches.Add(new DrawBatch(0, 0, image.texture));
+			batchStart = 0;
+		}
+		var lastBatch = batches[batches.Count - 1];
+		if (lastBatch.Texture == image.texture) {
+			batches[batches.Count - 1] = new(lastBatch.FirstVertex, lastBatch.VertexCount + count, lastBatch.Texture);
+		} else {
+			CloseBatch(image.texture);
+		}
 	}
 
 	public void DrawLine(double x1, double y1, double x2, double y2, Color color, double stroke = 1) {
@@ -134,6 +166,7 @@ public class DrawingContext : IDisposable {
 
 	public void DrawTriangle(Triangle triangle, Color color) {
 		TriangleShape shape = new TriangleShape(triangle, color);
+		SwitchTexture(0);
 		unsafe {
 			buffer.Buffer(&shape, 1);
 		}
@@ -145,6 +178,7 @@ public class DrawingContext : IDisposable {
 
 	public void DrawQuad(Quad quad, Color color) {
 		QuadShape shape = new QuadShape(quad, color);
+		SwitchTexture(0);
 		unsafe {
 			buffer.Buffer((TriangleShape*)&shape, 2);
 		}
@@ -157,6 +191,7 @@ public class DrawingContext : IDisposable {
 
 	public void DrawRectangle(Rect rect, Color color) {
 		RectShape shape = new(rect, color);
+		SwitchTexture(0);
 		unsafe {
 			buffer.Buffer((TriangleShape*)&shape, 2);
 		}
@@ -164,21 +199,40 @@ public class DrawingContext : IDisposable {
 
 	public void DrawCircle(Circle circle, Color color) {
 		CircleShape shape = new(circle, color);
+		SwitchTexture(0);
 		unsafe {
 			fixed(TriangleShape* ptr = &shape.triangles[0])
 				buffer.Buffer(ptr, (uint)shape.triangles.Length);
 		}
 	}
 
-	public void DrawLineRectangle() {
-
+	public void DrawImage(Vector3d pos, Image image) {
+		Rect rect = new(pos.X, pos.Y, image.Width, image.Height);
+		DrawImageRectangle(rect, image);
 	}
 
-	public void DrawImage(Vector3d pos, Image image) {
-		CloseBatch(0);
-		Rect rect = new(pos.X, pos.Y, image.Width, image.Height);
-		DrawRectangle(rect, Color.BLACK);
-		CloseBatch(image.texture);
+	public void DrawImageRectangle(Rect rect, Image image) {
+		RectShape shape = new(rect, Color.BLACK);
+		SwitchTexture(image.texture);
+		unsafe {
+			buffer.Buffer((TriangleShape*)&shape, 2);
+		}
+	}
+
+	public void DrawImageTriangle(Triangle triangle, Image image) {
+		TriangleShape shape = new(triangle, Color.BLACK);
+		SwitchTexture(image.texture);
+		unsafe {
+			buffer.Buffer(&shape, 1);
+		}
+	}
+
+	public void DrawImageQuad(Quad quad, Image image) {
+		QuadShape shape = new(quad, Color.BLACK);
+		SwitchTexture(image.texture);
+		unsafe {
+			buffer.Buffer((TriangleShape*)&shape, 2);
+		}
 	}
 
 	public void Dispose() {
