@@ -65,7 +65,7 @@ public class Socket : IDisposable {
 			int recievedBytesCount;
 			try {
 				ArraySegment<byte> segment = new(buffer, recieved, Protocoll.PACKET_BYTE_LENGTH - recieved);
-				recievedBytesCount = await socket.ReceiveAsync(segment, SocketFlags.None);
+				recievedBytesCount = await socket.ReceiveAsync(segment, SocketFlags.None, InterrupSouce.Token);
 			} catch (SocketException) {
 				break;
 			}
@@ -90,7 +90,7 @@ public class Socket : IDisposable {
 			int sentBytesCount;
 			try {
 				ArraySegment<byte> segment = new(buffer, sent, Protocoll.PACKET_BYTE_LENGTH - sent);
-				sentBytesCount = await socket.SendAsync(segment, SocketFlags.None);
+				sentBytesCount = await socket.SendAsync(segment, SocketFlags.None, InterrupSouce.Token);
 			} catch (SocketException) {
 				break;
 			}
@@ -104,9 +104,11 @@ public class Socket : IDisposable {
 
 	public void Dispose() {
 		stop = true;
+		InterrupSouce.Cancel();
 		if (socket.Connected)
 			socket.Close();
 		socket.Dispose();
+		InterrupSouce.Dispose();
 		GC.SuppressFinalize(this);
 	}
 
