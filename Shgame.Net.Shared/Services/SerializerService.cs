@@ -16,6 +16,8 @@ public static class SerializerService {
 
 	public static unsafe void SerializePlayer(byte* buffer, Player player, int offset = 0) {
 		byte* ptr = PtrWithOffset(buffer, offset);
+		Unsafe.Write(ptr, player.PlayerUUID);
+		ptr += 2;
 		Unsafe.Write(ptr, player.Health);
 		ptr += 4;
 		Unsafe.Write(ptr, player.Pos.X);
@@ -32,19 +34,15 @@ public static class SerializerService {
 		ptr += 8;
 		Unsafe.Write(ptr, (int)player.Speed);
 		ptr += 4;
-		Unsafe.Write(ptr, player.PlayerUUID);
-		ptr += 2;
-		Unsafe.Write(ptr, player.WeaponCooldownTicks);
-		ptr += 2;
 		Unsafe.Write(ptr, player.weaponCooldownTicksDone);
-		ptr += 2;
-		Unsafe.Write(ptr, player.InitialBulletSpeed);
 		ptr += 2;
 		*ptr = player.IsShooting;
 	}
 
 	public static unsafe void DeserializePlayer(byte* buffer, Player player, int offset = 0) {
 		byte* ptr = PtrWithOffset(buffer, offset);
+		player.PlayerUUID = Unsafe.Read<short>(ptr);
+		ptr += 2;
 		player.Health = Unsafe.Read<int>(ptr);
 		ptr += 4;
 		double px = Unsafe.Read<double>(ptr);
@@ -64,10 +62,6 @@ public static class SerializerService {
 		player.LookDir = new Vector3d(lx, ly, 0.0);
 		player.Speed = Unsafe.Read<int>(ptr);
 		ptr += 4;
-		player.PlayerUUID = Unsafe.Read<short>(ptr);
-		ptr += 2;
-		short ticks = Unsafe.Read<short>(ptr);
-		ptr += 2;
 		player.Weapon.CooldownTicksDone = Unsafe.Read<short>(ptr);
 		ptr += 2;
 		player.IsShooting = *ptr;
@@ -75,7 +69,6 @@ public static class SerializerService {
 
 	public static unsafe short DeserializePlayerId(byte* buffer, int offset = 0) {
 		byte* ptr = PtrWithOffset(buffer, offset);
-		ptr+=40;
 		return Unsafe.Read<short>(ptr);
 	}
 

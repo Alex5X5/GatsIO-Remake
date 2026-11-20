@@ -76,7 +76,8 @@ public class NetworkService : IDisposable {
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
 			int offset = i*Player.SizeInBytesForNetwork;
 			unsafe {
-				players[i] = SerializerService.DeserializePlayer(response.Payload, offset);
+				players[i] = new();
+				SerializerService.DeserializePlayer(response.Payload, players[i], offset);
 			}
 		}
 		response.Dispose();
@@ -86,9 +87,9 @@ public class NetworkService : IDisposable {
 	public async Task<Player> RegisterToServerAsync() {
 		await socket.SendPacketAsync(new Packet(PacketType.Register));
 		Packet response = await socket.RecievePacketAsync();
-		Player player;
+		Player player = new();
 		unsafe {
-			player = SerializerService.DeserializePlayer(response.Payload);
+			SerializerService.DeserializePlayer(response.Payload, player);
 		}
 		response.Dispose();
 		return player;

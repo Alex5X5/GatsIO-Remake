@@ -141,7 +141,7 @@ public class GameServer : IDisposable {
 	}
 
 	internal unsafe Packet OnGetBulletsRequest() {
-		//logger.Log("processing get bullets request");
+		logger.Log("processing get bullets request");
 		Packet response = new Packet(PacketType.Bullets);
 		for (int i = 0; i<Constants.BULLET_COUNT; i++) {
 			SerializerService.SerializeBullet(response.Payload, gameService.Bullets[i], i*Bullet.SizeInBytesForNetwork);
