@@ -1,10 +1,13 @@
 ﻿namespace ShGame.Types;
 
 using ShGame.Math;
+using ShGame.Types.Weapons;
 
 using System;
 
-public struct Player {
+public class Player {
+
+	public Weapon Weapon;
 
 	public short WeaponCooldownTicks = 20;
 	public short weaponCooldownTicksDone = 0;
@@ -38,6 +41,7 @@ public struct Player {
 	//the constructor for invalid players
 	public Player() : this(new(0, 0, 0), -1, 0) {
 		Visible = false;
+		Weapon = new MachineGun();
 	}
 
 	public Player(Vector3d pos, int health, short UUID) {

@@ -104,16 +104,14 @@ public class GameServer : IDisposable {
 	}
 
 	internal unsafe Packet OnUpdatePlayerRequest(Packet request) {
-		Player updated = SerializerService.DeserializePlayer(request.Payload);
 		//logger.Log("processing update player request", new MessageParameter("player", player));
-		UpdatePlayer(ref gameService.GetPlayerById(updated.PlayerUUID), updated);
-		return Packet.Empty;
-	}
-
-	private void UpdatePlayer(ref Player player, Player updated) {
+		Player updated = new();
+		var player = gameService.GetPlayerById(SerializerService.DeserializePlayerId(request.Payload));
+		SerializerService.DeserializePlayer(request.Payload, updated);
 		player.MoveDir = updated.MoveDir;
 		player.LookDir = updated.LookDir;
 		player.IsShooting = updated.IsShooting;
+		return Packet.Empty;
 	}
 
 	internal unsafe Packet OnRegisterPlayerRequest(Packet packet) {
