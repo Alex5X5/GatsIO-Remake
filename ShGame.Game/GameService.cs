@@ -44,23 +44,6 @@ public class GameService {
 		BulletsAccessLock = new ReaderWriterLockSlim();
 	}
 
-	private void StartNewLoop(Action loop) {
-		new Thread(
-			() => {
-				logger.Log("start loop");
-				long nextExecution = DateTime.Now.Ticks + Constants.TARGET_LOOP_DELAY_TICKS;
-				while (Run) {
-					while (DateTime.Now.Ticks<nextExecution && Run)
-						Thread.Sleep(Constants.LOOP_FRAGMENT_SLEEP_TIMESPAN);
-					nextExecution = DateTime.Now.Ticks + Constants.TARGET_LOOP_DELAY_TICKS;
-					loop();
-				}
-			}
-			//,
-			//InterruptSource.Token
-		).Start();
-	}
-
 	public void StartAllLoops() {
 		Run=true;
 		StartNewLoop(PlayerMoveLoop);
@@ -82,11 +65,28 @@ public class GameService {
 
 	private delegate void RefAction<T>(ref T item);
 
-	private void ForEachPlayer(RefAction<Player> action) {
+	private void StartNewLoop(Action loop) {
+		new Thread(
+			() => {
+				logger.Log("start loop");
+				long nextExecution = DateTime.Now.Ticks + Constants.TARGET_LOOP_DELAY_TICKS;
+				while (Run) {
+					while (DateTime.Now.Ticks<nextExecution && Run)
+						Thread.Sleep(Constants.LOOP_FRAGMENT_SLEEP_TIMESPAN);
+					nextExecution = DateTime.Now.Ticks + Constants.TARGET_LOOP_DELAY_TICKS;
+					loop();
+				}
+			}
+		//,
+		//InterruptSource.Token
+		).Start();
+	}
+
+	private void ForEachPlayer(Action<Player> action) {
 		if (Players.Length == 0)
 			return;
 		for (int i = 0; i<Constants.PLAYER_COUNT; i++) {
-			action(ref Players[i]);
+			action(Players[i]);
 		}
 	}
 
@@ -97,7 +97,7 @@ public class GameService {
 	}
 
 	public void PlayerMoveLoop() {
-		void MovePlayer(ref Player p) {
+		void MovePlayer(Player p) {
 			if (p.Health >= 0)
 				p.Move();
 		}
@@ -105,11 +105,18 @@ public class GameService {
 		ForEachPlayer(MovePlayer);
 	}
 
-	private long lastBulletTick = Stopwatch.GetTimestamp();
-	public double GetBulletTickAlpha() {
-		double elapsed = (Stopwatch.GetTimestamp() - Volatile.Read(ref lastBulletTick)) / (double)Stopwatch.Frequency;
-		double tickLength = Constants.TARGET_LOOP_DELAY_TICKS / (double)TimeSpan.TicksPerSecond;
-		return Math.Clamp(elapsed / tickLength, 0.0, 1.0);
+	public void PlayerShootLoop() {
+
+		void PlayerShoot(Player p) {
+			if (p.IsShooting == 0x1 && p.Weapon.CooldownTicksDone==0) {
+				AllocBullet(p);
+				p.Weapon.CooldownTicksDone = p.Weapon.CooldownTicks;
+			}
+			if (p.Weapon.CooldownTicksDone>0)
+				p.Weapon.CooldownTicksDone--;
+		}
+
+		ForEachPlayer(PlayerShoot);
 	}
 
 	public void BulletMoveLoop() {
@@ -151,6 +158,13 @@ public class GameService {
 		player.Health = Player.MAX_HEALTH;
 	}
 
+	private long lastBulletTick = Stopwatch.GetTimestamp();
+	public double GetBulletTickAlpha() {
+		double elapsed = (Stopwatch.GetTimestamp() - Volatile.Read(ref lastBulletTick)) / (double)Stopwatch.Frequency;
+		double tickLength = Constants.TARGET_LOOP_DELAY_TICKS / (double)TimeSpan.TicksPerSecond;
+		return Math.Clamp(elapsed / tickLength, 0.0, 1.0);
+	}
+
 	public void MergeBulletSnapshot(Bullet[] snapshot, double latencyTicks) {
 		for(int i=0; i<Constants.BULLET_COUNT; i++) {
 			var b = snapshot[i];
@@ -167,20 +181,6 @@ public class GameService {
 			else
 				Bullets[i].Pos.Add(error.Scl(0.2));
 		}
-	}
-
-	public void PlayerShootLoop() {
-
-		void PlayerShoot(ref Player p) {
-			if (p.IsShooting == 0x1 && p.weaponCooldownTicksDone==0) {
-				AllocBullet(p);
-				p.weaponCooldownTicksDone = p.WeaponCooldownTicks;
-			}
-			if (p.weaponCooldownTicksDone>0)
-				p.weaponCooldownTicksDone--;
-		}
-	
-		ForEachPlayer(PlayerShoot);
 	}
 
 	#endregion game loops
